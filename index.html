@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tathastu Weddings — Studio Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-lt:#E8CC80;--gold-dk:#8B6914;
+  --ink:#0A0A0A;--s1:#141414;--s2:#1E1E1E;--s3:#272727;
+  --br:#2A2A2A;--tx:#F0EAD8;--txm:#7A7060;
+  --red:#E07070;--red-bg:rgba(224,112,112,.1);--red-br:rgba(224,112,112,.25);
+  --grn:#5CC87A;--grn-bg:rgba(92,200,122,.1);--grn-br:rgba(92,200,122,.25);
+  --amb:#F0A840;--amb-bg:rgba(240,168,64,.1);--amb-br:rgba(240,168,64,.25);
+  --blu:#60A8E0;--blu-bg:rgba(96,168,224,.1);--blu-br:rgba(96,168,224,.25);
+  --r:8px;
+}
+body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-size:13px;min-height:100vh;overflow-x:hidden}
+.hdr{display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--br);background:var(--s1)}
+.logo-ring{width:54px;height:54px;border-radius:50%;border:2px solid var(--gold);background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-ring svg{width:44px;height:44px}
+.studio{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--gold);line-height:1}
+.studio-sub{font-size:10px;color:var(--txm);letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+.hdr-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.date-chip{background:var(--s2);border:1px solid var(--br);padding:5px 12px;border-radius:var(--r);font-size:11px;color:var(--txm)}
+.date-chip b{color:var(--gold)}
+
+/* NAV */
+.nav{display:flex;background:var(--s1);border-bottom:1px solid var(--br);padding:0 20px;gap:2px;overflow-x:auto}
+.nav::-webkit-scrollbar{height:0}
+.ntab{padding:11px 14px;font-size:12px;color:var(--txm);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .18s;font-family:'Outfit',sans-serif}
+.ntab:hover{color:var(--tx)}
+.ntab.on{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* MAIN */
+.pg{padding:18px 20px;min-height:400px}
+.hidden{display:none!important}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.sc{background:var(--s2);border:1px solid var(--br);border-radius:var(--r);padding:12px;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:.5}
+.sc-lbl{font-size:10px;color:var(--txm);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+.sc-val{font-size:20px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--tx)}
+.sc-val.g{color:var(--gold)}
+.sc-val.r{color:var(--red)}
+.sc-val.gr{color:var(--grn)}
+
+/* SECTION HDR */
+.shdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.stitle{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--gold-lt)}
+.ssub{font-size:11px;color:var(--txm);margin-top:1px}
+
+/* BUTTONS */
+.btn{padding:7px 16px;border-radius:var(--r);border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;transition:all .15s}
+.btn-g{background:var(--gold);color:#180F00}
+.btn-g:hover{background:var(--gold-lt)}
+.btn-o{background:transparent;border:1px solid var(--br);color:var(--txm)}
+.btn-o:hover{border-color:var(--gold);color:var(--gold)}
+.btn-d{background:transparent;border:1px solid var(--red-br);color:var(--red)}
+.btn-sm{padding:4px 10px;font-size:11px;border-radius:5px}
+.btn-wa{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25D366;font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif}
+.btn-row{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+
+/* TABLE */
+.tw{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.tw table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.tw th{background:var(--s2);color:var(--txm);font-weight:500;padding:9px 10px;text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--br)}
+.tw td{padding:9px 10px;border-bottom:1px solid var(--br);color:var(--tx);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tw tr:last-child td{border-bottom:none}
+.tw tr:hover td{background:var(--s2)}
+
+/* BADGES */
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;letter-spacing:.04em;white-space:nowrap}
+.bdg-g{background:var(--gold-dk);color:var(--gold-lt);border:1px solid rgba(201,168,76,.3)}
+.bdg-grn{background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-br)}
+.bdg-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-br)}
+.bdg-amb{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-br)}
+.bdg-blu{background:var(--blu-bg);color:var(--blu);border:1px solid var(--blu-br)}
+.bdg-muted{background:var(--s2);color:var(--txm);border:1px solid var(--br)}
+.bdg-urg{background:rgba(224,112,112,.2);color:#FF9090;border:1px solid var(--red-br);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* FORMS */
+.fc{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.ftitle{font-size:11px;font-weight:500;color:var(--gold);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em}
+.fg{display:grid;gap:8px}
+.fg-2{grid-template-columns:repeat(2,1fr)}
+.fg-3{grid-template-columns:repeat(3,1fr)}
+.fg-4{grid-template-columns:repeat(4,1fr)}
+.fg-5{grid-template-columns:repeat(5,1fr)}
+.ff{display:flex;flex-direction:column;gap:3px}
+.ff label{font-size:10px;color:var(--txm);text-transform:uppercase;letter-spacing:.07em}
+.ff input,.ff select,.ff textarea{background:var(--s2);border:1px solid var(--br);border-radius:6px;color:var(--tx);font-family:'Outfit',sans-serif;font-size:12px;padding:7px 9px;width:100%;outline:none;transition:border-color .18s}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--gold)}
+.ff select option{background:var(--s2)}
+.ff textarea{resize:vertical;min-height:50px}
+.ff input[readonly]{opacity:.6}
+
+/* CREW GRID */
+.crew-g{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:8px}
+.ci{background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.ci label{font-size:9px;color:var(--txm);text-align:center;letter-spacing:.03em;line-height:1.2}
+.ci input{background:var(--s3);border:1px solid var(--br);border-radius:4px;color:var(--tx);font-size:13px;font-weight:600;text-align:center;width:44px;padding:3px;outline:none}
+.ci input:focus{border-color:var(--gold)}
+
+/* PRICE CARD */
+.price-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.pcard{background:var(--s2);border:1px solid var(--br);border-radius:var(--r);padding:12px}
+.pcard-name{font-size:12px;font-weight:500;color:var(--tx);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard-row{display:flex;justify-content:space-between;font-size:11px;margin-top:3px}
+.pcard-lbl{color:var(--txm)}
+.pcard-val{font-weight:500;color:var(--tx)}
+.pcard-profit{color:var(--grn);font-weight:600}
+.pcard-warn{color:var(--amb)}
+
+/* TASK CARD */
+.task-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.tk{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;gap:10px}
+.tk.urg{border-left:3px solid var(--red)}
+.tk.hi{border-left:3px solid var(--amb)}
+.tk.norm{border-left:3px solid var(--blu)}
+.tk-info{flex:1;min-width:0}
+.tk-name{font-size:12px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tk-meta{font-size:10px;color:var(--txm);margin-top:2px}
+.tk-right{display:flex;gap:6px;align-items:center;flex-shrink:0}
+
+/* SEARCH */
+.srow{display:flex;gap:8px;margin-bottom:12px}
+.sinp{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);color:var(--tx);font-family:'Outfit',sans-serif;font-size:12px;padding:8px 12px;flex:1;outline:none}
+.sinp:focus{border-color:var(--gold)}
+.fsel{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);color:var(--txm);font-family:'Outfit',sans-serif;font-size:12px;padding:8px 10px;outline:none}
+
+/* REPORT */
+.rep-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.rep-card{background:var(--s2);border:1px solid var(--br);border-radius:var(--r);padding:14px}
+.rep-title{font-size:11px;color:var(--txm);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.rep-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--br);font-size:12px}
+.rep-row:last-child{border-bottom:none}
+.rep-lbl{color:var(--txm)}
+.rep-val{font-weight:500;color:var(--tx)}
+
+/* MODAL SHADE */
+.shade{background:rgba(0,0,0,.85);display:flex;align-items:flex-start;justify-content:center;padding:20px}
+.modal{background:var(--s1);border:1px solid var(--br);border-radius:12px;padding:20px;width:100%;max-width:640px}
+.mtitle{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.mclose{background:transparent;border:none;color:var(--txm);cursor:pointer;font-size:16px;font-family:'Outfit',sans-serif}
+.divider{border:none;border-top:1px solid var(--br);margin:12px 0}
+.csub{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin:10px 0 6px}
+
+/* QUICK LOG */
+.ql{background:var(--s2);border:1px solid var(--gold-dk);border-radius:var(--r);padding:14px;margin-bottom:16px}
+.ql-title{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+
+.empty{text-align:center;padding:36px;color:var(--txm);font-size:12px}
+.phone{font-size:10px;color:var(--txm);margin-top:1px}
+.amt{color:var(--gold-lt);font-weight:500}
+.bal-r{color:var(--red)}
+.bal-g{color:var(--grn)}
+.mt8{margin-top:8px}
+</style>
+
+<h2 class="sr-only">Tathastu Studio — complete order, pricing, task and report management system</h2>
+
+<div class="hdr">
+  <div class="logo-ring">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#111" stroke="#C9A84C" stroke-width="3"/>
+      <g transform="translate(50,30)" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round">
+        <line x1="-7" y1="-11" x2="-5" y2="-17"/>
+        <line x1="-3" y1="-13" x2="-2" y2="-19"/>
+        <line x1="1" y1="-13" x2="1" y2="-20"/>
+        <line x1="5" y1="-13" x2="4" y2="-19"/>
+        <line x1="8" y1="-11" x2="7" y2="-16"/>
+        <path d="M-9,-9 Q-9,2 -7,9 L9,9 Q11,2 11,-9 Q9,-13 1,-13 Q-7,-13 -9,-9Z" fill="rgba(201,168,76,.12)" stroke="#C9A84C"/>
+      </g>
+      <text x="50" y="66" font-family="Georgia,serif" font-size="10" fill="#C9A84C" text-anchor="middle" font-weight="600" letter-spacing="2">TW</text>
+      <text x="50" y="76" font-family="Georgia,serif" font-size="5.5" fill="#8B6914" text-anchor="middle" letter-spacing="2.5">STUDIO</text>
+    </svg>
+  </div>
+  <div>
+    <div class="studio">Tathastu Weddings</div>
+    <div class="studio-sub">Studio Management System · All Modules</div>
+  </div>
+  <div class="hdr-right">
+    <div class="date-chip">Today <b id="hdr-date"></b></div>
+    <button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button>
+    <button class="btn btn-g btn-sm" onclick="showAdd('walkin')">+ Walk-in</button>
+    <button class="btn btn-g btn-sm" onclick="showAdd('event')">+ Event</button>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="ntab on" onclick="go('dash',this)">Dashboard</button>
+  <button class="ntab" onclick="go('walkins',this)">Walk-ins</button>
+  <button class="ntab" onclick="go('events',this)">Events</button>
+  <button class="ntab" onclick="go('tasks',this)">Tasks</button>
+  <button class="ntab" onclick="go('pricing',this)">Pricing</button>
+  <button class="ntab" onclick="go('customers',this)">Customers</button>
+  <button class="ntab" onclick="go('pending',this)">Pending</button>
+  <button class="ntab" onclick="go('delivery',this)">Delivery</button>
+  <button class="ntab" onclick="go('reports',this)">Reports</button>
+  <button class="ntab" onclick="go('quicklog',this)">Quick Log</button>
+</div>
+
+<div class="pg" id="pg"></div>
+
+<script>
+const WALKIN_SVC=['Passport Photos','ID Photos','Baby Shoot','Birthday Shoot','Couple Shoot','Portrait','Product Photography','School Photos','Resume Photos','Photo Frame','Photo Printing','DVD Recovery','Data Recovery','Lamination','Other'];
+const BIG_SVC=['Wedding','Pre Wedding','Maternity Shoot','Event','Jagran','Chowki','Sagai','Ring Ceremony','Portfolio','Family Shoot','Documentary','Movie','Janeu'];
+const ORDER_STATUS=['New Order','In Progress','Urgent','Ready','Delivered','Payment Pending','Cancelled'];
+const TASK_PRI=['Urgent','High','Normal','Low'];
+const PAY_MODES=['Cash','UPI','Card','Bank Transfer'];
+const FRAME_SIZES=['4x6','5x7','6x8','8x10','8x12','10x12','10x14','12x15','12x16','12x18','16x20','16x24','20x24','20x30','24x30','24x36'];
+
+let DB={
+  walkins: JSON.parse(localStorage.getItem('tw_wi')||'[]'),
+  events:  JSON.parse(localStorage.getItem('tw_ev')||'[]'),
+  tasks:   JSON.parse(localStorage.getItem('tw_tk')||'[]'),
+  pricing: JSON.parse(localStorage.getItem('tw_pr')||JSON.stringify(
+    FRAME_SIZES.map(s=>({size:s,cost:0,sell:0,note:''}))
+  )),
+  customers: JSON.parse(localStorage.getItem('tw_cu')||'[]'),
+};
+
+function save(){
+  localStorage.setItem('tw_wi',JSON.stringify(DB.walkins));
+  localStorage.setItem('tw_ev',JSON.stringify(DB.events));
+  localStorage.setItem('tw_tk',JSON.stringify(DB.tasks));
+  localStorage.setItem('tw_pr',JSON.stringify(DB.pricing));
+  localStorage.setItem('tw_cu',JSON.stringify(DB.customers));
+}
+
+function today(){return new Date().toISOString().split('T')[0];}
+function fmtINR(n){return '₹'+(Math.round(parseFloat(n)||0)).toLocaleString('en-IN');}
+function daysFrom(d){if(!d)return null;const diff=Math.ceil((new Date(d)-new Date(today()))/86400000);return diff;}
+
+document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+let curTab='dash';
+function go(id,btn){
+  curTab=id;
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+function render(){
+  const pg=document.getElementById('pg');
+  if(curTab==='dash') pg.innerHTML=renderDash();
+  else if(curTab==='walkins') pg.innerHTML=renderWalkins();
+  else if(curTab==='events') pg.innerHTML=renderEvents();
+  else if(curTab==='tasks') pg.innerHTML=renderTasks();
+  else if(curTab==='pricing') pg.innerHTML=renderPricing();
+  else if(curTab==='customers') pg.innerHTML=renderCustomers();
+  else if(curTab==='pending') pg.innerHTML=renderPending();
+  else if(curTab==='delivery') pg.innerHTML=renderDelivery();
+  else if(curTab==='reports') pg.innerHTML=renderReports();
+  else if(curTab==='quicklog') pg.innerHTML=renderQuickLog();
+  attachEvents();
+}
+
+/* ─── DASHBOARD ─── */
+function renderDash(){
+  const all=[...DB.walkins,...DB.events];
+  const totalAdv=all.reduce((a,o)=>a+(parseFloat(o.advance)||0),0);
+  const totalBal=all.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
+  const urgent=DB.tasks.filter(t=>t.priority==='Urgent'&&t.status!=='Done').length;
+  const todayDel=[...DB.walkins,...DB.events].filter(o=>{const d=o.deliveryDate||o.eventDate;return d===today();}).length;
+
+  const recentWi=DB.walkins.slice(-5).reverse();
+  const upcoming=DB.events.filter(e=>e.eventDate&&new Date(e.eventDate)>=new Date()).sort((a,b)=>new Date(a.eventDate)-new Date(b.eventDate)).slice(0,5);
+  const urgTasks=DB.tasks.filter(t=>t.priority==='Urgent'&&t.status!=='Done').slice(0,4);
+
+  return `
+  <div class="stats">
+    <div class="sc"><div class="sc-lbl">Total Orders</div><div class="sc-val g">${DB.walkins.length+DB.events.length}</div></div>
+    <div class="sc"><div class="sc-lbl">Advance In</div><div class="sc-val">${fmtINR(totalAdv)}</div></div>
+    <div class="sc"><div class="sc-lbl">Balance Due</div><div class="sc-val r">${fmtINR(totalBal)}</div></div>
+    <div class="sc"><div class="sc-lbl">Urgent Tasks</div><div class="sc-val ${urgent>0?'r':'gr'}">${urgent}</div></div>
+    <div class="sc"><div class="sc-lbl">Due Today</div><div class="sc-val ${todayDel>0?'r':'gr'}">${todayDel}</div></div>
+  </div>
+  ${urgTasks.length?`<div class="shdr"><div><div class="stitle">🔴 Urgent Tasks</div></div></div>
+  <div class="task-list">${urgTasks.map(t=>`<div class="tk urg"><div class="tk-info"><div class="tk-name">${t.name}</div><div class="tk-meta">${t.customer||'—'} · Due: ${t.deadline||'—'} ${t.dueTime?'at '+t.dueTime:''}</div></div><div class="tk-right"><span class="bdg bdg-urg">URGENT</span><span class="bdg bdg-muted">${t.status||'Pending'}</span></div></div>`).join('')}</div>`:''}
+  <div class="shdr"><div><div class="stitle">Recent Walk-ins</div><div class="ssub">Last 5 orders</div></div></div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:80px">Date</th><th style="width:130px">Customer</th><th>Service</th><th style="width:70px">Amount</th><th style="width:70px">Balance</th><th style="width:70px">Status</th><th style="width:80px">Delivery</th></tr></thead>
+    <tbody>${recentWi.length?recentWi.map(o=>`<tr>
+      <td>${o.date||'—'}</td>
+      <td>${o.name}<div class="phone">${o.phone||''}</div></td>
+      <td><span class="bdg bdg-muted">${o.service||'—'}</span></td>
+      <td class="amt">${fmtINR(o.amount)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td>${o.deliveryDate||'—'}</td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty">No walk-ins yet</td></tr>'}</tbody>
+  </table></div>
+  <div class="shdr"><div><div class="stitle">Upcoming Events</div></div></div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:90px">Event Date</th><th style="width:130px">Customer</th><th style="width:90px">Type</th><th>Crew</th><th style="width:70px">Amount</th><th style="width:70px">Balance</th></tr></thead>
+    <tbody>${upcoming.length?upcoming.map(o=>`<tr>
+      <td><b>${o.eventDate}</b></td>
+      <td>${o.name}<div class="phone">${o.phone||''}</div></td>
+      <td><span class="bdg bdg-g">${o.eventType}</span></td>
+      <td style="font-size:10px;color:var(--txm)">${crewSum(o)}</td>
+      <td class="amt">${fmtINR(o.amount)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+    </tr>`).join(''):'<tr><td colspan="6" class="empty">No upcoming events</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ─── WALK-INS ─── */
+function renderWalkins(){
+  const q=(window._wq||'').toLowerCase();
+  const sf=window._wf||'';
+  let list=[...DB.walkins].reverse();
+  if(q) list=list.filter(o=>(o.name||'').toLowerCase().includes(q)||(o.phone||'').includes(q)||(o.service||'').toLowerCase().includes(q));
+  if(sf) list=list.filter(o=>o.service===sf);
+  return `
+  <div class="shdr"><div><div class="stitle">Walk-in Orders</div></div><button class="btn btn-g btn-sm" onclick="showAdd('walkin')">+ Add Order</button></div>
+  <div class="srow">
+    <input class="sinp" placeholder="Search name, phone, service…" value="${window._wq||''}" oninput="window._wq=this.value;render()">
+    <select class="fsel" onchange="window._wf=this.value;render()">
+      <option value="">All Services</option>
+      ${WALKIN_SVC.map(s=>`<option ${sf===s?'selected':''}>${s}</option>`).join('')}
+    </select>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:80px">Date</th><th style="width:120px">Customer</th><th style="width:100px">Service</th><th style="width:65px">Amount</th><th style="width:65px">Advance</th><th style="width:65px">Balance</th><th style="width:75px">Status</th><th style="width:80px">Delivery</th><th style="width:55px">WA</th><th style="width:40px"></th></tr></thead>
+    <tbody>${list.length?list.map((o,_i)=>{const ri=DB.walkins.indexOf(o);return`<tr>
+      <td>${o.date||'—'}</td>
+      <td><b style="font-size:12px">${o.name}</b><div class="phone">${o.phone||''}</div></td>
+      <td><span class="bdg bdg-muted">${o.service||'—'}</span></td>
+      <td class="amt">${fmtINR(o.amount)}</td>
+      <td class="amt">${fmtINR(o.advance)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td>${o.deliveryDate||'—'}</td>
+      <td>${o.phone?`<button class="btn-wa" onclick="wa('${o.phone}','${o.name}','${o.service}','${o.deliveryDate||''}')">WA</button>`:'—'}</td>
+      <td><button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
+    </tr>`}).join(''):'<tr><td colspan="10" class="empty">No orders found</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ─── EVENTS ─── */
+function renderEvents(){
+  const q=(window._eq||'').toLowerCase();
+  const sf=window._ef||'';
+  let list=[...DB.events].reverse();
+  if(q) list=list.filter(o=>(o.name||'').toLowerCase().includes(q)||(o.phone||'').includes(q)||(o.eventType||'').toLowerCase().includes(q));
+  if(sf) list=list.filter(o=>o.eventType===sf);
+  return `
+  <div class="shdr"><div><div class="stitle">Event Bookings</div></div><button class="btn btn-g btn-sm" onclick="showAdd('event')">+ Add Event</button></div>
+  <div class="srow">
+    <input class="sinp" placeholder="Search name, phone, event type…" value="${window._eq||''}" oninput="window._eq=this.value;render()">
+    <select class="fsel" onchange="window._ef=this.value;render()">
+      <option value="">All Events</option>${BIG_SVC.map(s=>`<option ${sf===s?'selected':''}>${s}</option>`).join('')}
+    </select>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:80px">Booked</th><th style="width:120px">Customer</th><th style="width:90px">Type</th><th style="width:90px">Event Date</th><th>Crew</th><th style="width:65px">Amount</th><th style="width:65px">Balance</th><th style="width:70px">Status</th><th style="width:40px"></th></tr></thead>
+    <tbody>${list.length?list.map(o=>{const ri=DB.events.indexOf(o);return`<tr>
+      <td>${o.date||'—'}</td>
+      <td><b style="font-size:12px">${o.name}</b><div class="phone">${o.phone||''}</div></td>
+      <td><span class="bdg bdg-g">${o.eventType}</span></td>
+      <td><b>${o.eventDate||'—'}</b></td>
+      <td style="font-size:10px;color:var(--txm);max-width:120px;overflow:hidden;text-overflow:ellipsis">${crewSum(o)}</td>
+      <td class="amt">${fmtINR(o.amount)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td><button class="btn btn-d btn-sm" onclick="delEv(${ri})">✕</button></td>
+    </tr>`}).join(''):'<tr><td colspan="9" class="empty">No events found</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ─── TASKS ─── */
+function renderTasks(){
+  const pf=window._tf||'';
+  let list=[...DB.tasks];
+  if(pf) list=list.filter(t=>t.priority===pf);
+  list.sort((a,b)=>{const po=['Urgent','High','Normal','Low'];return po.indexOf(a.priority)-po.indexOf(b.priority);});
+  return `
+  <div class="shdr"><div><div class="stitle">Task & Priority Board</div></div><button class="btn btn-g btn-sm" onclick="showAdd('task')">+ Add Task</button></div>
+  <div class="srow">
+    <select class="fsel" onchange="window._tf=this.value;render()">
+      <option value="">All Priorities</option>${TASK_PRI.map(p=>`<option ${pf===p?'selected':''}>${p}</option>`).join('')}
+    </select>
+  </div>
+  <div class="task-list">${list.length?list.map(t=>{
+    const ri=DB.tasks.indexOf(t);
+    const cls=t.priority==='Urgent'?'urg':t.priority==='High'?'hi':'norm';
+    return`<div class="tk ${cls}">
+      <div class="tk-info">
+        <div class="tk-name">${t.name}</div>
+        <div class="tk-meta">${[t.customer,t.deadline?(t.deadline+(t.dueTime?' at '+t.dueTime:'')):'',t.assigned].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div class="tk-right">
+        <span class="bdg ${t.priority==='Urgent'?'bdg-urg':t.priority==='High'?'bdg-amb':t.priority==='Normal'?'bdg-blu':'bdg-muted'}">${t.priority}</span>
+        <select style="background:var(--s2);border:1px solid var(--br);border-radius:5px;color:var(--tx);font-size:11px;padding:3px 6px;font-family:'Outfit',sans-serif" onchange="updateTaskStatus(${ri},this.value)">
+          ${['Pending','In Progress','Done'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <button class="btn btn-d btn-sm" onclick="delTask(${ri})">✕</button>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty">No tasks. Add one to track your work.</div>'}</div>`;
+}
+
+/* ─── PRICING ─── */
+function renderPricing(){
+  return `
+  <div class="shdr"><div><div class="stitle">Photo Frame Pricing</div><div class="ssub">Vendor cost × 2 = minimum target price</div></div><button class="btn btn-g btn-sm" onclick="showAdd('price')">+ Add Size</button></div>
+  <div class="price-row">${DB.pricing.map((p,i)=>{
+    const min=Math.round((parseFloat(p.cost)||0)*2);
+    const margin=p.sell>0&&p.cost>0?Math.round(((p.sell-p.cost)/p.cost)*100):0;
+    const ok=p.sell>=min;
+    return`<div class="pcard">
+      <div class="pcard-name">📐 ${p.size||'?'} inches</div>
+      <div class="pcard-row"><span class="pcard-lbl">Vendor Cost</span><span class="pcard-val">${fmtINR(p.cost)}</span></div>
+      <div class="pcard-row"><span class="pcard-lbl">Min. Target</span><span class="pcard-val">${fmtINR(min)}</span></div>
+      <div class="pcard-row"><span class="pcard-lbl">Selling Price</span><span class="${ok?'pcard-profit':'pcard-warn'}">${fmtINR(p.sell)}</span></div>
+      <div class="pcard-row"><span class="pcard-lbl">Margin</span><span class="${margin>=50?'pcard-profit':'pcard-warn'}">${margin}%</span></div>
+      ${p.note?`<div style="font-size:10px;color:var(--txm);margin-top:5px">${p.note}</div>`:''}
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <button class="btn btn-o btn-sm" onclick="editPrice(${i})">Edit</button>
+        <button class="btn btn-d btn-sm" onclick="delPrice(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ─── CUSTOMERS ─── */
+function renderCustomers(){
+  const q=(window._cq||'').toLowerCase();
+  let list=[...DB.customers];
+  if(q) list=list.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
+  return `
+  <div class="shdr"><div><div class="stitle">Customer Profiles</div></div><button class="btn btn-g btn-sm" onclick="showAdd('customer')">+ Add Customer</button></div>
+  <div class="srow"><input class="sinp" placeholder="Search by name or phone…" value="${window._cq||''}" oninput="window._cq=this.value;render()"></div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:130px">Name</th><th style="width:100px">Phone</th><th style="width:100px">WhatsApp</th><th>Address</th><th style="width:70px">Orders</th><th style="width:70px">Total Spent</th><th style="width:70px">Pending</th><th style="width:70px">Review</th><th style="width:40px"></th></tr></thead>
+    <tbody>${list.length?list.map((c,i)=>{
+      const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone===c.phone);
+      const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+      const pending=cOrders.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
+      return`<tr>
+        <td><b style="font-size:12px">${c.name}</b></td>
+        <td>${c.phone||'—'}</td>
+        <td>${c.whatsapp||c.phone||'—'}</td>
+        <td style="font-size:11px;color:var(--txm)">${c.address||'—'}</td>
+        <td style="text-align:center">${cOrders.length}</td>
+        <td class="amt">${fmtINR(spent)}</td>
+        <td class="${pending>0?'bal-r':'bal-g'}">${fmtINR(pending)}</td>
+        <td>${c.reviewDone?'<span class="bdg bdg-grn">✓ Done</span>':'<span class="bdg bdg-amb">Pending</span>'}</td>
+        <td><button class="btn btn-d btn-sm" onclick="delCust(${i})">✕</button></td>
+      </tr>`;
+    }).join(''):'<tr><td colspan="9" class="empty">No customers yet</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ─── PENDING ─── */
+function renderPending(){
+  const all=[...DB.walkins.map(o=>({...o,_t:'Walk-in'})),...DB.events.map(o=>({...o,_t:o.eventType||'Event'}))].filter(o=>parseFloat(o.balance)>0).sort((a,b)=>(parseFloat(b.balance)||0)-(parseFloat(a.balance)||0));
+  return `
+  <div class="shdr"><div><div class="stitle">Pending Balances</div><div class="ssub">${all.length} orders with outstanding payment · Total: ${fmtINR(all.reduce((a,o)=>a+(parseFloat(o.balance)||0),0))}</div></div></div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:130px">Customer</th><th style="width:80px">Type</th><th style="width:80px">Date</th><th style="width:70px">Amount</th><th style="width:70px">Advance</th><th style="width:80px">Balance Due</th><th style="width:70px">Delivery</th><th style="width:55px">WA</th></tr></thead>
+    <tbody>${all.length?all.map(o=>`<tr>
+      <td><b style="font-size:12px">${o.name}</b><div class="phone">${o.phone||''}</div></td>
+      <td><span class="bdg ${o._t==='Walk-in'?'bdg-muted':'bdg-g'}">${o._t}</span></td>
+      <td>${o.date||'—'}</td>
+      <td>${fmtINR(o.amount)}</td>
+      <td class="amt">${fmtINR(o.advance)}</td>
+      <td class="bal-r" style="font-weight:600">${fmtINR(o.balance)}</td>
+      <td>${o.deliveryDate||o.eventDate||'—'}</td>
+      <td>${o.phone?`<button class="btn-wa" onclick="waRemind('${o.phone}','${o.name}','${fmtINR(o.balance)}')">WA</button>`:'—'}</td>
+    </tr>`).join(''):'<tr><td colspan="8" class="empty" style="color:var(--grn)">✓ All balances cleared!</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ─── DELIVERY ─── */
+function renderDelivery(){
+  const n=new Date();n.setHours(0,0,0,0);
+  const all=[...DB.walkins.map(o=>({...o,_t:'Walk-in'})),...DB.events.map(o=>({...o,_t:o.eventType,deliveryDate:o.eventDate}))].filter(o=>o.deliveryDate).sort((a,b)=>new Date(a.deliveryDate)-new Date(b.deliveryDate));
+  return `
+  <div class="shdr"><div><div class="stitle">Delivery Tracker</div></div></div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:90px">Date</th><th style="width:130px">Customer</th><th style="width:80px">Type</th><th style="width:80px">Status</th><th style="width:60px">Balance</th><th>Notes</th></tr></thead>
+    <tbody>${all.length?all.map(o=>{
+      const d=new Date(o.deliveryDate);d.setHours(0,0,0,0);
+      const diff=Math.ceil((d-n)/86400000);
+      let cls='bdg-grn',lbl='In '+diff+'d';
+      if(diff<0){cls='bdg-red';lbl='Overdue '+Math.abs(diff)+'d';}
+      else if(diff===0){cls='bdg-amb';lbl='Today';}
+      else if(diff<=2){cls='bdg-amb';lbl='In '+diff+'d';}
+      return`<tr>
+        <td><b>${o.deliveryDate}</b></td>
+        <td>${o.name}<div class="phone">${o.phone||''}</div></td>
+        <td><span class="bdg ${o._t==='Walk-in'?'bdg-muted':'bdg-g'}">${o._t}</span></td>
+        <td><span class="bdg ${cls}">${lbl}</span></td>
+        <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+        <td style="font-size:11px;color:var(--txm)">${o.notes||'—'}</td>
+      </tr>`;
+    }).join(''):'<tr><td colspan="6" class="empty">No deliveries tracked yet</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ─── REPORTS ─── */
+function renderReports(){
+  const allOrd=[...DB.walkins,...DB.events];
+  const totalSales=allOrd.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+  const totalAdv=allOrd.reduce((a,o)=>a+(parseFloat(o.advance)||0),0);
+  const totalBal=allOrd.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
+  const delivered=allOrd.filter(o=>o.status==='Delivered').length;
+  const svcCount={};
+  DB.walkins.forEach(o=>{svcCount[o.service]=(svcCount[o.service]||0)+1;});
+  const topSvc=Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const evCount={};
+  DB.events.forEach(o=>{evCount[o.eventType]=(evCount[o.eventType]||0)+1;});
+  const topEv=Object.entries(evCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const totalVendorCost=DB.pricing.reduce((a,p)=>a+(parseFloat(p.cost)||0),0);
+  const bestFrame=DB.pricing.filter(p=>p.sell>0&&p.cost>0).sort((a,b)=>((b.sell-b.cost)/b.cost)-((a.sell-a.cost)/a.cost))[0];
+  return `
+  <div class="shdr"><div><div class="stitle">Reports & Analytics</div></div><button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button></div>
+  <div class="rep-grid">
+    <div class="rep-card">
+      <div class="rep-title">Financial Summary</div>
+      <div class="rep-row"><span class="rep-lbl">Total Sales</span><span class="rep-val amt">${fmtINR(totalSales)}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Advance Collected</span><span class="rep-val">${fmtINR(totalAdv)}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Balance Pending</span><span class="rep-val bal-r">${fmtINR(totalBal)}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Orders Delivered</span><span class="rep-val bal-g">${delivered}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Total Orders</span><span class="rep-val">${allOrd.length}</span></div>
+    </div>
+    <div class="rep-card">
+      <div class="rep-title">Top Walk-in Services</div>
+      ${topSvc.length?topSvc.map(([s,c])=>`<div class="rep-row"><span class="rep-lbl">${s}</span><span class="rep-val">${c} orders</span></div>`).join(''):'<div style="font-size:11px;color:var(--txm);padding:8px 0">No data yet</div>'}
+    </div>
+    <div class="rep-card">
+      <div class="rep-title">Top Event Types</div>
+      ${topEv.length?topEv.map(([s,c])=>`<div class="rep-row"><span class="rep-lbl">${s}</span><span class="rep-val">${c} bookings</span></div>`).join(''):'<div style="font-size:11px;color:var(--txm);padding:8px 0">No data yet</div>'}
+    </div>
+    <div class="rep-card">
+      <div class="rep-title">Pricing Summary</div>
+      <div class="rep-row"><span class="rep-lbl">Frame Sizes Listed</span><span class="rep-val">${DB.pricing.length}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Best Margin Frame</span><span class="rep-val bal-g">${bestFrame?bestFrame.size+' ('+Math.round(((bestFrame.sell-bestFrame.cost)/bestFrame.cost)*100)+'%)':'—'}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Customers Tracked</span><span class="rep-val">${DB.customers.length}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Reviews Pending</span><span class="rep-val bal-r">${DB.customers.filter(c=>!c.reviewDone).length}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Open Tasks</span><span class="rep-val">${DB.tasks.filter(t=>t.status!=='Done').length}</span></div>
+    </div>
+  </div>`;
+}
+
+/* ─── QUICK LOG ─── */
+function renderQuickLog(){
+  return `
+  <div class="shdr"><div><div class="stitle">Quick Log — Daddy's Entry Screen</div><div class="ssub">Fast, minimal — log a job in 10 seconds</div></div></div>
+  <div class="ql">
+    <div class="ql-title">New Entry</div>
+    <div class="fg fg-3 mt8">
+      <div class="ff"><label>Customer Name</label><input type="text" id="ql-name" placeholder="Full name"></div>
+      <div class="ff"><label>Phone</label><input type="tel" id="ql-phone" placeholder="Mobile number"></div>
+      <div class="ff"><label>Work Type</label><select id="ql-svc">${[...WALKIN_SVC,...BIG_SVC].map(s=>`<option>${s}</option>`).join('')}</select></div>
+    </div>
+    <div class="fg fg-4 mt8">
+      <div class="ff"><label>Total Amount (₹)</label><input type="number" id="ql-amt" placeholder="0" oninput="qlBal()"></div>
+      <div class="ff"><label>Advance (₹)</label><input type="number" id="ql-adv" placeholder="0" oninput="qlBal()"></div>
+      <div class="ff"><label>Balance (₹)</label><input type="number" id="ql-bal" readonly placeholder="Auto"></div>
+      <div class="ff"><label>Delivery Date</label><input type="date" id="ql-del"></div>
+    </div>
+    <div class="fg fg-2 mt8">
+      <div class="ff"><label>Notes</label><input type="text" id="ql-note" placeholder="Any details"></div>
+      <div class="ff"><label>Date</label><input type="date" id="ql-date" value="${today()}"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-g" onclick="saveQL()">Save Entry</button>
+    </div>
+  </div>
+  <div class="shdr mt8"><div><div class="stitle">Today's Entries</div></div></div>
+  <div class="tw"><table>
+    <thead><tr><th style="width:120px">Customer</th><th style="width:100px">Service</th><th style="width:65px">Amount</th><th style="width:65px">Advance</th><th style="width:65px">Balance</th><th style="width:80px">Delivery</th><th>Notes</th></tr></thead>
+    <tbody>${[...DB.walkins].filter(o=>o.date===today()).reverse().map(o=>`<tr>
+      <td><b>${o.name}</b><div class="phone">${o.phone||''}</div></td>
+      <td><span class="bdg bdg-muted">${o.service}</span></td>
+      <td class="amt">${fmtINR(o.amount)}</td>
+      <td class="amt">${fmtINR(o.advance)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td>${o.deliveryDate||'—'}</td>
+      <td style="font-size:11px;color:var(--txm)">${o.notes||''}</td>
+    </tr>`).join('')||'<tr><td colspan="7" class="empty">No entries today yet</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ─── ADD MODAL FORMS ─── */
+function showAdd(type){
+  const shade=document.createElement('div');
+  shade.className='shade';
+  shade.id='shade';
+  shade.style='position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;overflow-y:auto;padding:20px';
+  shade.innerHTML=`<div class="modal">${buildForm(type)}</div>`;
+  document.body.appendChild(shade);
+  if(type==='walkin'||type==='quicklog') setupWiCalc();
+  if(type==='event') setupEvCalc();
+  if(type==='price') setupPriceCalc();
+}
+function closeShade(){const s=document.getElementById('shade');if(s)s.remove();}
+
+function buildForm(type){
+  if(type==='walkin') return `
+    <div class="mtitle">New Walk-in Order <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="fg fg-3"><div class="ff"><label>Date</label><input type="date" id="f-date" value="${today()}"></div><div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name"></div><div class="ff"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile"></div></div>
+    <div class="fg fg-3 mt8"><div class="ff"><label>Service</label><select id="f-svc">${WALKIN_SVC.map(s=>`<option>${s}</option>`).join('')}</select></div><div class="ff"><label>Status</label><select id="f-status">${ORDER_STATUS.map(s=>`<option>${s}</option>`).join('')}</select></div><div class="ff"><label>Delivery Date</label><input type="date" id="f-del"></div></div>
+    <div class="fg fg-4 mt8"><div class="ff"><label>Amount (₹)</label><input type="number" id="f-amt" placeholder="0" oninput="calcBal('wi')"></div><div class="ff"><label>Advance (₹)</label><input type="number" id="f-adv" placeholder="0" oninput="calcBal('wi')"></div><div class="ff"><label>Balance (₹)</label><input type="number" id="f-bal" readonly></div><div class="ff"><label>Payment Mode</label><select id="f-pay">${PAY_MODES.map(p=>`<option>${p}</option>`).join('')}</select></div></div>
+    <div class="fg fg-2 mt8"><div class="ff"><label>Urgent?</label><select id="f-urg"><option>No</option><option>Yes</option></select></div><div class="ff"><label>Notes</label><input type="text" id="f-notes" placeholder="Any special requirements"></div></div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveWi()">Save Order</button></div>`;
+
+  if(type==='event') return `
+    <div class="mtitle">New Event Booking <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="fg fg-3"><div class="ff"><label>Booking Date</label><input type="date" id="f-date" value="${today()}"></div><div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name"></div><div class="ff"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile"></div></div>
+    <div class="fg fg-3 mt8"><div class="ff"><label>Event Type</label><select id="f-etype">${BIG_SVC.map(s=>`<option>${s}</option>`).join('')}</select></div><div class="ff"><label>Event Date</label><input type="date" id="f-edate"></div><div class="ff"><label>Venue</label><input type="text" id="f-venue" placeholder="Venue / City"></div></div>
+    <div class="divider"></div>
+    <div class="csub">Crew Configuration</div>
+    <div class="crew-g">
+      ${[['pt','Photo Traditional'],['pc','Photo Cinematic'],['vt','Video Traditional'],['vc','Video Cinematic'],['ph','Photo Hybrid'],['vh','Video Hybrid'],['vv','Vertical Video'],['v3','360 Video'],['dr','Drone'],['ac','Action Cam']].map(([k,l])=>`<div class="ci"><label>${l}</label><input type="number" id="f-${k}" value="0" min="0" max="20"></div>`).join('')}
+    </div>
+    <div class="divider"></div>
+    <div class="fg fg-4 mt8"><div class="ff"><label>Package Amount (₹)</label><input type="number" id="f-amt" placeholder="0" oninput="calcBal('ev')"></div><div class="ff"><label>Advance (₹)</label><input type="number" id="f-adv" placeholder="0" oninput="calcBal('ev')"></div><div class="ff"><label>Balance (₹)</label><input type="number" id="f-bal" readonly></div><div class="ff"><label>Status</label><select id="f-status">${ORDER_STATUS.map(s=>`<option>${s}</option>`).join('')}</select></div></div>
+    <div class="fg fg-2 mt8"><div class="ff"><label>Payment Terms</label><input type="text" id="f-terms" placeholder="e.g. 50% advance, 50% on delivery"></div><div class="ff"><label>Notes</label><input type="text" id="f-notes" placeholder="Special requirements"></div></div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveEv()">Book Event</button></div>`;
+
+  if(type==='task') return `
+    <div class="mtitle">New Task <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="fg fg-2"><div class="ff"><label>Task Name</label><input type="text" id="f-tname" placeholder="What needs to be done?"></div><div class="ff"><label>Customer / Order Ref</label><input type="text" id="f-cust" placeholder="Customer name or order"></div></div>
+    <div class="fg fg-4 mt8"><div class="ff"><label>Priority</label><select id="f-pri">${TASK_PRI.map(p=>`<option>${p}</option>`).join('')}</select></div><div class="ff"><label>Deadline Date</label><input type="date" id="f-dl"></div><div class="ff"><label>Due Time</label><input type="time" id="f-tm"></div><div class="ff"><label>Assigned To</label><input type="text" id="f-asgn" placeholder="Staff name"></div></div>
+    <div class="fg fg-2 mt8"><div class="ff"><label>Status</label><select id="f-stat"><option>Pending</option><option>In Progress</option><option>Done</option></select></div><div class="ff"><label>Notes</label><input type="text" id="f-tnotes" placeholder="Any details"></div></div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveTask()">Add Task</button></div>`;
+
+  if(type==='price') return `
+    <div class="mtitle">Add / Edit Frame Price <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="fg fg-2"><div class="ff"><label>Frame Size (e.g. 8x10)</label><input type="text" id="f-psize" placeholder="8x10"></div><div class="ff"><label>Vendor Cost (₹)</label><input type="number" id="f-pcost" placeholder="0" oninput="calcSell()"></div></div>
+    <div class="fg fg-3 mt8"><div class="ff"><label>Min. Target Price (₹)</label><input type="number" id="f-pmin" readonly style="opacity:.6"></div><div class="ff"><label>Selling Price (₹)</label><input type="number" id="f-psell" placeholder="0" oninput="calcMargin()"></div><div class="ff"><label>Margin %</label><input type="number" id="f-pmarg" readonly style="opacity:.6"></div></div>
+    <div class="ff mt8"><label>Notes</label><input type="text" id="f-pnote" placeholder="Any vendor notes"></div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="savePrice()">Save</button></div>`;
+
+  if(type==='customer') return `
+    <div class="mtitle">Add Customer <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="fg fg-3"><div class="ff"><label>Name</label><input type="text" id="f-cname" placeholder="Full name"></div><div class="ff"><label>Mobile</label><input type="tel" id="f-cmob" placeholder="Mobile number"></div><div class="ff"><label>WhatsApp (if diff)</label><input type="tel" id="f-cwa" placeholder="WhatsApp number"></div></div>
+    <div class="fg fg-2 mt8"><div class="ff"><label>Address</label><input type="text" id="f-cadr" placeholder="Area / locality"></div><div class="ff"><label>Google Review Done?</label><select id="f-crev"><option value="0">No</option><option value="1">Yes</option></select></div></div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveCust()">Save Customer</button></div>`;
+
+  return '';
+}
+
+/* ─── FORM HELPERS ─── */
+function calcBal(t){
+  const a=parseFloat(document.getElementById('f-amt').value)||0;
+  const d=parseFloat(document.getElementById('f-adv').value)||0;
+  document.getElementById('f-bal').value=Math.max(0,a-d);
+}
+function setupWiCalc(){setTimeout(()=>{const i=document.getElementById('f-amt');if(i){i.addEventListener('input',()=>calcBal('wi'));}},100);}
+function setupEvCalc(){setTimeout(()=>{const i=document.getElementById('f-amt');if(i){i.addEventListener('input',()=>calcBal('ev'));}},100);}
+function setupPriceCalc(){}
+function calcSell(){
+  const c=parseFloat(document.getElementById('f-pcost').value)||0;
+  document.getElementById('f-pmin').value=Math.round(c*2);
+  calcMargin();
+}
+function calcMargin(){
+  const c=parseFloat(document.getElementById('f-pcost').value)||0;
+  const s=parseFloat(document.getElementById('f-psell').value)||0;
+  document.getElementById('f-pmarg').value=c>0?Math.round(((s-c)/c)*100):0;
+}
+function qlBal(){
+  const a=parseFloat(document.getElementById('ql-amt').value)||0;
+  const d=parseFloat(document.getElementById('ql-adv').value)||0;
+  document.getElementById('ql-bal').value=Math.max(0,a-d);
+}
+
+/* ─── SAVE ACTIONS ─── */
+function saveWi(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){alert('Customer name required');return;}
+  const amt=parseFloat(document.getElementById('f-amt').value)||0;
+  const adv=parseFloat(document.getElementById('f-adv').value)||0;
+  DB.walkins.push({date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,service:document.getElementById('f-svc').value,status:document.getElementById('f-status').value,amount:amt,advance:adv,balance:Math.max(0,amt-adv),payMode:document.getElementById('f-pay').value,urgent:document.getElementById('f-urg').value==='Yes',deliveryDate:document.getElementById('f-del').value,notes:document.getElementById('f-notes').value});
+  save();closeShade();render();
+}
+function saveEv(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){alert('Customer name required');return;}
+  const amt=parseFloat(document.getElementById('f-amt').value)||0;
+  const adv=parseFloat(document.getElementById('f-adv').value)||0;
+  const crew={pt:+document.getElementById('f-pt').value,pc:+document.getElementById('f-pc').value,vt:+document.getElementById('f-vt').value,vc:+document.getElementById('f-vc').value,ph:+document.getElementById('f-ph').value,vh:+document.getElementById('f-vh').value,vv:+document.getElementById('f-vv').value,v3:+document.getElementById('f-v3').value,dr:+document.getElementById('f-dr').value,ac:+document.getElementById('f-ac').value};
+  DB.events.push({date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,eventType:document.getElementById('f-etype').value,eventDate:document.getElementById('f-edate').value,venue:document.getElementById('f-venue').value,...crew,amount:amt,advance:adv,balance:Math.max(0,amt-adv),status:document.getElementById('f-status').value,terms:document.getElementById('f-terms').value,notes:document.getElementById('f-notes').value});
+  save();closeShade();render();
+}
+function saveTask(){
+  const name=document.getElementById('f-tname').value.trim();
+  if(!name){alert('Task name required');return;}
+  DB.tasks.push({name,customer:document.getElementById('f-cust').value,priority:document.getElementById('f-pri').value,deadline:document.getElementById('f-dl').value,dueTime:document.getElementById('f-tm').value,assigned:document.getElementById('f-asgn').value,status:document.getElementById('f-stat').value,notes:document.getElementById('f-tnotes').value});
+  save();closeShade();render();
+}
+function savePrice(){
+  const size=document.getElementById('f-psize').value.trim();
+  if(!size){alert('Size required');return;}
+  DB.pricing.push({size,cost:parseFloat(document.getElementById('f-pcost').value)||0,sell:parseFloat(document.getElementById('f-psell').value)||0,note:document.getElementById('f-pnote').value});
+  save();closeShade();render();
+}
+function saveCust(){
+  const name=document.getElementById('f-cname').value.trim();
+  if(!name){alert('Name required');return;}
+  DB.customers.push({name,phone:document.getElementById('f-cmob').value,whatsapp:document.getElementById('f-cwa').value,address:document.getElementById('f-cadr').value,reviewDone:document.getElementById('f-crev').value==='1'});
+  save();closeShade();render();
+}
+function saveQL(){
+  const name=document.getElementById('ql-name').value.trim();
+  if(!name){alert('Customer name required');return;}
+  const amt=parseFloat(document.getElementById('ql-amt').value)||0;
+  const adv=parseFloat(document.getElementById('ql-adv').value)||0;
+  DB.walkins.push({date:document.getElementById('ql-date').value,name,phone:document.getElementById('ql-phone').value,service:document.getElementById('ql-svc').value,status:'New Order',amount:amt,advance:adv,balance:Math.max(0,amt-adv),deliveryDate:document.getElementById('ql-del').value,notes:document.getElementById('ql-note').value});
+  save();
+  ['ql-name','ql-phone','ql-amt','ql-adv','ql-bal','ql-del','ql-note'].forEach(id=>{document.getElementById(id).value='';});
+  render();
+}
+function editPrice(i){
+  showAdd('price');
+  setTimeout(()=>{
+    const p=DB.pricing[i];
+    document.getElementById('f-psize').value=p.size;
+    document.getElementById('f-pcost').value=p.cost;
+    document.getElementById('f-psell').value=p.sell;
+    document.getElementById('f-pnote').value=p.note||'';
+    calcSell();
+    const btn=document.querySelector('.btn.btn-g');
+    if(btn){btn.onclick=()=>{DB.pricing[i]={size:document.getElementById('f-psize').value,cost:parseFloat(document.getElementById('f-pcost').value)||0,sell:parseFloat(document.getElementById('f-psell').value)||0,note:document.getElementById('f-pnote').value};save();closeShade();render();};}
+  },150);
+}
+
+/* ─── DELETE ─── */
+function delWi(i){if(confirm('Delete this order?')){DB.walkins.splice(i,1);save();render();}}
+function delEv(i){if(confirm('Delete this event?')){DB.events.splice(i,1);save();render();}}
+function delTask(i){if(confirm('Delete this task?')){DB.tasks.splice(i,1);save();render();}}
+function delPrice(i){if(confirm('Remove this size?')){DB.pricing.splice(i,1);save();render();}}
+function delCust(i){if(confirm('Delete customer?')){DB.customers.splice(i,1);save();render();}}
+function updateTaskStatus(i,v){DB.tasks[i].status=v;save();}
+
+/* ─── WHATSAPP ─── */
+function wa(phone,name,svc,del){
+  const msg=`Hello ${name}! Your ${svc} order at Tathastu Weddings is ready for pickup${del?' on '+del:''}. Please contact us to confirm. Thank you! 🙏`;
+  window.open('https://wa.me/91'+phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg));
+}
+function waRemind(phone,name,bal){
+  const msg=`Hello ${name}! This is a gentle reminder from Tathastu Weddings. Your pending balance is ${bal}. Please make the payment at your earliest convenience. Thank you! 🙏`;
+  window.open('https://wa.me/91'+phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg));
+}
+
+/* ─── UTILS ─── */
+function crewSum(o){
+  const m=[['pt','P-T'],['pc','P-C'],['vt','V-T'],['vc','V-C'],['ph','P-H'],['vh','V-H'],['vv','VV'],['v3','360'],['dr','Drone'],['ac','Actn'],
+           ['photoTrad','P-T'],['photoCine','P-C'],['videoTrad','V-T'],['videoCine','V-C'],['photoHybrid','P-H'],['videoHybrid','V-H'],['verticalVideo','VV'],['video360','360'],['drone','Drone'],['action','Actn']];
+  const seen=new Set();const r=[];
+  m.forEach(([k,l])=>{if(!seen.has(l)&&o[k]>0){seen.add(l);r.push(o[k]+l);}});
+  return r.join(' · ')||'—';
+}
+function statusBadge(s){
+  const map={Urgent:'bdg-urg',Delivered:'bdg-grn','New Order':'bdg-blu','In Progress':'bdg-amb',Ready:'bdg-grn','Payment Pending':'bdg-red',Cancelled:'bdg-red'};
+  return`<span class="bdg ${map[s]||'bdg-muted'}">${s||'—'}</span>`;
+}
+
+/* ─── CSV EXPORT ─── */
+function exportAll(){
+  const rows=[['Type','Date','Customer','Phone','Service/Event','Event Date','Amount','Advance','Balance','Status','Delivery','Notes','Crew']];
+  DB.walkins.forEach(o=>rows.push(['Walk-in',o.date,o.name,o.phone,o.service,'',o.amount,o.advance,o.balance,o.status,o.deliveryDate,o.notes,'']));
+  DB.events.forEach(o=>rows.push(['Event',o.date,o.name,o.phone,o.eventType,o.eventDate,o.amount,o.advance,o.balance,o.status,o.eventDate,o.notes,crewSum(o)]));
+  const csv=rows.map(r=>r.map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='tathastu_'+today()+'.csv';a.click();
+}
+
+function attachEvents(){}
+
+render();
+</script>
+
+</body>
+</html>
