@@ -3,12 +3,6 @@
  *
  * R2 Bucket binding : TATHASTU_BUCKET  →  bucket name: tathastu-studio-data
  * Secrets required  : AUTH_USERNAME, AUTH_PASSWORD
- *
- * Endpoints:
- *   GET  /data    — load full studio DB (requires Basic Auth)
- *   POST /data    — save full studio DB (requires Basic Auth)
- *   POST /verify  — validate credentials
- *   OPTIONS *     — CORS preflight
  */
 
 const DATA_KEY = 'studio-db.json';
@@ -37,72 +31,41 @@ function parseBasicAuth(request) {
     const decoded = atob(header.slice(6));
     const colon   = decoded.indexOf(':');
     if (colon < 0) return null;
-    return {
-      user: decoded.slice(0, colon).trim(),
-      pass: decoded.slice(colon + 1).trim(),
-    };
-  } catch {
-    return null;
-  }
+    return { user: decoded.slice(0, colon).trim(), pass: decoded.slice(colon + 1).trim() };
+  } catch { return null; }
 }
 
 function checkAuth(request, env) {
   const creds = parseBasicAuth(request);
   if (!creds) return false;
-  const expectedUser = (env.AUTH_USERNAME || '').trim();
-  const expectedPass = (env.AUTH_PASSWORD || '').trim();
-  // constant-time comparison to avoid timing attacks
-  const userOk = creds.user.length === expectedUser.length &&
-    [...creds.user].every((c, i) => c === expectedUser[i]);
-  const passOk = creds.pass.length === expectedPass.length &&
-    [...creds.pass].every((c, i) => c === expectedPass[i]);
-  return userOk && passOk;
+  const eu = (env.AUTH_USERNAME || '').trim();
+  const ep = (env.AUTH_PASSWORD || '').trim();
+  const uOk = creds.user.length === eu.length && [...creds.user].every((c,i)=>c===eu[i]);
+  const pOk = creds.pass.length === ep.length && [...creds.pass].every((c,i)=>c===ep[i]);
+  return uOk && pOk;
 }
 
 export default {
   async fetch(request, env) {
-    const url    = new URL(request.url);
+    const url = new URL(request.url);
     const method = request.method;
-
-    if (method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: CORS });
-    }
-
-    /* ── POST /verify ── */
-    if (method === 'POST' && url.pathname === '/verify') {
-      return checkAuth(request, env)
-        ? text('OK', 200)
-        : text('Unauthorized', 401);
-    }
-
-    /* ── GET /data ── */
+    if (method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
+    if (method === 'POST' && url.pathname === '/verify')
+      return checkAuth(request, env) ? text('OK') : text('Unauthorized', 401);
     if (method === 'GET' && url.pathname === '/data') {
       if (!checkAuth(request, env)) return text('Unauthorized', 401);
-
       const obj = await env.TATHASTU_BUCKET.get(DATA_KEY);
-      if (!obj) {
-        return json({ walkins: [], events: [], tasks: [], pricing: [], customers: [] });
-      }
-      return new Response(obj.body, {
-        headers: { ...CORS, 'Content-Type': 'application/json' },
-      });
+      if (!obj) return json({ walkins:[], events:[], tasks:[], pricing:[], customers:[] });
+      return new Response(obj.body, { headers: { ...CORS, 'Content-Type': 'application/json' } });
     }
-
-    /* ── POST /data ── */
     if (method === 'POST' && url.pathname === '/data') {
       if (!checkAuth(request, env)) return text('Unauthorized', 401);
-
       const body = await request.text();
-      if (body.length > 10 * 1024 * 1024) return text('Payload too large', 413);
-
+      if (body.length > 10*1024*1024) return text('Payload too large', 413);
       try { JSON.parse(body); } catch { return text('Invalid JSON', 400); }
-
-      await env.TATHASTU_BUCKET.put(DATA_KEY, body, {
-        httpMetadata: { contentType: 'application/json' },
-      });
+      await env.TATHASTU_BUCKET.put(DATA_KEY, body, { httpMetadata: { contentType: 'application/json' } });
       return text('OK');
     }
-
     return text('Not Found', 404);
   },
 };
