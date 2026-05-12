@@ -14,7 +14,7 @@
      e.g. https://tathastu-studio.yourname.workers.dev
      ═══════════════════════════════════════════════ -->
 <script>
-const WORKER_URL = 'tathastu.vicky-bhardwaj.workers.dev';  // <-- PASTE YOUR WORKER URL HERE
+const WORKER_URL = 'https://tathastu.vicky-bhardwaj.workers.dev';
 </script>
 
 <style>
@@ -291,9 +291,13 @@ function getCredentials(){
   return u&&p ? 'Basic '+btoa(u+':'+p) : null;
 }
 
-function workerAvailable(){
-  return typeof WORKER_URL==='string' && WORKER_URL.trim()!=='';
+function workerBase(){
+  let u = (typeof WORKER_URL === 'string' ? WORKER_URL : '').trim();
+  if(!u) return '';
+  if(!u.startsWith('http')) u = 'https://' + u;
+  return u.replace(/\/$/, ''); // strip trailing slash
 }
+function workerAvailable(){ return workerBase() !== ''; }
 
 /* ── Sync status UI ── */
 function setSyncStatus(state){
@@ -318,7 +322,7 @@ function save(){
     if(!creds) return;
     setSyncStatus('saving');
     try{
-      const res=await fetch(WORKER_URL+'/data',{
+      const res=await fetch(workerBase()+'/data',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':creds},
         body:JSON.stringify(DB),
@@ -343,7 +347,7 @@ async function doLogin(){
 
   err.textContent='Signing in…';
   try{
-    const res=await fetch(WORKER_URL+'/verify',{
+    const res=await fetch(workerBase()+'/verify',{
       method:'POST',
       headers:{'Authorization':'Basic '+btoa(u+':'+p)},
     });
@@ -373,7 +377,7 @@ async function loadFromWorker(){
   const creds=getCredentials();
   if(!creds) return loadFromCache();
   try{
-    const res=await fetch(WORKER_URL+'/data',{
+    const res=await fetch(workerBase()+'/data',{
       headers:{'Authorization':creds},
     });
     if(!res.ok) return loadFromCache();
