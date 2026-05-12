@@ -72,7 +72,8 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
 .btn-o:hover{border-color:var(--gold);color:var(--gold)}
 .btn-d{background:transparent;border:1px solid var(--red-br);color:var(--red)}
 .btn-sm{padding:4px 10px;font-size:11px;border-radius:5px}
-.btn-wa{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25D366;font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif}
+.btn-wa{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25D366;font-size:11px;padding:5px 7px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif;display:inline-flex;align-items:center;justify-content:center}
+.btn-wa:hover{background:rgba(37,211,102,.28)}
 .btn-print{background:rgba(96,168,224,.15);border:1px solid rgba(96,168,224,.3);color:var(--blu);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif}
 .btn-row{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
 
@@ -557,7 +558,7 @@ function renderWalkins(){
     </select>
   </div>
   <div class="tw"><table>
-    <thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:40px">WA</th><th style="width:78px">Actions</th></tr></thead>
+    <thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></th><th style="width:78px">Actions</th></tr></thead>
     <tbody>${list.length?list.map(o=>{
       const ri=DB.walkins.indexOf(o);
       return`<tr>
@@ -569,7 +570,7 @@ function renderWalkins(){
         <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
         <td>${statusBadge(o.status)}</td>
         <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
-        <td>${o.phone?`<button class="btn-wa" onclick="wa('${o.phone}','${o.name}','${o.service}','${o.deliveryDate||''}')">WA</button>`:'—'}</td>
+        <td>${o.phone?`<button class="btn-wa" onclick="wa('${o.phone}','${o.name}','${o.service}','${o.deliveryDate||''}')" title="Send WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>`:'—'}</td>
         <td style="white-space:normal"><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button>&nbsp;<button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
       </tr>`;
     }).join(''):'<tr><td colspan="10" class="empty">No orders found</td></tr>'}</tbody>
@@ -717,7 +718,7 @@ function renderPending(){
       <td class="amt">${fmtINR(o.advance)}</td>
       <td class="bal-r" style="font-weight:600">${fmtINR(o.balance)}</td>
       <td>${o.deliveryDate||o.eventDate||'—'}</td>
-      <td>${o.phone?`<button class="btn-wa" onclick="waRemind('${o.phone}','${o.name}','${fmtINR(o.balance)}')">WA</button>`:'—'}</td>
+      <td>${o.phone?`<button class="btn-wa" onclick="waRemind('${o.phone}','${o.name}','${fmtINR(o.balance)}')" title="Send WhatsApp reminder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>`:'—'}</td>
     </tr>`).join(''):'<tr><td colspan="8" class="empty" style="color:var(--grn)">✓ All balances cleared!</td></tr>'}</tbody>
   </table></div>`;
 }
