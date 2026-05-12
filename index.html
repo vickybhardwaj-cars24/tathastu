@@ -72,8 +72,7 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
 .btn-o:hover{border-color:var(--gold);color:var(--gold)}
 .btn-d{background:transparent;border:1px solid var(--red-br);color:var(--red)}
 .btn-sm{padding:4px 10px;font-size:11px;border-radius:5px}
-.btn-wa{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25D366;font-size:11px;padding:5px 7px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif;display:inline-flex;align-items:center;justify-content:center}
-.btn-wa:hover{background:rgba(37,211,102,.28)}
+.btn-wa{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25D366;font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif}
 .btn-print{background:rgba(96,168,224,.15);border:1px solid rgba(96,168,224,.3);color:var(--blu);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif}
 .btn-row{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
 
@@ -266,7 +265,7 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
   <div class="hdr-right">
     <div class="date-chip">Today <b id="hdr-date"></b></div>
     <div id="sync-status"><span class="sync-dot ok" id="sync-dot"></span><span id="sync-txt">Synced</span></div>
-    <button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button>
+    <button class="btn btn-o btn-sm" onclick="exportAll()">&#11015; Export CSV</button>
     <button class="btn btn-g btn-sm" onclick="showAdd('walkin')">+ Walk-in</button>
     <button class="btn btn-g btn-sm" onclick="showAdd('event')">+ Event</button>
     <button class="btn btn-o btn-sm" onclick="doLogout()">Sign Out</button>
@@ -558,7 +557,7 @@ function renderWalkins(){
     </select>
   </div>
   <div class="tw"><table>
-    <thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></th><th style="width:78px">Actions</th></tr></thead>
+    <thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:40px">WA</th><th style="width:78px">Actions</th></tr></thead>
     <tbody>${list.length?list.map(o=>{
       const ri=DB.walkins.indexOf(o);
       return`<tr>
@@ -570,8 +569,8 @@ function renderWalkins(){
         <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
         <td>${statusBadge(o.status)}</td>
         <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
-        <td>${o.phone?`<button class="btn-wa" onclick="wa('${o.phone}','${o.name}','${o.service}','${o.deliveryDate||''}')" title="Send WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>`:'—'}</td>
-        <td style="white-space:normal"><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button>&nbsp;<button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
+        <td>${o.phone?`<button class="btn-wa" onclick="wa('${o.phone}','${o.name}','${o.service}','${o.deliveryDate||''}')">WA</button>`:'—'}</td>
+        <td style="white-space:normal"><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button>&nbsp;<button class="btn btn-d btn-sm" onclick="delWi(${ri})">&#10005;</button></td>
       </tr>`;
     }).join(''):'<tr><td colspan="10" class="empty">No orders found</td></tr>'}</tbody>
   </table></div>`;
@@ -608,7 +607,7 @@ function renderEvents(){
         <td class="amt">${fmtINR(o.amount)}</td>
         <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
         <td>${statusBadge(o.status)}</td>
-        <td><button class="btn btn-d btn-sm" onclick="delEv(${ri})">✕</button></td>
+        <td><button class="btn btn-d btn-sm" onclick="delEv(${ri})">&#10005;</button></td>
       </tr>`;
     }).join(''):'<tr><td colspan="10" class="empty">No events found</td></tr>'}</tbody>
   </table></div>`;
@@ -646,7 +645,7 @@ function renderTasks(){
         <select style="background:var(--s2);border:1px solid var(--br);border-radius:5px;color:var(--tx);font-size:11px;padding:3px 6px;font-family:'Outfit',sans-serif" onchange="updateTaskStatus(${ri},this.value)">
           ${['Pending','In Progress','Done'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
-        <button class="btn btn-d btn-sm" onclick="delTask(${ri})">✕</button>
+        <button class="btn btn-d btn-sm" onclick="delTask(${ri})">&#10005;</button>
       </div>
     </div>`;
   }).join(''):'<div class="empty">No tasks. Add one to track your work.</div>'}</div>`;
@@ -669,7 +668,7 @@ function renderPricing(){
       ${p.note?`<div style="font-size:10px;color:var(--txm);margin-top:5px">${p.note}</div>`:''}
       <div style="margin-top:8px;display:flex;gap:6px">
         <button class="btn btn-o btn-sm" onclick="editPrice(${i})">Edit</button>
-        <button class="btn btn-d btn-sm" onclick="delPrice(${i})">✕</button>
+        <button class="btn btn-d btn-sm" onclick="delPrice(${i})">&#10005;</button>
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -697,7 +696,7 @@ function renderCustomers(){
         <td class="amt">${fmtINR(spent)}</td>
         <td class="${pending>0?'bal-r':'bal-g'}">${fmtINR(pending)}</td>
         <td>${c.reviewDone?'<span class="bdg bdg-grn">✓ Done</span>':'<span class="bdg bdg-amb">Pending</span>'}</td>
-        <td><button class="btn btn-d btn-sm" onclick="delCust(${i})">✕</button></td>
+        <td><button class="btn btn-d btn-sm" onclick="delCust(${i})">&#10005;</button></td>
       </tr>`;
     }).join(''):'<tr><td colspan="8" class="empty">No customers yet</td></tr>'}</tbody>
   </table></div>`;
@@ -718,7 +717,7 @@ function renderPending(){
       <td class="amt">${fmtINR(o.advance)}</td>
       <td class="bal-r" style="font-weight:600">${fmtINR(o.balance)}</td>
       <td>${o.deliveryDate||o.eventDate||'—'}</td>
-      <td>${o.phone?`<button class="btn-wa" onclick="waRemind('${o.phone}','${o.name}','${fmtINR(o.balance)}')" title="Send WhatsApp reminder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>`:'—'}</td>
+      <td>${o.phone?`<button class="btn-wa" onclick="waRemind('${o.phone}','${o.name}','${fmtINR(o.balance)}')">WA</button>`:'—'}</td>
     </tr>`).join(''):'<tr><td colspan="8" class="empty" style="color:var(--grn)">✓ All balances cleared!</td></tr>'}</tbody>
   </table></div>`;
 }
@@ -764,7 +763,7 @@ function renderReports(){
   const topEv=Object.entries(evCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const bestFrame=DB.pricing.filter(p=>p.sell>0&&p.cost>0).sort((a,b)=>((b.sell-b.cost)/b.cost)-((a.sell-a.cost)/a.cost))[0];
   return `
-  <div class="shdr"><div><div class="stitle">Reports &amp; Analytics</div></div><button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button></div>
+  <div class="shdr"><div><div class="stitle">Reports &amp; Analytics</div></div><button class="btn btn-o btn-sm" onclick="exportAll()">&#11015; Export CSV</button></div>
   <div class="rep-grid">
     <div class="rep-card">
       <div class="rep-title">Financial Summary</div>
@@ -850,7 +849,7 @@ function closeShade(){const s=document.getElementById('shade');if(s)s.remove();}
 
 function buildForm(type){
   if(type==='walkin') return `
-    <div class="mtitle">New Walk-in Order <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="mtitle">New Walk-in Order <button class="mclose" onclick="closeShade()">&#10005;</button></div>
     <div class="fg fg-3">
       <div class="ff"><label>Date</label><input type="date" id="f-date" value="${today()}"></div>
       <div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name"></div>
@@ -875,7 +874,7 @@ function buildForm(type){
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveWi()">Save Order</button></div>`;
 
   if(type==='event') return `
-    <div class="mtitle">New Event Booking <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="mtitle">New Event Booking <button class="mclose" onclick="closeShade()">&#10005;</button></div>
     <div class="fg fg-3">
       <div class="ff"><label>Booking Date</label><input type="date" id="f-date" value="${today()}"></div>
       <div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name"></div>
@@ -919,7 +918,7 @@ function buildForm(type){
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveEv()">Book Event</button></div>`;
 
   if(type==='task') return `
-    <div class="mtitle">New Task <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="mtitle">New Task <button class="mclose" onclick="closeShade()">&#10005;</button></div>
     <div class="fg fg-2">
       <div class="ff"><label>Task Name</label><input type="text" id="f-tname" placeholder="What needs to be done?"></div>
       <div class="ff"><label>Customer / Order Ref</label><input type="text" id="f-cust" placeholder="Customer name or order"></div>
@@ -938,7 +937,7 @@ function buildForm(type){
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveTask()">Add Task</button></div>`;
 
   if(type==='price') return `
-    <div class="mtitle">Add / Edit Frame Price <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="mtitle">Add / Edit Frame Price <button class="mclose" onclick="closeShade()">&#10005;</button></div>
     <div class="fg fg-2">
       <div class="ff"><label>Frame Size (e.g. 8x10)</label><input type="text" id="f-psize" placeholder="8x10"></div>
       <div class="ff"><label>Vendor Cost (₹)</label><input type="number" id="f-pcost" placeholder="0" oninput="calcSell()"></div>
@@ -952,7 +951,7 @@ function buildForm(type){
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="savePrice()">Save</button></div>`;
 
   if(type==='customer') return `
-    <div class="mtitle">Add Customer <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="mtitle">Add Customer <button class="mclose" onclick="closeShade()">&#10005;</button></div>
     <div class="fg fg-3">
       <div class="ff"><label>Name</label><input type="text" id="f-cname" placeholder="Full name"></div>
       <div class="ff"><label>Mobile</label><input type="tel" id="f-cmob" placeholder="Mobile number"></div>
@@ -972,14 +971,14 @@ function addDateRow(){
   const c=document.getElementById('extra-dates');if(!c)return;
   const d=document.createElement('div');
   d.style='display:flex;gap:6px;align-items:flex-end;margin-top:6px';
-  d.innerHTML='<div class="ff" style="flex:1"><label>Additional Date</label><input type="date" class="extra-date" style="background:var(--s2);border:1px solid var(--br);border-radius:6px;color:var(--tx);font-family:\'Outfit\',sans-serif;font-size:12px;padding:7px 9px;width:100%;outline:none"></div><button type="button" onclick="this.parentElement.remove()" style="background:transparent;border:1px solid var(--red-br);color:var(--red);border-radius:4px;padding:7px 9px;cursor:pointer;font-size:11px;height:32px;flex-shrink:0">✕</button>';
+  d.innerHTML='<div class="ff" style="flex:1"><label>Additional Date</label><input type="date" class="extra-date" style="background:var(--s2);border:1px solid var(--br);border-radius:6px;color:var(--tx);font-family:\'Outfit\',sans-serif;font-size:12px;padding:7px 9px;width:100%;outline:none"></div><button type="button" onclick="this.parentElement.remove()" style="background:transparent;border:1px solid var(--red-br);color:var(--red);border-radius:4px;padding:7px 9px;cursor:pointer;font-size:11px;height:32px;flex-shrink:0">&#10005;</button>';
   c.appendChild(d);
 }
 function addVenueRow(){
   const c=document.getElementById('extra-venues');if(!c)return;
   const d=document.createElement('div');
   d.style='display:flex;gap:6px;align-items:flex-end;margin-top:6px';
-  d.innerHTML='<div class="ff" style="flex:1"><label>Additional Venue</label><input type="text" class="extra-venue" placeholder="Venue / City" style="background:var(--s2);border:1px solid var(--br);border-radius:6px;color:var(--tx);font-family:\'Outfit\',sans-serif;font-size:12px;padding:7px 9px;width:100%;outline:none"></div><button type="button" onclick="this.parentElement.remove()" style="background:transparent;border:1px solid var(--red-br);color:var(--red);border-radius:4px;padding:7px 9px;cursor:pointer;font-size:11px;height:32px;flex-shrink:0">✕</button>';
+  d.innerHTML='<div class="ff" style="flex:1"><label>Additional Venue</label><input type="text" class="extra-venue" placeholder="Venue / City" style="background:var(--s2);border:1px solid var(--br);border-radius:6px;color:var(--tx);font-family:\'Outfit\',sans-serif;font-size:12px;padding:7px 9px;width:100%;outline:none"></div><button type="button" onclick="this.parentElement.remove()" style="background:transparent;border:1px solid var(--red-br);color:var(--red);border-radius:4px;padding:7px 9px;cursor:pointer;font-size:11px;height:32px;flex-shrink:0">&#10005;</button>';
   c.appendChild(d);
 }
 
@@ -1208,11 +1207,14 @@ function updateTaskStatus(i,v){DB.tasks[i].status=v;save();}
 
 /* ─── WHATSAPP ─── */
 function wa(phone,name,svc,del){
-  const msg='Hello '+name+'! Your '+svc+' order at Tathastu Weddings is ready for pickup'+(del?' on '+del:'')+'.\nPlease contact us to confirm. Thank you! 🙏';
+  const msg='Hello '+name+'! Your '+svc+' order at Tathastu Weddings is ready for pickup'+(del?' on '+del:'')+'.
+Please contact us to confirm. Thank you! 🙏';
   window.open('https://wa.me/91'+phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg));
 }
 function waRemind(phone,name,bal){
-  const msg='Hello '+name+'! This is a gentle reminder from Tathastu Weddings.\nYour pending balance is '+bal+'.\nPlease make the payment at your earliest convenience. Thank you! 🙏';
+  const msg='Hello '+name+'! This is a gentle reminder from Tathastu Weddings.
+Your pending balance is '+bal+'.
+Please make the payment at your earliest convenience. Thank you! 🙏';
   window.open('https://wa.me/91'+phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg));
 }
 
@@ -1259,4 +1261,3 @@ function attachEvents(){}
 </script>
 
 </body>
-</html>
