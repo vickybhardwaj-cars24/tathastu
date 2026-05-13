@@ -50,7 +50,7 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
 .hidden{display:none!important}
 
 /* STATS */
-.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:16px}
 .sc{background:var(--s2);border:1px solid var(--br);border-radius:var(--r);padding:12px;position:relative;overflow:hidden}
 .sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:.5}
 .sc-lbl{font-size:10px;color:var(--txm);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
@@ -214,6 +214,19 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
 .book-date{font-size:12px;color:var(--txm);margin-bottom:16px}
 .fest-banner{background:var(--amb-bg);border:1px solid var(--amb-br);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--amb);text-align:left;line-height:1.6}
 .fest-code{font-size:15px;font-weight:700;color:var(--gold);letter-spacing:2px}
+
+/* PRICE TABS */
+.price-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.ptab-group{display:flex;gap:4px;background:var(--s2);border:1px solid var(--br);border-radius:var(--r);padding:3px}
+.ptab-group-lbl{font-size:10px;color:var(--txm);padding:6px 10px;display:flex;align-items:center;text-transform:uppercase;letter-spacing:.07em}
+.ptab{padding:5px 14px;border-radius:5px;border:none;background:transparent;color:var(--txm);cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;transition:all .15s}
+.ptab.on{background:var(--gold);color:#180F00}
+.ptab:hover:not(.on){color:var(--tx)}
+.price-summary{background:var(--s2);border:1px solid var(--br);border-radius:var(--r);padding:10px 16px;margin-top:8px;font-size:11px;color:var(--txm);display:flex;gap:24px}
+.ps-item{display:flex;flex-direction:column;gap:2px}
+.ps-val{font-size:15px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--gold)}
+/* ADMIN TAB */
+#tab-admin{font-size:16px;opacity:0.5}
 </style>
 
 <!-- LOGIN OVERLAY -->
@@ -283,6 +296,7 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
   <button class="ntab" onclick="go('pending',this)">Pending</button>
   <button class="ntab" onclick="go('delivery',this)">Delivery</button>
   <button class="ntab" onclick="go('reports',this)">Reports</button>
+  <button class="ntab" id="tab-admin" onclick="go('admin',this)">⚙</button>
   <button class="ntab" onclick="go('quicklog',this)">Quick Log</button>
 </div>
 
@@ -310,14 +324,53 @@ const BIG_SVC=[
 const ORDER_STATUS=['New Order','In Progress','Urgent','Ready','Delivered','Payment Pending','Cancelled'];
 const TASK_PRI=['Urgent','High','Normal','Low'];
 const PAY_MODES=['Cash','UPI','Card','Bank Transfer'];
-const FRAME_SIZES=['4x6','5x7','6x8','8x10','8x12','10x12','10x14','12x15','12x16','12x18','16x20','16x24','20x24','20x30','24x30','24x36'];
+const PRICE_DATA=[
+  // Single > Small Prints
+  {size:'4x6',   group:'Single',category:'Small Prints',  cost:8,  frameCost:40,  starred:true, note:'Most common'},
+  {size:'5x7',   group:'Single',category:'Small Prints',  cost:12, frameCost:55,  starred:true, note:''},
+  {size:'6x8',   group:'Single',category:'Small Prints',  cost:18, frameCost:70,  starred:false,note:''},
+  {size:'3.5x5', group:'Single',category:'Small Prints',  cost:6,  frameCost:35,  starred:false,note:'ID/passport size'},
+  {size:'4x4',   group:'Single',category:'Small Prints',  cost:7,  frameCost:38,  starred:false,note:'Square format'},
+  // Single > Medium/Normal
+  {size:'8x10',  group:'Single',category:'Medium/Normal', cost:25, frameCost:90,  starred:true, note:''},
+  {size:'8x12',  group:'Single',category:'Medium/Normal', cost:30, frameCost:100, starred:true, note:''},
+  {size:'10x12', group:'Single',category:'Medium/Normal', cost:38, frameCost:120, starred:false,note:''},
+  {size:'10x14', group:'Single',category:'Medium/Normal', cost:45, frameCost:140, starred:false,note:''},
+  {size:'12x15', group:'Single',category:'Medium/Normal', cost:55, frameCost:160, starred:true, note:''},
+  {size:'12x16', group:'Single',category:'Medium/Normal', cost:60, frameCost:170, starred:false,note:''},
+  // Single > Large Prints
+  {size:'12x18', group:'Single',category:'Large Prints',  cost:70, frameCost:190, starred:true, note:''},
+  {size:'16x20', group:'Single',category:'Large Prints',  cost:90, frameCost:240, starred:true, note:''},
+  {size:'16x24', group:'Single',category:'Large Prints',  cost:110,frameCost:280, starred:false,note:''},
+  {size:'20x24', group:'Single',category:'Large Prints',  cost:130,frameCost:320, starred:true, note:''},
+  {size:'20x30', group:'Single',category:'Large Prints',  cost:160,frameCost:380, starred:false,note:''},
+  // Bulk > Premium/Big
+  {size:'24x30', group:'Bulk',  category:'Premium/Big',   cost:200,frameCost:450, starred:true, note:''},
+  {size:'24x36', group:'Bulk',  category:'Premium/Big',   cost:240,frameCost:520, starred:false,note:''},
+  {size:'30x40', group:'Bulk',  category:'Premium/Big',   cost:300,frameCost:650, starred:false,note:''},
+  {size:'30x45', group:'Bulk',  category:'Premium/Big',   cost:350,frameCost:720, starred:false,note:''},
+  {size:'36x48', group:'Bulk',  category:'Premium/Big',   cost:420,frameCost:850, starred:false,note:''},
+  // Bulk > Rare Sizes
+  {size:'5x5',   group:'Bulk',  category:'Rare Sizes',    cost:10, frameCost:45,  starred:false,note:'Square'},
+  {size:'6x6',   group:'Bulk',  category:'Rare Sizes',    cost:14, frameCost:60,  starred:false,note:'Square'},
+  {size:'8x8',   group:'Bulk',  category:'Rare Sizes',    cost:22, frameCost:80,  starred:false,note:'Square'},
+  {size:'10x10', group:'Bulk',  category:'Rare Sizes',    cost:32, frameCost:110, starred:false,note:'Square'},
+  {size:'12x12', group:'Bulk',  category:'Rare Sizes',    cost:48, frameCost:150, starred:false,note:'Square'},
+  // Bulk > Standard
+  {size:'4x6',   group:'Bulk',  category:'Standard',      cost:6,  frameCost:32,  starred:false,note:'Bulk rate'},
+  {size:'5x7',   group:'Bulk',  category:'Standard',      cost:10, frameCost:45,  starred:false,note:'Bulk rate'},
+  {size:'8x10',  group:'Bulk',  category:'Standard',      cost:20, frameCost:75,  starred:false,note:'Bulk rate'},
+  {size:'10x12', group:'Bulk',  category:'Standard',      cost:30, frameCost:95,  starred:false,note:'Bulk rate'},
+];
+function getDefaultPricing(){return [...PRICE_DATA];}
 
 let DB={
   walkins:   [],
   events:    [],
   tasks:     [],
-  pricing:   FRAME_SIZES.map(s=>({size:s,cost:0,sell:0,note:''})),
+  pricing:   getDefaultPricing(),
   customers: [],
+  priceConfig:{mrpMultiplier:2.5,customerMultiplier:2.0},
 };
 
 /* ── Auth helpers ── */
@@ -404,11 +457,12 @@ async function loadFromWorker(){
     const res=await fetch(workerBase()+'/data',{headers:{'Authorization':creds}});
     if(!res.ok) return loadFromCache();
     const data=await res.json();
-    DB.walkins   = data.walkins   || [];
-    DB.events    = data.events    || [];
-    DB.tasks     = data.tasks     || [];
-    DB.pricing   = data.pricing   || FRAME_SIZES.map(s=>({size:s,cost:0,sell:0,note:''}));
-    DB.customers = data.customers || [];
+    DB.walkins     = data.walkins     || [];
+    DB.events      = data.events      || [];
+    DB.tasks       = data.tasks       || [];
+    DB.pricing     = data.pricing     || getDefaultPricing();
+    DB.customers   = data.customers   || [];
+    DB.priceConfig = data.priceConfig || {mrpMultiplier:2.5,customerMultiplier:2.0};
     localStorage.setItem('tw_db',JSON.stringify(DB));
     setSyncStatus('ok');
     render();
@@ -419,11 +473,12 @@ function loadFromCache(){
   if(cached){
     try{
       const d=JSON.parse(cached);
-      DB.walkins   = d.walkins   || [];
-      DB.events    = d.events    || [];
-      DB.tasks     = d.tasks     || [];
-      DB.pricing   = d.pricing   || FRAME_SIZES.map(s=>({size:s,cost:0,sell:0,note:''}));
-      DB.customers = d.customers || [];
+      DB.walkins     = d.walkins     || [];
+      DB.events      = d.events      || [];
+      DB.tasks       = d.tasks       || [];
+      DB.pricing     = d.pricing     || getDefaultPricing();
+      DB.customers   = d.customers   || [];
+      DB.priceConfig = d.priceConfig || {mrpMultiplier:2.5,customerMultiplier:2.0};
     }catch{}
   }
   setSyncStatus('err');
@@ -469,6 +524,7 @@ function render(){
   else if(curTab==='pending')   pg.innerHTML=renderPending();
   else if(curTab==='delivery')  pg.innerHTML=renderDelivery();
   else if(curTab==='reports')   pg.innerHTML=renderReports();
+  else if(curTab==='admin')     pg.innerHTML=renderAdmin();
   else if(curTab==='quicklog')  pg.innerHTML=renderQuickLog();
   /* update events reminder badge */
   const cnt=eventReminderCount();
@@ -483,8 +539,6 @@ function render(){
 /* ─── DASHBOARD ─── */
 function renderDash(){
   const all=[...DB.walkins,...DB.events];
-  const totalAdv=all.reduce((a,o)=>a+(parseFloat(o.advance)||0),0);
-  const totalBal=all.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
   const urgent=DB.tasks.filter(t=>t.priority==='Urgent'&&t.status!=='Done').length;
   const todayDel=all.filter(o=>{const d=o.deliveryDate||o.eventDate;return d===today();}).length;
   const recentWi=DB.walkins.slice(-5).reverse();
@@ -495,49 +549,41 @@ function renderDash(){
   return `
   <div class="stats">
     <div class="sc"><div class="sc-lbl">Total Orders</div><div class="sc-val g">${DB.walkins.length+DB.events.length}</div></div>
-    <div class="sc"><div class="sc-lbl">Advance In</div><div class="sc-val">${fmtINR(totalAdv)}</div></div>
-    <div class="sc"><div class="sc-lbl">Balance Due</div><div class="sc-val r">${fmtINR(totalBal)}</div></div>
     <div class="sc"><div class="sc-lbl">Urgent Tasks</div><div class="sc-val ${urgent>0?'r':'gr'}">${urgent}</div></div>
     <div class="sc"><div class="sc-lbl">Due Today</div><div class="sc-val ${todayDel>0?'r':'gr'}">${todayDel}</div></div>
   </div>
   ${soonEvents.length?`<div class="shdr"><div><div class="stitle">🔔 Events Within 3 Days</div></div></div>
-  <div class="tw"><table>
-    <thead><tr><th style="width:110px">Event Date</th><th style="width:130px">Customer</th><th style="width:90px">Type</th><th>Venue</th><th style="width:68px">Amount</th><th style="width:68px">Balance</th></tr></thead>
+  <div class="tw"><table style="table-layout:auto">
+    <thead><tr><th>Event Date</th><th>Customer</th><th>Type</th><th>Venue</th></tr></thead>
     <tbody>${soonEvents.map(o=>{const d=daysFrom(o.eventDate);return`<tr>
       <td><b style="color:var(--amb)">${o.eventDate}</b> <span class="bdg bdg-urg">${d===0?'TODAY':'In '+d+'d'}</span></td>
       <td>${o.name}<div class="phone">${waLink(o.phone)}</div></td>
       <td><span class="bdg bdg-g">${o.eventType}</span></td>
       <td style="font-size:11px;color:var(--txm)">${o.venue||'—'}</td>
-      <td class="amt">${fmtINR(o.amount)}</td>
-      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
     </tr>`;}).join('')}</tbody>
   </table></div>`:''}
   ${urgTasks.length?`<div class="shdr"><div><div class="stitle">🔴 Urgent Tasks</div></div></div>
   <div class="task-list">${urgTasks.map(t=>`<div class="tk urg"><div class="tk-info"><div class="tk-name">${t.name}</div><div class="tk-meta">${t.customer||'—'} · Due: ${t.deadline||'—'}${t.dueTime?' at '+t.dueTime:''}</div></div><div class="tk-right"><span class="bdg bdg-urg">URGENT</span><span class="bdg bdg-muted">${t.status||'Pending'}</span></div></div>`).join('')}</div>`:''}
   <div class="shdr"><div><div class="stitle">Recent Walk-ins</div><div class="ssub">Last 5 orders</div></div></div>
-  <div class="tw"><table>
-    <thead><tr><th style="width:80px">Date</th><th style="width:130px">Customer</th><th>Service</th><th style="width:68px">Amount</th><th style="width:68px">Balance</th><th style="width:70px">Status</th><th style="width:80px">Delivery</th></tr></thead>
+  <div class="tw"><table style="table-layout:auto">
+    <thead><tr><th>Date</th><th>Customer</th><th>Service</th><th>Status</th><th>Delivery</th></tr></thead>
     <tbody>${recentWi.length?recentWi.map(o=>`<tr>
-      <td>${o.date||'—'}</td>
+      <td style="white-space:nowrap">${o.date||'—'}</td>
       <td>${o.name}<div class="phone">${waLink(o.phone)}</div></td>
       <td><span class="bdg bdg-muted">${o.service||'—'}</span></td>
-      <td class="amt">${fmtINR(o.amount)}</td>
-      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
       <td>${statusBadge(o.status)}</td>
-      <td>${o.deliveryDate||'—'}</td>
-    </tr>`).join(''):'<tr><td colspan="7" class="empty">No walk-ins yet</td></tr>'}</tbody>
+      <td style="white-space:nowrap">${o.deliveryDate||'—'}</td>
+    </tr>`).join(''):'<tr><td colspan="5" class="empty">No walk-ins yet</td></tr>'}</tbody>
   </table></div>
   <div class="shdr"><div><div class="stitle">Upcoming Events</div></div></div>
-  <div class="tw"><table>
-    <thead><tr><th style="width:90px">Event Date</th><th style="width:130px">Customer</th><th style="width:90px">Type</th><th>Crew</th><th style="width:68px">Amount</th><th style="width:68px">Balance</th></tr></thead>
+  <div class="tw"><table style="table-layout:auto">
+    <thead><tr><th>Event Date</th><th>Customer</th><th>Type</th><th>Crew</th></tr></thead>
     <tbody>${upcoming.length?upcoming.map(o=>`<tr>
-      <td><b>${o.eventDate}</b></td>
+      <td style="white-space:nowrap"><b>${o.eventDate}</b></td>
       <td>${o.name}<div class="phone">${waLink(o.phone)}</div></td>
       <td><span class="bdg bdg-g">${o.eventType}</span></td>
       <td style="font-size:10px;color:var(--txm)">${crewSum(o)}</td>
-      <td class="amt">${fmtINR(o.amount)}</td>
-      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
-    </tr>`).join(''):'<tr><td colspan="6" class="empty">No upcoming events</td></tr>'}</tbody>
+    </tr>`).join(''):'<tr><td colspan="4" class="empty">No upcoming events</td></tr>'}</tbody>
   </table></div>`;
 }
 
@@ -654,25 +700,63 @@ function renderTasks(){
 
 /* ─── PRICING ─── */
 function renderPricing(){
+  const mrpM=DB.priceConfig.mrpMultiplier;
+  const custM=DB.priceConfig.customerMultiplier;
+  const grp=window._pg||'Single';
+  const cats=[...new Set(DB.pricing.filter(p=>p.group===grp).map(p=>p.category))];
+  const cat=(window._pc&&cats.includes(window._pc))?window._pc:(cats[0]||'');
+  const rows=DB.pricing.filter(p=>p.group===grp&&p.category===cat);
+  const totalSave=rows.reduce((a,p)=>{
+    return a+Math.round((p.cost||0)*mrpM)-Math.round((p.cost||0)*custM)+Math.round((p.frameCost||0)*mrpM)-Math.round((p.frameCost||0)*custM);
+  },0);
   return `
-  <div class="shdr"><div><div class="stitle">Photo Frame Pricing</div><div class="ssub">Vendor cost × 2 = minimum target price</div></div><button class="btn btn-g btn-sm" onclick="showAdd('price')">+ Add Size</button></div>
-  <div class="price-row">${DB.pricing.map((p,i)=>{
-    const min=Math.round((parseFloat(p.cost)||0)*2);
-    const margin=p.sell>0&&p.cost>0?Math.round(((p.sell-p.cost)/p.cost)*100):0;
-    const ok=p.sell>=min;
-    return`<div class="pcard">
-      <div class="pcard-name">📐 ${p.size||'?'} inches</div>
-      <div class="pcard-row"><span class="pcard-lbl">Vendor Cost</span><span class="pcard-val">${fmtINR(p.cost)}</span></div>
-      <div class="pcard-row"><span class="pcard-lbl">Min. Target</span><span class="pcard-val">${fmtINR(min)}</span></div>
-      <div class="pcard-row"><span class="pcard-lbl">Selling Price</span><span class="${ok?'pcard-profit':'pcard-warn'}">${fmtINR(p.sell)}</span></div>
-      <div class="pcard-row"><span class="pcard-lbl">Margin</span><span class="${margin>=50?'pcard-profit':'pcard-warn'}">${margin}%</span></div>
-      ${p.note?`<div style="font-size:10px;color:var(--txm);margin-top:5px">${p.note}</div>`:''}
-      <div style="margin-top:8px;display:flex;gap:6px">
-        <button class="btn btn-o btn-sm" onclick="editPrice(${i})">Edit</button>
-        <button class="btn btn-d btn-sm" onclick="delPrice(${i})">✕</button>
-      </div>
-    </div>`;
-  }).join('')}</div>`;
+  <div class="shdr"><div><div class="stitle">Photo Frame Pricing</div><div class="ssub">MRP = cost × ${mrpM} &nbsp;·&nbsp; Customer Price = cost × ${custM} &nbsp;·&nbsp; Computed at display time</div></div><button class="btn btn-g btn-sm" onclick="showAdd('price')">+ Add Size</button></div>
+  <div class="price-tabs">
+    <div class="ptab-group">
+      <span class="ptab-group-lbl">Group:</span>
+      ${['Single','Bulk'].map(g=>`<button class="ptab ${grp===g?'on':''}" onclick="window._pg='${g}';window._pc='';render()">${g}</button>`).join('')}
+    </div>
+    <div class="ptab-group" style="margin-left:10px">
+      <span class="ptab-group-lbl">Category:</span>
+      ${cats.map(c=>`<button class="ptab ${cat===c?'on':''}" onclick="window._pc='${c}';render()">${c}</button>`).join('')}
+    </div>
+  </div>
+  <div class="tw"><table style="table-layout:auto">
+    <thead><tr>
+      <th>Size</th>
+      <th>Print MRP</th>
+      <th>Print Price</th>
+      <th>Frame MRP</th>
+      <th>Frame Price</th>
+      <th>You Save</th>
+      <th style="width:120px">Notes</th>
+      <th style="width:100px">Actions</th>
+    </tr></thead>
+    <tbody>${rows.length?rows.map(p=>{
+      const i=DB.pricing.indexOf(p);
+      const pMRP=Math.round((p.cost||0)*mrpM);
+      const pCust=Math.round((p.cost||0)*custM);
+      const fMRP=Math.round((p.frameCost||0)*mrpM);
+      const fCust=Math.round((p.frameCost||0)*custM);
+      const save=(pMRP-pCust)+(fMRP-fCust);
+      return`<tr>
+        <td><b>${p.size}</b>${p.starred?' <span class="bdg bdg-g" style="font-size:9px">★</span>':''}</td>
+        <td><s style="color:var(--txm)">${fmtINR(pMRP)}</s></td>
+        <td><b style="color:var(--gold)">${fmtINR(pCust)}</b> <span class="bdg bdg-blu" style="font-size:9px">${custM}×</span></td>
+        <td><s style="color:var(--txm)">${fmtINR(fMRP)}</s></td>
+        <td><b style="color:var(--gold)">${fmtINR(fCust)}</b></td>
+        <td style="color:var(--grn);font-weight:500">${fmtINR(save)}</td>
+        <td style="font-size:11px;color:var(--txm)">${p.note||'—'}</td>
+        <td><button class="btn btn-o btn-sm" onclick="editPrice(${i})">Edit</button> <button class="btn btn-d btn-sm" onclick="delPrice(${i})">✕</button></td>
+      </tr>`;
+    }).join(''):'<tr><td colspan="8" class="empty">No sizes in this category</td></tr>'}</tbody>
+  </table></div>
+  ${rows.length?`<div class="price-summary">
+    <div class="ps-item"><span>Sizes</span><span class="ps-val">${rows.length}</span></div>
+    <div class="ps-item"><span>Avg. Savings / Item</span><span class="ps-val">${fmtINR(Math.round(totalSave/rows.length))}</span></div>
+    <div class="ps-item"><span>MRP Multiplier</span><span class="ps-val">${mrpM}×</span></div>
+    <div class="ps-item"><span>Price Multiplier</span><span class="ps-val">${custM}×</span></div>
+  </div>`:''}`;
 }
 
 /* ─── CUSTOMERS ─── */
@@ -762,7 +846,12 @@ function renderReports(){
   const topSvc=Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const evCount={};DB.events.forEach(o=>{evCount[o.eventType]=(evCount[o.eventType]||0)+1;});
   const topEv=Object.entries(evCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const bestFrame=DB.pricing.filter(p=>p.sell>0&&p.cost>0).sort((a,b)=>((b.sell-b.cost)/b.cost)-((a.sell-a.cost)/a.cost))[0];
+  const _mrpM=DB.priceConfig.mrpMultiplier,_custM=DB.priceConfig.customerMultiplier;
+  const bestFrame=DB.pricing.filter(p=>(p.cost||0)>0).sort((a,b)=>{
+    const saveA=((a.cost||0)+(a.frameCost||0))*(_mrpM-_custM);
+    const saveB=((b.cost||0)+(b.frameCost||0))*(_mrpM-_custM);
+    return saveB-saveA;
+  })[0];
   return `
   <div class="shdr"><div><div class="stitle">Reports &amp; Analytics</div></div><button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button></div>
   <div class="rep-grid">
@@ -785,7 +874,7 @@ function renderReports(){
     <div class="rep-card">
       <div class="rep-title">Pricing Summary</div>
       <div class="rep-row"><span class="rep-lbl">Frame Sizes Listed</span><span class="rep-val">${DB.pricing.length}</span></div>
-      <div class="rep-row"><span class="rep-lbl">Best Margin Frame</span><span class="rep-val bal-g">${bestFrame?bestFrame.size+' ('+Math.round(((bestFrame.sell-bestFrame.cost)/bestFrame.cost)*100)+'%)':'—'}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Best Value Frame</span><span class="rep-val bal-g">${bestFrame?bestFrame.size+(bestFrame.group?' ('+bestFrame.group+')':''):'—'}</span></div>
       <div class="rep-row"><span class="rep-lbl">Customers Tracked</span><span class="rep-val">${DB.customers.length}</span></div>
       <div class="rep-row"><span class="rep-lbl">Reviews Pending</span><span class="rep-val bal-r">${DB.customers.filter(c=>!c.reviewDone).length}</span></div>
       <div class="rep-row"><span class="rep-lbl">Open Tasks</span><span class="rep-val">${DB.tasks.filter(t=>t.status!=='Done').length}</span></div>
@@ -941,13 +1030,17 @@ function buildForm(type){
     <div class="mtitle">Add / Edit Frame Price <button class="mclose" onclick="closeShade()">✕</button></div>
     <div class="fg fg-2">
       <div class="ff"><label>Frame Size (e.g. 8x10)</label><input type="text" id="f-psize" placeholder="8x10"></div>
-      <div class="ff"><label>Vendor Cost (₹)</label><input type="number" id="f-pcost" placeholder="0" oninput="calcSell()"></div>
+      <div class="ff"><label>Group</label><select id="f-pgrp" onchange="updatePriceCatOptions()"><option>Single</option><option>Bulk</option></select></div>
     </div>
-    <div class="fg fg-3 mt8">
-      <div class="ff"><label>Min. Target Price (₹)</label><input type="number" id="f-pmin" readonly style="opacity:.6"></div>
-      <div class="ff"><label>Selling Price (₹)</label><input type="number" id="f-psell" placeholder="0" oninput="calcMargin()"></div>
-      <div class="ff"><label>Margin %</label><input type="number" id="f-pmarg" readonly style="opacity:.6"></div>
+    <div class="fg fg-2 mt8">
+      <div class="ff"><label>Category</label><select id="f-pcat"><option>Small Prints</option><option>Medium/Normal</option><option>Large Prints</option></select></div>
+      <div class="ff"><label>Starred (featured size)</label><select id="f-pstar"><option value="0">No</option><option value="1">Yes — show as featured</option></select></div>
     </div>
+    <div class="fg fg-2 mt8">
+      <div class="ff"><label>Vendor Print Cost (₹)</label><input type="number" id="f-pcost" placeholder="0" oninput="updatePricePreview()"></div>
+      <div class="ff"><label>Vendor Frame Cost (₹)</label><input type="number" id="f-pfcost" placeholder="0" oninput="updatePricePreview()"></div>
+    </div>
+    <div id="price-preview" style="background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:9px 12px;margin-top:8px;font-size:12px;min-height:34px;color:var(--txm)">Enter costs above to see live pricing preview</div>
     <div class="ff mt8"><label>Notes</label><input type="text" id="f-pnote" placeholder="Any vendor notes"></div>
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="savePrice()">Save</button></div>`;
 
@@ -1062,7 +1155,7 @@ function printReceipt(idx){
     '.np{text-align:center;margin-top:18px}'+
     '@media print{.np{display:none}body{margin:0}}'+
   '</style></head><body>'+
-  '<div class="hdr"><h1>Tathastu Weddings</h1><p>Photography &amp; Videography Studio</p></div>'+
+  '<div class="hdr"><img src="logo.png" alt="" style="width:60px;height:60px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px" onerror="this.style.display=\'none\'"><h1>Tathastu Weddings</h1><p>Photography &amp; Videography Studio</p></div>'+
   '<div class="title">RECEIPT</div>'+
   '<div class="rno">No: '+rNo+' &nbsp;|&nbsp; Date: '+(o.date||today())+'</div>'+
   '<table>'+
@@ -1078,7 +1171,7 @@ function printReceipt(idx){
     '<tr><td>Advance Paid</td><td>&#8377;'+Math.round(parseFloat(o.advance)||0).toLocaleString('en-IN')+'</td></tr>'+
     '<tr><td class="'+(bal>0?'rp':'rg')+'">Balance Due</td><td class="'+(bal>0?'rp':'rg')+'">&#8377;'+bal.toLocaleString('en-IN')+'</td></tr>'+
   '</table>'+
-  '<div class="stamp">STAMP / SIGNATURE</div>'+
+  '<div style="text-align:center;margin:14px 0;font-size:10px;color:#777;border:1px dashed #ccc;padding:8px;border-radius:4px">This is a computer generated receipt. No signature required.</div>'+
   '<div class="footer"><b>Thank you for choosing Tathastu Weddings!</b><br>Please keep this receipt for your records.</div>'+
   '<div class="np"><button onclick="window.print()" style="background:#111;color:#fff;border:none;padding:9px 24px;border-radius:5px;cursor:pointer;font-size:12px;margin-top:4px">🖶 Print Receipt</button></div>'+
   '</body></html>');
@@ -1093,17 +1186,9 @@ function calcBal(){
 }
 function setupWiCalc(){setTimeout(calcBal,80);}
 function setupEvCalc(){setTimeout(calcBal,80);}
-function setupPriceCalc(){}
-function calcSell(){
-  const c=parseFloat(document.getElementById('f-pcost').value)||0;
-  document.getElementById('f-pmin').value=Math.round(c*2);
-  calcMargin();
-}
-function calcMargin(){
-  const c=parseFloat(document.getElementById('f-pcost').value)||0;
-  const s=parseFloat(document.getElementById('f-psell').value)||0;
-  document.getElementById('f-pmarg').value=c>0?Math.round(((s-c)/c)*100):0;
-}
+function setupPriceCalc(){setTimeout(()=>{updatePriceCatOptions();updatePricePreview();},80);}
+function calcSell(){}
+function calcMargin(){}
 function qlBal(){
   const a=parseFloat(document.getElementById('ql-amt').value)||0;
   const d=parseFloat(document.getElementById('ql-adv').value)||0;
@@ -1165,7 +1250,15 @@ function saveTask(){
 function savePrice(){
   const size=document.getElementById('f-psize').value.trim();
   if(!size){alert('Size required');return;}
-  DB.pricing.push({size,cost:parseFloat(document.getElementById('f-pcost').value)||0,sell:parseFloat(document.getElementById('f-psell').value)||0,note:document.getElementById('f-pnote').value});
+  DB.pricing.push({
+    size,
+    group:document.getElementById('f-pgrp').value,
+    category:document.getElementById('f-pcat').value,
+    cost:parseFloat(document.getElementById('f-pcost').value)||0,
+    frameCost:parseFloat(document.getElementById('f-pfcost').value)||0,
+    starred:document.getElementById('f-pstar').value==='1',
+    note:document.getElementById('f-pnote').value,
+  });
   save();closeShade();render();
 }
 function saveCust(){
@@ -1188,13 +1281,30 @@ function editPrice(i){
   showAdd('price');
   setTimeout(()=>{
     const p=DB.pricing[i];
-    document.getElementById('f-psize').value=p.size;
-    document.getElementById('f-pcost').value=p.cost;
-    document.getElementById('f-psell').value=p.sell;
-    document.getElementById('f-pnote').value=p.note||'';
-    calcSell();calcMargin();
-    const btn=document.querySelector('#shade .btn.btn-g');
-    if(btn) btn.onclick=()=>{DB.pricing[i]={size:document.getElementById('f-psize').value,cost:parseFloat(document.getElementById('f-pcost').value)||0,sell:parseFloat(document.getElementById('f-psell').value)||0,note:document.getElementById('f-pnote').value};save();closeShade();render();};
+    document.getElementById('f-psize').value=p.size||'';
+    document.getElementById('f-pgrp').value=p.group||'Single';
+    updatePriceCatOptions();
+    setTimeout(()=>{
+      if(p.category) document.getElementById('f-pcat').value=p.category;
+      document.getElementById('f-pcost').value=p.cost||0;
+      document.getElementById('f-pfcost').value=p.frameCost||0;
+      document.getElementById('f-pstar').value=p.starred?'1':'0';
+      document.getElementById('f-pnote').value=p.note||'';
+      updatePricePreview();
+      const btn=document.querySelector('#shade .btn.btn-g');
+      if(btn) btn.onclick=()=>{
+        DB.pricing[i]={
+          size:document.getElementById('f-psize').value,
+          group:document.getElementById('f-pgrp').value,
+          category:document.getElementById('f-pcat').value,
+          cost:parseFloat(document.getElementById('f-pcost').value)||0,
+          frameCost:parseFloat(document.getElementById('f-pfcost').value)||0,
+          starred:document.getElementById('f-pstar').value==='1',
+          note:document.getElementById('f-pnote').value,
+        };
+        save();closeShade();render();
+      };
+    },80);
   },150);
 }
 
@@ -1235,6 +1345,95 @@ function exportAll(){
   DB.events.forEach(o=>rows.push(['Event',o.date,o.name,o.phone,o.eventType,o.eventDate,o.amount,o.advance,o.balance,o.status,o.eventDate,'',o.notes,crewSum(o),o.guests||'']));
   const csv=rows.map(r=>r.map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='tathastu_'+today()+'.csv';a.click();
+}
+
+/* ─── PRICING FORM HELPERS ─── */
+function updatePriceCatOptions(){
+  const grp=document.getElementById('f-pgrp')?.value;
+  const catSel=document.getElementById('f-pcat');
+  if(!catSel||!grp)return;
+  const cats={Single:['Small Prints','Medium/Normal','Large Prints'],Bulk:['Premium/Big','Rare Sizes','Standard']};
+  const opts=cats[grp]||[];
+  catSel.innerHTML=opts.map(c=>`<option>${c}</option>`).join('');
+  updatePricePreview();
+}
+function updatePricePreview(){
+  const cost=parseFloat(document.getElementById('f-pcost')?.value)||0;
+  const fc=parseFloat(document.getElementById('f-pfcost')?.value)||0;
+  const el=document.getElementById('price-preview');if(!el)return;
+  if(!cost&&!fc){el.textContent='Enter costs above to see live pricing preview';return;}
+  const mrp=DB.priceConfig.mrpMultiplier,cust=DB.priceConfig.customerMultiplier;
+  const pMRP=Math.round(cost*mrp),pCust=Math.round(cost*cust);
+  const fMRP=Math.round(fc*mrp),fCust=Math.round(fc*cust);
+  el.innerHTML=`<span style="color:var(--txm)">Preview:</span> Print <s style="color:var(--txm)">${fmtINR(pMRP)}</s> → <b style="color:var(--gold)">${fmtINR(pCust)}</b> &nbsp;·&nbsp; Frame <s style="color:var(--txm)">${fmtINR(fMRP)}</s> → <b style="color:var(--gold)">${fmtINR(fCust)}</b> &nbsp;·&nbsp; Customer Saves <span style="color:var(--grn);font-weight:600">${fmtINR((pMRP-pCust)+(fMRP-fCust))}</span>`;
+}
+
+/* ─── ADMIN ─── */
+function renderAdmin(){
+  const cfg=DB.priceConfig;
+  return `
+  <div style="background:var(--amb-bg);border:1px solid var(--amb-br);border-radius:var(--r);padding:10px 14px;margin-bottom:16px;font-size:11px;color:var(--amb)">
+    ⚠️ <b>Admin Panel</b> — Changes here affect all pricing calculations displayed across the entire app.
+  </div>
+  <div class="shdr"><div><div class="stitle">Multiplier Configuration</div><div class="ssub">Controls how vendor cost maps to MRP and customer price</div></div></div>
+  <div class="fc">
+    <div class="fg fg-2">
+      <div class="ff"><label>MRP Multiplier (strikethrough price)</label><input type="number" id="cfg-mrp" value="${cfg.mrpMultiplier}" step="0.1" min="1" oninput="updateCfgPreview()"></div>
+      <div class="ff"><label>Customer Price Multiplier (bold price)</label><input type="number" id="cfg-cust" value="${cfg.customerMultiplier}" step="0.1" min="1" oninput="updateCfgPreview()"></div>
+    </div>
+    <div id="cfg-preview" style="margin-top:10px;background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--txm)">Adjust values above to see preview</div>
+    <div class="btn-row"><button class="btn btn-g" onclick="savePriceConfig()">Save Multipliers</button></div>
+  </div>
+  <div class="shdr" style="margin-top:20px"><div><div class="stitle">Vendor Cost Editor</div><div class="ssub">Edit raw costs — customer prices update automatically</div></div><button class="btn btn-g btn-sm" onclick="showAdd('price')">+ Add Size</button></div>
+  <div class="tw"><table style="table-layout:auto">
+    <thead><tr>
+      <th>Size</th><th>Group</th><th>Category</th>
+      <th>Print Cost (₹)</th><th>Frame Cost (₹)</th>
+      <th>Cust. Print</th><th>Cust. Frame</th>
+      <th style="width:40px"></th>
+    </tr></thead>
+    <tbody>${DB.pricing.map((p,i)=>{
+      const pCust=Math.round((p.cost||0)*cfg.customerMultiplier);
+      const fCust=Math.round((p.frameCost||0)*cfg.customerMultiplier);
+      return`<tr>
+        <td><b>${p.size}</b>${p.starred?' <span style="color:var(--gold)">★</span>':''}</td>
+        <td><span class="bdg ${p.group==='Single'?'bdg-blu':'bdg-amb'}">${p.group||'—'}</span></td>
+        <td style="font-size:11px;color:var(--txm)">${p.category||'—'}</td>
+        <td><input type="number" value="${p.cost||0}" style="background:var(--s2);border:1px solid var(--br);border-radius:4px;color:var(--tx);font-size:12px;padding:4px 6px;width:76px;outline:none;font-family:'Outfit',sans-serif" onchange="updateCost(${i},'cost',this.value)"></td>
+        <td><input type="number" value="${p.frameCost||0}" style="background:var(--s2);border:1px solid var(--br);border-radius:4px;color:var(--tx);font-size:12px;padding:4px 6px;width:76px;outline:none;font-family:'Outfit',sans-serif" onchange="updateCost(${i},'frameCost',this.value)"></td>
+        <td style="color:var(--gold);font-weight:500">${fmtINR(pCust)}</td>
+        <td style="color:var(--gold);font-weight:500">${fmtINR(fCust)}</td>
+        <td><button class="btn btn-d btn-sm" onclick="delPrice(${i})">✕</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>
+  <div class="fc" style="border-color:var(--red-br);margin-top:20px">
+    <div class="ftitle" style="color:var(--red)">Danger Zone</div>
+    <div style="font-size:11px;color:var(--txm);margin-bottom:10px">These actions cannot be undone.</div>
+    <button class="btn btn-d btn-sm" onclick="if(confirm('Reset ALL pricing data to defaults? This cannot be undone.')){DB.pricing=getDefaultPricing();DB.priceConfig={mrpMultiplier:2.5,customerMultiplier:2.0};save();render();}">Reset Pricing to Factory Defaults</button>
+  </div>`;
+}
+function updateCfgPreview(){
+  const mrp=parseFloat(document.getElementById('cfg-mrp')?.value)||2.5;
+  const cust=parseFloat(document.getElementById('cfg-cust')?.value)||2.0;
+  const el=document.getElementById('cfg-preview');if(!el)return;
+  const ex=100;
+  el.innerHTML=`Example (vendor cost ₹${ex}): MRP = <s style="color:var(--txm)">${fmtINR(Math.round(ex*mrp))}</s> &nbsp;·&nbsp; Customer Price = <b style="color:var(--gold)">${fmtINR(Math.round(ex*cust))}</b> &nbsp;·&nbsp; Customer Saves = <span style="color:var(--grn)">${fmtINR(Math.round(ex*(mrp-cust)))}</span>`;
+}
+function savePriceConfig(){
+  const mrp=parseFloat(document.getElementById('cfg-mrp')?.value)||2.5;
+  const cust=parseFloat(document.getElementById('cfg-cust')?.value)||2.0;
+  if(cust>=mrp){alert('Customer price multiplier must be less than MRP multiplier.');return;}
+  DB.priceConfig.mrpMultiplier=mrp;
+  DB.priceConfig.customerMultiplier=cust;
+  save();
+  alert('Multipliers saved!');
+  render();
+}
+function updateCost(i,field,val){
+  if(!DB.pricing[i])return;
+  DB.pricing[i][field]=parseFloat(val)||0;
+  save();
 }
 
 function attachEvents(){}
