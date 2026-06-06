@@ -609,80 +609,105 @@ function renderDash(){
 }
 
 /* ─── WALK-INS ─── */
-function renderWalkins(){
+const WI_TABLE_HDR=`<thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:36px">WA</th><th style="width:148px">Actions</th></tr></thead>`;
+const WA_SVG14=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
+function wiRows(list){
+  return list.length?list.map(o=>{
+    const ri=DB.walkins.indexOf(o);
+    const nm=o.name.replace(/'/g,"\\'");
+    return`<tr>
+      <td>${o.date||'—'}</td>
+      <td><b style="font-size:12px">${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
+      <td><span class="bdg bdg-muted">${o.service||'—'}</span></td>
+      <td class="amt">${fmtINR(o.amount)}</td>
+      <td class="amt">${fmtINR(o.advance)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
+      <td>${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${nm}','walkin','${o.service||''}','${o.deliveryDate||''}')" title="WhatsApp">${WA_SVG14}</button>`:'—'}</td>
+      <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap"><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button><button class="btn-urg btn-sm ${o.urgent?'':'off'}" onclick="toggleUrgent(${ri})">${o.urgent?'🔴 Urgent':'⚪ Normal'}</button><button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="10" class="empty">No orders found</td></tr>';
+}
+function getWiList(){
   const q=(window._wq||'').toLowerCase();
   const sf=window._wf||'';
   let list=[...DB.walkins].reverse();
   if(q) list=list.filter(o=>(o.name||'').toLowerCase().includes(q)||(o.phone||'').includes(q)||(o.service||'').toLowerCase().includes(q));
   if(sf) list=list.filter(o=>o.service===sf);
+  return list;
+}
+function renderWalkinsOnly(){
+  const wrap=document.getElementById('wi-table-wrap');
+  if(!wrap){render();return;}
+  wrap.innerHTML=`<div class="tw"><table>${WI_TABLE_HDR}<tbody>${wiRows(getWiList())}</tbody></table></div>`;
+  setTimeout(()=>{const inp=document.getElementById('wi-search');if(inp){const p=inp.value.length;inp.focus();try{inp.setSelectionRange(p,p);}catch(e){}}},0);
+}
+function renderWalkins(){
+  const sf=window._wf||'';
   return `
   <div class="shdr"><div><div class="stitle">Walk-in Orders</div></div><button class="btn btn-g btn-sm" onclick="showAdd('walkin')">+ Add Order</button></div>
   <div class="srow">
-    <input class="sinp" placeholder="Search name, phone, service…" value="${window._wq||''}" oninput="window._wq=this.value;render()">
+    <input class="sinp" id="wi-search" placeholder="Search name, phone, service…" value="${window._wq||''}" oninput="window._wq=this.value;renderWalkinsOnly()">
     <select class="fsel" onchange="window._wf=this.value;render()">
       <option value="">All Services</option>
       ${WALKIN_SVC.map(s=>`<option ${sf===s?'selected':''}>${s}</option>`).join('')}
     </select>
   </div>
-  <div class="tw"><table>
-    <thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:36px">WA</th><th style="width:148px">Actions</th></tr></thead>
-    <tbody>${list.length?list.map(o=>{
-      const ri=DB.walkins.indexOf(o);
-      return`<tr>
-        <td>${o.date||'—'}</td>
-        <td><b style="font-size:12px">${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
-        <td><span class="bdg bdg-muted">${o.service||'—'}</span></td>
-        <td class="amt">${fmtINR(o.amount)}</td>
-        <td class="amt">${fmtINR(o.advance)}</td>
-        <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
-        <td>${statusBadge(o.status)}</td>
-        <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
-        <td>${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${o.name.replace(/'/g,"\\'")}','walkin','${o.service||''}','${o.deliveryDate||''}')" title="WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>`:'—'}</td>
-        <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap"><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button><button class="btn-urg btn-sm ${o.urgent?'':'off'}" onclick="toggleUrgent(${ri})">${o.urgent?'🔴 Urgent':'⚪ Normal'}</button><button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
-      </tr>`;
-    }).join(''):'<tr><td colspan="10" class="empty">No orders found</td></tr>'}</tbody>
-  </table></div>`;
+  <div id="wi-table-wrap"><div class="tw"><table>${WI_TABLE_HDR}<tbody>${wiRows(getWiList())}</tbody></table></div></div>`;
 }
 
 /* ─── EVENTS ─── */
-function renderEvents(){
+const EV_TABLE_HDR=`<thead><tr><th style="width:76px">Booked</th><th style="width:115px">Customer</th><th style="width:88px">Type</th><th style="width:96px">Event Date</th><th style="width:88px">Venue</th><th>Crew</th><th style="width:60px">Amount</th><th style="width:60px">Balance</th><th style="width:68px">Status</th><th style="width:120px">Actions</th></tr></thead>`;
+function evRows(list){
+  return list.length?list.map(o=>{
+    const ri=DB.events.indexOf(o);
+    const d=daysFrom(o.eventDate);
+    const soon=d!==null&&d>=0&&d<=3;
+    const nm=o.name.replace(/'/g,"\\'");
+    return`<tr>
+      <td>${o.date||'—'}</td>
+      <td><b style="font-size:12px">${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
+      <td><span class="bdg bdg-g">${o.eventType}</span></td>
+      <td><b style="${soon?'color:var(--amb)':''}">${o.eventDate||'—'}</b>${soon?` <span class="bdg bdg-urg">${d===0?'TODAY':'In '+d+'d'}</span>`:''}</td>
+      <td style="font-size:11px;color:var(--txm)">${o.venue||'—'}${o.extraVenues&&o.extraVenues.length?'<div class="phone">+'+o.extraVenues.length+' more</div>':''}</td>
+      <td style="font-size:10px;color:var(--txm);max-width:100px;overflow:hidden;text-overflow:ellipsis">${crewSum(o)}</td>
+      <td class="amt">${fmtINR(o.amount)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td style="white-space:normal;display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn-print btn-sm" onclick="printEventReceipt(${ri})">Receipt</button>
+        ${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${nm}','event','${o.eventType||''}','${o.eventDate||''}')" title="WhatsApp">${WA_SVG14}</button>`:''}
+        <button class="btn btn-d btn-sm" onclick="delEv(${ri})">✕</button>
+      </td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="10" class="empty">No events found</td></tr>';
+}
+function getEvList(){
   const q=(window._eq||'').toLowerCase();
   const sf=window._ef||'';
   let list=[...DB.events].reverse();
   if(q) list=list.filter(o=>(o.name||'').toLowerCase().includes(q)||(o.phone||'').includes(q)||(o.eventType||'').toLowerCase().includes(q));
   if(sf) list=list.filter(o=>o.eventType===sf);
+  return list;
+}
+function renderEventsOnly(){
+  const wrap=document.getElementById('ev-table-wrap');
+  if(!wrap){render();return;}
+  wrap.innerHTML=`<div class="tw"><table>${EV_TABLE_HDR}<tbody>${evRows(getEvList())}</tbody></table></div>`;
+  setTimeout(()=>{const inp=document.getElementById('ev-search');if(inp){const p=inp.value.length;inp.focus();try{inp.setSelectionRange(p,p);}catch(e){}}},0);
+}
+function renderEvents(){
+  const sf=window._ef||'';
   return `
   <div class="shdr"><div><div class="stitle">Event Bookings</div></div><button class="btn btn-g btn-sm" onclick="showAdd('event')">+ Add Event</button></div>
   <div class="srow">
-    <input class="sinp" placeholder="Search name, phone, event type…" value="${window._eq||''}" oninput="window._eq=this.value;render()">
+    <input class="sinp" id="ev-search" placeholder="Search name, phone, event type…" value="${window._eq||''}" oninput="window._eq=this.value;renderEventsOnly()">
     <select class="fsel" onchange="window._ef=this.value;render()">
       <option value="">All Events</option>${BIG_SVC.map(s=>`<option ${sf===s?'selected':''}>${s}</option>`).join('')}
     </select>
   </div>
-  <div class="tw"><table>
-    <thead><tr><th style="width:76px">Booked</th><th style="width:115px">Customer</th><th style="width:88px">Type</th><th style="width:96px">Event Date</th><th style="width:88px">Venue</th><th>Crew</th><th style="width:60px">Amount</th><th style="width:60px">Balance</th><th style="width:68px">Status</th><th style="width:120px">Actions</th></tr></thead>
-    <tbody>${list.length?list.map(o=>{
-      const ri=DB.events.indexOf(o);
-      const d=daysFrom(o.eventDate);
-      const soon=d!==null&&d>=0&&d<=3;
-      return`<tr>
-        <td>${o.date||'—'}</td>
-        <td><b style="font-size:12px">${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
-        <td><span class="bdg bdg-g">${o.eventType}</span></td>
-        <td><b style="${soon?'color:var(--amb)':''}">${o.eventDate||'—'}</b>${soon?` <span class="bdg bdg-urg">${d===0?'TODAY':'In '+d+'d'}</span>`:''}</td>
-        <td style="font-size:11px;color:var(--txm)">${o.venue||'—'}${o.extraVenues&&o.extraVenues.length?'<div class="phone">+'+o.extraVenues.length+' more</div>':''}</td>
-        <td style="font-size:10px;color:var(--txm);max-width:100px;overflow:hidden;text-overflow:ellipsis">${crewSum(o)}</td>
-        <td class="amt">${fmtINR(o.amount)}</td>
-        <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
-        <td>${statusBadge(o.status)}</td>
-        <td style="white-space:normal;display:flex;gap:4px;flex-wrap:wrap">
-          <button class="btn-print btn-sm" onclick="printEventReceipt(${ri})">Receipt</button>
-          ${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${o.name.replace(/'/g,"\\'")}','event','${o.eventType||''}','${o.eventDate||''}')" title="WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>`:''}
-          <button class="btn btn-d btn-sm" onclick="delEv(${ri})">✕</button>
-        </td>
-      </tr>`;
-    }).join(''):'<tr><td colspan="10" class="empty">No events found</td></tr>'}</tbody>
-  </table></div>`;
+  <div id="ev-table-wrap"><div class="tw"><table>${EV_TABLE_HDR}<tbody>${evRows(getEvList())}</tbody></table></div></div>`;
 }
 
 /* ─── TASKS ─── */
