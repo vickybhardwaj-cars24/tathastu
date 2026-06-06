@@ -239,6 +239,8 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
 .ac-item{padding:7px 10px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--br)}
 .ac-item:last-child{border-bottom:none}
 .ac-item:hover{background:var(--s3);color:var(--gold)}
+/* CUSTOMER FOUND CHIP */
+#cust-found-chip{background:var(--grn-bg);border:1px solid var(--grn-br);border-radius:6px;padding:6px 12px;font-size:11px;gap:8px;align-items:center;margin-top:6px;display:none;flex-wrap:wrap}
 /* MSG TEMPLATE MODAL */
 .msg-tmpl{background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:10px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
 .msg-tmpl:hover{border-color:var(--gold)}
@@ -1001,8 +1003,9 @@ function buildForm(type){
     <div class="fg fg-3">
       <div class="ff"><label>Date</label><input type="date" id="f-date" value="${today()}"></div>
       <div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name or search…" oninput="acName(this,'f-phone','walkin')"><div id="ac-name-drop" class="ac-drop" style="display:none"></div></div>
-      <div class="ff ac-wrap"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile — name auto-fills" oninput="lookupCustomer(this.value,'f-name','f-cemail-wi')"><div id="ac-phone-drop" class="ac-drop" style="display:none"></div></div>
+      <div class="ff ac-wrap"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile — name auto-fills" oninput="lookupCustomer(this.value,'f-name')"><div id="ac-phone-drop" class="ac-drop" style="display:none"></div></div>
     </div>
+    <div id="cust-found-chip"></div>
     <div class="fg fg-3 mt8">
       <div class="ff"><label>Service</label><select id="f-svc">${WALKIN_SVC.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="ff"><label>Status</label><select id="f-status">${ORDER_STATUS.map(s=>`<option>${s}</option>`).join('')}</select></div>
@@ -1026,8 +1029,9 @@ function buildForm(type){
     <div class="fg fg-3">
       <div class="ff"><label>Booking Date</label><input type="date" id="f-date" value="${today()}"></div>
       <div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name or search…" oninput="acName(this,'f-phone','event')"><div id="ac-name-drop" class="ac-drop" style="display:none"></div></div>
-      <div class="ff ac-wrap"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile — name auto-fills" oninput="lookupCustomer(this.value,'f-name','f-cemail-ev')"><div id="ac-phone-drop" class="ac-drop" style="display:none"></div></div>
+      <div class="ff ac-wrap"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile — name auto-fills" oninput="lookupCustomer(this.value,'f-name')"><div id="ac-phone-drop" class="ac-drop" style="display:none"></div></div>
     </div>
+    <div id="cust-found-chip"></div>
     <div class="fg fg-3 mt8">
       <div class="ff"><label>Event Type</label><select id="f-etype">${BIG_SVC.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="ff"><label>Guest Count (approx)</label><input type="number" id="f-guests" placeholder="e.g. 150" min="0" oninput="updateCrewFeedback()"></div>
@@ -1499,26 +1503,35 @@ function updateCost(i,field,val){
 
 function attachEvents(){}
 
-/* ─── AUTO-CREATE CUSTOMER ─── */
+/* ─── AUTO-CREATE / UPDATE CUSTOMER ─── */
 function autoCreateCustomer(name,phone){
-  if(!name||!phone) return;
-  const clean=phone.replace(/\D/g,'');
-  const exists=DB.customers.find(c=>c.phone&&c.phone.replace(/\D/g,'')===clean);
-  if(!exists){
+  if(!name) return;
+  const clean=phone?phone.replace(/\D/g,''):'';
+  if(!clean) return;
+  const idx=DB.customers.findIndex(c=>c.phone&&c.phone.replace(/\D/g,'')===clean);
+  if(idx===-1){
     DB.customers.push({name,phone,whatsapp:'',email:'',address:'',reviewDone:false});
+  } else {
+    if(!DB.customers[idx].name) DB.customers[idx].name=name;
   }
 }
 
-/* ─── PHONE LOOKUP (auto-fill name) ─── */
+/* ─── PHONE LOOKUP (auto-fill name + show chip) ─── */
 function lookupCustomer(phone,nameFieldId){
   const clean=phone.replace(/\D/g,'');
-  if(clean.length<5) return;
+  const chipId='cust-found-chip';
+  const chip=document.getElementById(chipId);
+  if(clean.length<8){if(chip)chip.style.display='none';return;}
   const found=DB.customers.find(c=>c.phone&&c.phone.replace(/\D/g,'')===clean);
   const nameEl=document.getElementById(nameFieldId);
-  if(found&&nameEl&&!nameEl.value){
-    nameEl.value=found.name;
-    nameEl.style.borderColor='var(--grn)';
-    setTimeout(()=>{if(nameEl)nameEl.style.borderColor='';},2000);
+  if(found){
+    if(nameEl) nameEl.value=found.name;
+    if(chip){
+      chip.style.display='flex';
+      chip.innerHTML=`<span style="color:var(--grn);font-weight:500">✓ Known Customer: ${found.name}</span>`+(found.address?`<span style="color:var(--txm);margin-left:8px;font-size:10px">${found.address}</span>`:'')+(found.email?`<span style="color:var(--txm);margin-left:8px;font-size:10px">${found.email}</span>`:'');
+    }
+  } else {
+    if(chip){chip.style.display='flex';chip.innerHTML='<span style="color:var(--txm);font-size:11px">⊕ New customer — profile will be created on save</span>';}
   }
 }
 
@@ -1540,6 +1553,12 @@ function selectAcCustomer(name,phone,phoneFieldId){
   if(phoneEl&&phone) phoneEl.value=phone;
   const drop=document.getElementById('ac-name-drop');
   if(drop) drop.style.display='none';
+  const found=DB.customers.find(c=>c.name===name);
+  const chip=document.getElementById('cust-found-chip');
+  if(chip&&found){
+    chip.style.display='flex';
+    chip.innerHTML=`<span style="color:var(--grn);font-weight:500">✓ Known Customer: ${found.name}</span>`+(found.address?`<span style="color:var(--txm);margin-left:8px;font-size:10px">${found.address}</span>`:'')+(found.email?`<span style="color:var(--txm);margin-left:8px;font-size:10px">${found.email}</span>`:'');
+  }
 }
 
 /* ─── LINKED DATE-VENUE ROW ─── */
