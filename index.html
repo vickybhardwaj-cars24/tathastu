@@ -266,6 +266,60 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
 .msg-tmpl:hover{border-color:var(--gold)}
 .msg-tmpl-title{font-size:11px;font-weight:500;color:var(--gold);margin-bottom:4px}
 .msg-tmpl-body{font-size:11px;color:var(--txm);line-height:1.5}
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:6px}
+.cal-hdr-cell{text-align:center;font-size:9px;color:var(--txm);text-transform:uppercase;letter-spacing:.07em;padding:5px 2px;background:var(--s2);border-radius:4px}
+.cal-day{background:var(--s2);border:1px solid var(--br);border-radius:4px;min-height:68px;padding:4px;position:relative}
+.cal-day.today{border-color:var(--gold);background:rgba(201,168,76,.07)}
+.cal-day.other-month{opacity:.28}
+.cal-day.blocked{background:var(--red-bg);border-color:var(--red-br)}
+.cal-day.has-event{border-color:rgba(201,168,76,.4)}
+.cal-dn{font-size:10px;font-weight:600;color:var(--txm);margin-bottom:2px}
+.cal-dn.today-n{color:var(--gold)}
+.cal-ev{font-size:8.5px;background:var(--gold-dk);color:var(--gold-lt);border-radius:2px;padding:1px 3px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-ev.wi{background:var(--blu-bg);color:var(--blu);border:1px solid var(--blu-br)}
+.cal-ev.blk{background:var(--red-bg);color:var(--red);border:1px solid var(--red-br)}
+.cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.cal-month-lbl{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);flex:1;text-align:center}
+/* STAFF */
+.staff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.staff-card{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);padding:14px}
+.staff-avatar{width:40px;height:40px;border-radius:50%;background:var(--gold-dk);color:var(--gold-lt);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;flex-shrink:0;margin-bottom:8px}
+.staff-name{font-size:13px;font-weight:500;color:var(--tx)}
+.staff-role{font-size:10px;color:var(--txm);margin-top:2px}
+.staff-rate{font-size:11px;color:var(--gold);margin-top:5px}
+/* FINANCE */
+.fin-stat{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.bar-chart-wrap{display:flex;gap:4px;align-items:flex-end;height:100px}
+.bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:2px}
+.bar-fill{width:100%;border-radius:3px 3px 0 0;min-height:2px}
+.bar-lbl{font-size:8.5px;color:var(--txm);text-align:center;max-width:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* LOYALTY TIER */
+.tier-g{color:#FFD700;font-weight:700;font-size:11px}
+.tier-s{color:#A8A8A8;font-weight:700;font-size:11px}
+.tier-b{color:#CD7F32;font-weight:700;font-size:11px}
+/* TIMELINE */
+.tl-item{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--br)}
+.tl-item:last-child{border-bottom:none}
+.tl-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px}
+.tl-text{font-size:12px;color:var(--tx);flex:1}
+.tl-date{font-size:10px;color:var(--txm)}
+/* EQUIPMENT */
+.eq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.eq-card{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);padding:12px}
+.eq-name{font-size:13px;font-weight:500;color:var(--tx)}
+.eq-type{font-size:10px;color:var(--txm);margin-top:2px}
+.eq-service{font-size:11px;margin-top:5px}
+/* HEATMAP */
+.hm-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
+.hm-cell{border-radius:5px;padding:10px 6px;text-align:center}
+.hm-lbl{font-size:9px;color:inherit;opacity:.8;display:block;margin-bottom:3px}
+.hm-val{font-size:13px;font-weight:600;display:block}
+/* INSTALLMENTS */
+.inst-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--br);font-size:12px}
+.inst-row:last-child{border-bottom:none}
+/* CONFLICT WARNING */
+.conflict-warn{background:var(--red-bg);border:1px solid var(--red-br);border-radius:var(--r);padding:10px 14px;margin:8px 0;font-size:11px;color:var(--red)}
 </style>
 
 <!-- LOGIN OVERLAY -->
@@ -336,6 +390,10 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
   <button class="ntab" onclick="go('pending',this)">Pending</button>
   <button class="ntab" onclick="go('delivery',this)">Delivery</button>
   <button class="ntab" onclick="go('reports',this)">Reports</button>
+  <button class="ntab" onclick="go('calendar',this)">Calendar</button>
+  <button class="ntab" onclick="go('staff',this)">Staff</button>
+  <button class="ntab" onclick="go('finance',this)">Finance</button>
+  <button class="ntab" onclick="go('equipment',this)">Equipment</button>
   <button class="ntab" id="tab-admin" onclick="go('admin',this)">⚙</button>
   <button class="ntab" onclick="go('quicklog',this)">Quick Log</button>
 </div>
@@ -411,6 +469,13 @@ let DB={
   pricing:   getDefaultPricing(),
   customers: [],
   priceConfig:{mrpMultiplier:2.5,customerMultiplier:2.0},
+  staff:     [],
+  expenses:  [],
+  blockedDates:[],
+  equipment: [],
+  commissions:[],
+  gstConfig: {gstin:'',businessName:'Tathastu Weddings',address:'',hsnCode:'998382',taxRate:18},
+  googleReviewLink:'',
 };
 
 /* ── Auth helpers ── */
@@ -503,6 +568,13 @@ async function loadFromWorker(){
     DB.pricing     = data.pricing     || getDefaultPricing();
     DB.customers   = data.customers   || [];
     DB.priceConfig = data.priceConfig || {mrpMultiplier:2.5,customerMultiplier:2.0};
+    DB.staff       = data.staff       || [];
+    DB.expenses    = data.expenses    || [];
+    DB.blockedDates= data.blockedDates|| [];
+    DB.equipment   = data.equipment   || [];
+    DB.commissions = data.commissions || [];
+    DB.gstConfig   = data.gstConfig   || {gstin:'',businessName:'Tathastu Weddings',address:'',hsnCode:'998382',taxRate:18};
+    DB.googleReviewLink = data.googleReviewLink || '';
     backfillCustomers();
     localStorage.setItem('tw_db',JSON.stringify(DB));
     setSyncStatus('ok');
@@ -520,6 +592,13 @@ function loadFromCache(){
       DB.pricing     = d.pricing     || getDefaultPricing();
       DB.customers   = d.customers   || [];
       DB.priceConfig = d.priceConfig || {mrpMultiplier:2.5,customerMultiplier:2.0};
+      DB.staff       = d.staff       || [];
+      DB.expenses    = d.expenses    || [];
+      DB.blockedDates= d.blockedDates|| [];
+      DB.equipment   = d.equipment   || [];
+      DB.commissions = d.commissions || [];
+      DB.gstConfig   = d.gstConfig   || {gstin:'',businessName:'Tathastu Weddings',address:'',hsnCode:'998382',taxRate:18};
+      DB.googleReviewLink = d.googleReviewLink || '';
     }catch{}
   }
   backfillCustomers();
@@ -566,6 +645,10 @@ function render(){
   else if(curTab==='pending')   pg.innerHTML=renderPending();
   else if(curTab==='delivery')  pg.innerHTML=renderDelivery();
   else if(curTab==='reports')   pg.innerHTML=renderReports();
+  else if(curTab==='calendar')  pg.innerHTML=renderCalendar();
+  else if(curTab==='staff')     pg.innerHTML=renderStaff();
+  else if(curTab==='finance')   pg.innerHTML=renderFinance();
+  else if(curTab==='equipment') pg.innerHTML=renderEquipment();
   else if(curTab==='admin')     pg.innerHTML=renderAdmin();
   else if(curTab==='quicklog')  pg.innerHTML=renderQuickLog();
   /* update events reminder badge */
@@ -587,6 +670,20 @@ function renderDash(){
   const upcoming=DB.events.filter(e=>e.eventDate&&new Date(e.eventDate)>=new Date()).sort((a,b)=>new Date(a.eventDate)-new Date(b.eventDate)).slice(0,5);
   const urgTasks=DB.tasks.filter(t=>t.priority==='Urgent'&&t.status!=='Done').slice(0,4);
   const soonEvents=DB.events.filter(e=>{const d=daysFrom(e.eventDate);return d!==null&&d>=0&&d<=3;});
+  // Birthday/anniversary reminders (within 7 days)
+  const todayDate=new Date(today());
+  const birthReminders=DB.customers.filter(c=>{
+    if(!c.birthday)return false;
+    const bd=new Date(today().substring(0,4)+'-'+c.birthday.substring(5));
+    const diff=Math.ceil((bd-todayDate)/86400000);
+    return diff>=0&&diff<=7;
+  });
+  const annivReminders=DB.customers.filter(c=>{
+    if(!c.anniversary)return false;
+    const ad=new Date(today().substring(0,4)+'-'+c.anniversary.substring(5));
+    const diff=Math.ceil((ad-todayDate)/86400000);
+    return diff>=0&&diff<=7;
+  });
 
   return `
   <div class="stats">
@@ -604,6 +701,11 @@ function renderDash(){
       <td style="font-size:11px;color:var(--txm)">${o.venue||'—'}</td>
     </tr>`;}).join('')}</tbody>
   </table></div>`:''}
+  ${(birthReminders.length||annivReminders.length)?`<div class="shdr"><div><div class="stitle">🎂 Birthday & Anniversary Reminders</div></div></div>
+  <div class="tw"><table style="table-layout:auto"><thead><tr><th>Customer</th><th>Type</th><th>Date</th><th>Phone</th></tr></thead><tbody>
+  ${birthReminders.map(c=>{const bd=new Date(today().substring(0,4)+'-'+c.birthday.substring(5));const d=Math.ceil((bd-todayDate)/86400000);return`<tr><td><b>${c.name}</b></td><td><span class="bdg bdg-amb">🎂 Birthday</span></td><td>${d===0?'<b style="color:var(--grn)">TODAY!</b>':'In '+d+' day'+(d>1?'s':'')}</td><td>${waLink(c.phone)}</td></tr>`;}).join('')}
+  ${annivReminders.map(c=>{const ad=new Date(today().substring(0,4)+'-'+c.anniversary.substring(5));const d=Math.ceil((ad-todayDate)/86400000);return`<tr><td><b>${c.name}</b></td><td><span class="bdg bdg-blu">💑 Anniversary</span></td><td>${d===0?'<b style="color:var(--grn)">TODAY!</b>':'In '+d+' day'+(d>1?'s':'')}</td><td>${waLink(c.phone)}</td></tr>`;}).join('')}
+  </tbody></table></div>`:''}
   ${urgTasks.length?`<div class="shdr"><div><div class="stitle">🔴 Urgent Tasks</div></div></div>
   <div class="task-list">${urgTasks.map(t=>`<div class="tk urg"><div class="tk-info"><div class="tk-name">${t.name}</div><div class="tk-meta">${t.customer||'—'} · Due: ${t.deadline||'—'}${t.dueTime?' at '+t.dueTime:''}</div></div><div class="tk-right"><span class="bdg bdg-urg">URGENT</span><span class="bdg bdg-muted">${t.status||'Pending'}</span></div></div>`).join('')}</div>`:''}
   <div class="shdr"><div><div class="stitle">Recent Walk-ins</div><div class="ssub">Last 5 orders</div></div></div>
@@ -630,7 +732,7 @@ function renderDash(){
 }
 
 /* ─── WALK-INS ─── */
-const WI_TABLE_HDR=`<thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:36px">WA</th><th style="width:148px">Actions</th></tr></thead>`;
+const WI_TABLE_HDR=`<thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:36px">WA</th><th style="width:195px">Actions</th></tr></thead>`;
 const WA_SVG14=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
 function wiRows(list){
   return list.length?list.map(o=>{
@@ -646,7 +748,7 @@ function wiRows(list){
       <td>${statusBadge(o.status)}</td>
       <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
       <td>${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${nm}','walkin','${o.service||''}','${o.deliveryDate||''}')" title="WhatsApp">${WA_SVG14}</button>`:'—'}</td>
-      <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap"><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button><button class="btn-urg btn-sm ${o.urgent?'':'off'}" onclick="toggleUrgent(${ri})">${o.urgent?'🔴 Urgent':'⚪ Normal'}</button><button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
+      <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap"><button class="btn btn-o btn-sm" onclick="editWi(${ri})">Edit</button><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button><button class="btn-print btn-sm" onclick="showQuotation('walkin',${ri})">Invoice</button><button class="btn-urg btn-sm ${o.urgent?'':'off'}" onclick="toggleUrgent(${ri})">${o.urgent?'🔴':'⚪'}</button><button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
     </tr>`;
   }).join(''):'<tr><td colspan="10" class="empty">No orders found</td></tr>';
 }
@@ -679,7 +781,7 @@ function renderWalkins(){
 }
 
 /* ─── EVENTS ─── */
-const EV_TABLE_HDR=`<thead><tr><th style="width:76px">Booked</th><th style="width:115px">Customer</th><th style="width:88px">Type</th><th style="width:96px">Event Date</th><th style="width:88px">Venue</th><th>Crew</th><th style="width:60px">Amount</th><th style="width:60px">Balance</th><th style="width:68px">Status</th><th style="width:120px">Actions</th></tr></thead>`;
+const EV_TABLE_HDR=`<thead><tr><th style="width:76px">Booked</th><th style="width:115px">Customer</th><th style="width:88px">Type</th><th style="width:96px">Event Date</th><th style="width:88px">Venue</th><th>Crew</th><th style="width:60px">Amount</th><th style="width:60px">Balance</th><th style="width:68px">Status</th><th style="width:195px">Actions</th></tr></thead>`;
 function evRows(list){
   return list.length?list.map(o=>{
     const ri=DB.events.indexOf(o);
@@ -696,8 +798,11 @@ function evRows(list){
       <td class="amt">${fmtINR(o.amount)}</td>
       <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
       <td>${statusBadge(o.status)}</td>
-      <td style="white-space:normal;display:flex;gap:4px;flex-wrap:wrap">
+      <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap">
+        <button class="btn btn-o btn-sm" onclick="editEv(${ri})">Edit</button>
         <button class="btn-print btn-sm" onclick="printEventReceipt(${ri})">Receipt</button>
+        <button class="btn-print btn-sm" onclick="showQuotation('event',${ri})">Invoice</button>
+        <button class="btn-print btn-sm" onclick="showInstallments(${ri})" style="color:var(--amb);border-color:var(--amb-br)">Payments</button>
         ${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${nm}','event','${o.eventType||''}','${o.eventDate||''}')" title="WhatsApp">${WA_SVG14}</button>`:''}
         <button class="btn btn-d btn-sm" onclick="delEv(${ri})">✕</button>
       </td>
@@ -841,10 +946,16 @@ function renderCustomers(){
   <div class="srow"><input class="sinp" id="cust-search" placeholder="Search by name, phone or email…" value="${window._cq||''}" oninput="window._cq=this.value;renderCustOnly()"></div>
   <div id="cust-table-wrap">
   <div class="tw"><table>
-    <thead><tr><th style="width:130px">Name</th><th style="width:115px">Phone</th><th style="width:140px">Email</th><th>Address</th><th style="width:50px">Orders</th><th style="width:68px">Spent</th><th style="width:68px">Pending</th><th style="width:68px">Review</th><th style="width:82px">Actions</th></tr></thead>
+    <thead><tr><th style="width:130px">Name</th><th style="width:115px">Phone</th><th style="width:140px">Email</th><th>Address</th><th style="width:50px">Orders</th><th style="width:68px">Spent</th><th style="width:68px">Pending</th><th style="width:68px">Review</th><th style="width:140px">Actions</th></tr></thead>
     <tbody>${custTableRows(list)}</tbody>
   </table></div>
   </div>`;
+}
+function custLoyaltyTier(spent){
+  if(spent>=50000)return`<span class="tier-g">🥇 Gold</span>`;
+  if(spent>=20000)return`<span class="tier-s">🥈 Silver</span>`;
+  if(spent>=5000) return`<span class="tier-b">🥉 Bronze</span>`;
+  return`<span style="font-size:11px;color:var(--txm)">New</span>`;
 }
 function custTableRows(list){
   return list.length?list.map(c=>{
@@ -853,8 +964,9 @@ function custTableRows(list){
     const pending=cOrders.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
     const ri=DB.customers.indexOf(c);
     const waBtn=c.phone?`<button class="btn-wa btn-sm" onclick="showMsgTemplates('${c.phone}','${c.name.replace(/'/g,"\\'")}','customer')" title="WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button> `:'';
+    const reviewLink=DB.googleReviewLink?`<a href="${DB.googleReviewLink}" target="_blank" class="btn-print btn-sm" style="text-decoration:none;display:inline-block;padding:3px 8px">⭐ Review</a>`:'';
     return`<tr>
-      <td><b style="font-size:12px">${c.name}</b></td>
+      <td><b style="font-size:12px">${c.name}</b><div style="font-size:9px;margin-top:2px">${custLoyaltyTier(spent)}</div>${c.birthday?`<div style="font-size:9px;color:var(--txm)">🎂 ${c.birthday.substring(5)}</div>`:''}</td>
       <td>${waLink(c.phone||c.whatsapp)}</td>
       <td style="font-size:10px;color:var(--txm)">${c.email||'—'}</td>
       <td style="font-size:11px;color:var(--txm)">${c.address||'—'}</td>
@@ -862,7 +974,7 @@ function custTableRows(list){
       <td class="amt">${fmtINR(spent)}</td>
       <td class="${pending>0?'bal-r':'bal-g'}">${fmtINR(pending)}</td>
       <td>${c.reviewDone?'<span class="bdg bdg-grn">✓ Done</span>':'<span class="bdg bdg-amb">Pending</span>'}</td>
-      <td style="white-space:normal">${waBtn}<button class="btn btn-d btn-sm" onclick="delCust(${ri})">✕</button></td>
+      <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap">${waBtn}${reviewLink}<button class="btn btn-o btn-sm" onclick="showCustDetail(${ri})">Notes</button><button class="btn btn-d btn-sm" onclick="delCust(${ri})">✕</button></td>
     </tr>`;
   }).join(''):'<tr><td colspan="9" class="empty">No customers found</td></tr>';
 }
@@ -873,7 +985,7 @@ function renderCustOnly(){
   let list=[...DB.customers];
   if(q) list=list.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.email||'').toLowerCase().includes(q));
   wrap.innerHTML=`<div class="tw"><table>
-    <thead><tr><th style="width:130px">Name</th><th style="width:115px">Phone</th><th style="width:140px">Email</th><th>Address</th><th style="width:50px">Orders</th><th style="width:68px">Spent</th><th style="width:68px">Pending</th><th style="width:68px">Review</th><th style="width:82px">Actions</th></tr></thead>
+    <thead><tr><th style="width:130px">Name</th><th style="width:115px">Phone</th><th style="width:140px">Email</th><th>Address</th><th style="width:50px">Orders</th><th style="width:68px">Spent</th><th style="width:68px">Pending</th><th style="width:68px">Review</th><th style="width:140px">Actions</th></tr></thead>
     <tbody>${custTableRows(list)}</tbody></table></div>`;
   setTimeout(()=>{const inp=document.getElementById('cust-search');if(inp){const p=inp.value.length;inp.focus();try{inp.setSelectionRange(p,p);}catch(e){}}},0);
 }
@@ -945,16 +1057,38 @@ function renderReports(){
     const saveB=((b.cost||0)+(b.frameCost||0))*(_mrpM-_custM);
     return saveB-saveA;
   })[0];
+  // Monthly revenue heatmap (last 12 months)
+  const now=new Date();
+  const months=[];
+  for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({year:d.getFullYear(),month:d.getMonth()+1,lbl:d.toLocaleString('en-IN',{month:'short'})+'\''+String(d.getFullYear()).slice(2)});}
+  const maxRev=Math.max(1,...months.map(m=>{
+    return allOrd.filter(o=>{const d=new Date(o.eventDate||o.date);return d.getFullYear()===m.year&&d.getMonth()+1===m.month;}).reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+  }));
+  // Monthly P&L
+  const curY=now.getFullYear(),curM=now.getMonth()+1;
+  const incThisMonth=allOrd.filter(o=>{const d=new Date(o.eventDate||o.date);return d.getFullYear()===curY&&d.getMonth()+1===curM;}).reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+  const expThisMonth=DB.expenses.filter(e=>{if(!e.date)return false;const d=new Date(e.date);return d.getFullYear()===curY&&d.getMonth()+1===curM;}).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+  const totalExpenses=DB.expenses.reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+  const netProfit=totalSales-totalExpenses;
   return `
   <div class="shdr"><div><div class="stitle">Reports &amp; Analytics</div></div><button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button></div>
   <div class="rep-grid">
     <div class="rep-card">
       <div class="rep-title">Financial Summary</div>
       <div class="rep-row"><span class="rep-lbl">Total Sales</span><span class="rep-val amt">${fmtINR(totalSales)}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Total Expenses</span><span class="rep-val bal-r">${fmtINR(totalExpenses)}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Net Profit</span><span class="rep-val" style="color:${netProfit>=0?'var(--grn)':'var(--red)'}">${fmtINR(netProfit)}</span></div>
       <div class="rep-row"><span class="rep-lbl">Advance Collected</span><span class="rep-val">${fmtINR(totalAdv)}</span></div>
       <div class="rep-row"><span class="rep-lbl">Balance Pending</span><span class="rep-val bal-r">${fmtINR(totalBal)}</span></div>
       <div class="rep-row"><span class="rep-lbl">Orders Delivered</span><span class="rep-val bal-g">${delivered}</span></div>
-      <div class="rep-row"><span class="rep-lbl">Total Orders</span><span class="rep-val">${allOrd.length}</span></div>
+    </div>
+    <div class="rep-card">
+      <div class="rep-title">This Month P&amp;L</div>
+      <div class="rep-row"><span class="rep-lbl">Income</span><span class="rep-val bal-g">${fmtINR(incThisMonth)}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Expenses</span><span class="rep-val bal-r">${fmtINR(expThisMonth)}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Net</span><span class="rep-val" style="color:${(incThisMonth-expThisMonth)>=0?'var(--grn)':'var(--red)'}">${fmtINR(incThisMonth-expThisMonth)}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Commission Paid</span><span class="rep-val">${fmtINR(DB.commissions.filter(c=>c.paid).reduce((a,c)=>a+(parseFloat(c.amount)||0),0))}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Commission Pending</span><span class="rep-val bal-r">${fmtINR(DB.commissions.filter(c=>!c.paid).reduce((a,c)=>a+(parseFloat(c.amount)||0),0))}</span></div>
     </div>
     <div class="rep-card">
       <div class="rep-title">Top Walk-in Services</div>
@@ -965,14 +1099,32 @@ function renderReports(){
       ${topEv.length?topEv.map(([s,c])=>`<div class="rep-row"><span class="rep-lbl">${s}</span><span class="rep-val">${c} bookings</span></div>`).join(''):'<div style="font-size:11px;color:var(--txm);padding:8px 0">No data yet</div>'}
     </div>
     <div class="rep-card">
-      <div class="rep-title">Pricing Summary</div>
+      <div class="rep-title">Pricing &amp; Customer Summary</div>
       <div class="rep-row"><span class="rep-lbl">Frame Sizes Listed</span><span class="rep-val">${DB.pricing.length}</span></div>
       <div class="rep-row"><span class="rep-lbl">Best Value Frame</span><span class="rep-val bal-g">${bestFrame?bestFrame.size+(bestFrame.group?' ('+bestFrame.group+')':''):'—'}</span></div>
       <div class="rep-row"><span class="rep-lbl">Customers Tracked</span><span class="rep-val">${DB.customers.length}</span></div>
       <div class="rep-row"><span class="rep-lbl">Reviews Pending</span><span class="rep-val bal-r">${DB.customers.filter(c=>!c.reviewDone).length}</span></div>
       <div class="rep-row"><span class="rep-lbl">Open Tasks</span><span class="rep-val">${DB.tasks.filter(t=>t.status!=='Done').length}</span></div>
     </div>
-  </div>`;
+    <div class="rep-card">
+      <div class="rep-title">Delivery Tracking</div>
+      <div class="rep-row"><span class="rep-lbl">Gallery Links Shared</span><span class="rep-val">${[...DB.walkins,...DB.events].filter(o=>o.galleryLink).length}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Watermark Previews Sent</span><span class="rep-val">${[...DB.walkins,...DB.events].filter(o=>o.watermarkSent).length}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Final Files Delivered</span><span class="rep-val bal-g">${[...DB.walkins,...DB.events].filter(o=>o.finalDelivered).length}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Pending Final Delivery</span><span class="rep-val bal-r">${[...DB.walkins,...DB.events].filter(o=>!o.finalDelivered&&(o.status==='Ready'||o.watermarkSent)).length}</span></div>
+    </div>
+  </div>
+  <div class="shdr"><div><div class="stitle">Revenue Heatmap — Last 12 Months</div><div class="ssub">Darker = higher revenue. Click Finance tab for expenses &amp; P&L.</div></div></div>
+  <div class="hm-grid">${months.map(m=>{
+    const rev=allOrd.filter(o=>{const d=new Date(o.eventDate||o.date);return d.getFullYear()===m.year&&d.getMonth()+1===m.month;}).reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+    const pct=rev/maxRev;
+    const alpha=Math.max(0.08,pct);
+    const isNow=m.year===curY&&m.month===curM;
+    return`<div class="hm-cell" style="background:rgba(201,168,76,${alpha});border:1px solid rgba(201,168,76,${alpha*2});${isNow?'border-color:var(--gold);outline:1px solid var(--gold)':''}">
+      <span class="hm-lbl">${m.lbl}</span>
+      <span class="hm-val" style="color:${pct>0.4?'#fff':'var(--gold)'}">${rev>0?'₹'+(rev>=100000?(rev/100000).toFixed(1)+'L':(rev>=1000?(rev/1000).toFixed(0)+'K':rev)):'—'}</span>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 /* ─── QUICK LOG ─── */
@@ -1025,7 +1177,7 @@ function showAdd(type){
   shade.innerHTML='<div class="modal">'+buildForm(type)+'</div>';
   document.body.appendChild(shade);
   if(type==='walkin') setupWiCalc();
-  if(type==='event')  setupEvCalc();
+  if(type==='event')  {setupEvCalc();setTimeout(()=>{const ed=document.getElementById('f-edate');if(ed)ed.addEventListener('change',checkConflict);},200);}
   if(type==='price')  setupPriceCalc();
 }
 function closeShade(){const s=document.getElementById('shade');if(s)s.remove();}
@@ -1054,6 +1206,11 @@ function buildForm(type){
       <div class="ff"><label>Delivery Time</label><input type="time" id="f-deltime"></div>
       <div class="ff"><label>Urgent?</label><select id="f-urg"><option>No</option><option>Yes</option></select></div>
       <div class="ff"><label>Notes</label><input type="text" id="f-notes" placeholder="Special requirements"></div>
+    </div>
+    <div class="fg fg-3 mt8">
+      <div class="ff"><label>Gallery/Delivery Link</label><input type="url" id="f-gallery" placeholder="Google Drive / WeTransfer URL"></div>
+      <div class="ff"><label>Watermark Preview Sent?</label><select id="f-watermark"><option value="0">No</option><option value="1">Yes</option></select></div>
+      <div class="ff"><label>Final Files Delivered?</label><select id="f-finaldel"><option value="0">No</option><option value="1">Yes</option></select></div>
     </div>
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveWi()">Save Order</button></div>`;
 
@@ -1097,6 +1254,12 @@ function buildForm(type){
       <div class="ff"><label>Payment Terms</label><input type="text" id="f-terms" placeholder="e.g. 50% advance, 50% on delivery"></div>
       <div class="ff"><label>Notes</label><input type="text" id="f-notes" placeholder="Special requirements"></div>
     </div>
+    <div class="fg fg-3 mt8">
+      <div class="ff"><label>Gallery/Delivery Link</label><input type="url" id="f-gallery" placeholder="Google Drive / WeTransfer URL"></div>
+      <div class="ff"><label>Referred By (for commission)</label><input type="text" id="f-refby" placeholder="Agent or vendor name"></div>
+      <div class="ff"><label>Commission Amount (₹)</label><input type="number" id="f-commission" placeholder="0"></div>
+    </div>
+    <div id="conflict-alert"></div>
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveEv()">Book Event</button></div>`;
 
   if(type==='task') return `
@@ -1148,7 +1311,56 @@ function buildForm(type){
       <div class="ff"><label>Address</label><input type="text" id="f-cadr" placeholder="Area / locality"></div>
       <div class="ff"><label>Google Review Done?</label><select id="f-crev"><option value="0">No</option><option value="1">Yes</option></select></div>
     </div>
+    <div class="fg fg-3 mt8">
+      <div class="ff"><label>Birthday (YYYY-MM-DD)</label><input type="date" id="f-cbday" placeholder="Birthday"></div>
+      <div class="ff"><label>Anniversary (YYYY-MM-DD)</label><input type="date" id="f-canniv" placeholder="Anniversary"></div>
+      <div class="ff"><label>Notes</label><input type="text" id="f-cnotes" placeholder="Any notes"></div>
+    </div>
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveCust()">Save Customer</button></div>`;
+
+  if(type==='staff') return `
+    <div class="mtitle">Staff Member <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="fg fg-3">
+      <div class="ff"><label>Full Name</label><input type="text" id="f-sname" placeholder="Name"></div>
+      <div class="ff"><label>Role</label><select id="f-srole">${STAFF_ROLES.map(r=>`<option>${r}</option>`).join('')}</select></div>
+      <div class="ff"><label>Phone</label><input type="tel" id="f-sphone" placeholder="Mobile"></div>
+    </div>
+    <div class="fg fg-3 mt8">
+      <div class="ff"><label>Daily Rate (₹)</label><input type="number" id="f-srate" placeholder="0"></div>
+      <div class="ff"><label>Available?</label><select id="f-savail"><option value="1">Yes</option><option value="0">No (Unavailable)</option></select></div>
+      <div class="ff"><label>Notes</label><input type="text" id="f-snotes" placeholder="Specialization, skills…"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveStaff()">Save</button></div>`;
+
+  if(type==='expense') return `
+    <div class="mtitle">Add Expense <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="fg fg-3">
+      <div class="ff"><label>Date</label><input type="date" id="f-expdate" value="${today()}"></div>
+      <div class="ff"><label>Category</label><select id="f-expcat">${EXPENSE_CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="ff"><label>Amount (₹)</label><input type="number" id="f-expamt" placeholder="0"></div>
+    </div>
+    <div class="fg fg-3 mt8">
+      <div class="ff"><label>Description</label><input type="text" id="f-expdesc" placeholder="What was purchased?"></div>
+      <div class="ff"><label>Vendor / Paid To</label><input type="text" id="f-expvendor" placeholder="Vendor name"></div>
+      <div class="ff"><label>Notes</label><input type="text" id="f-expnotes" placeholder="Invoice no., etc."></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveExpense()">Save Expense</button></div>`;
+
+  if(type==='equipment') return `
+    <div class="mtitle">Add Equipment <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="fg fg-3">
+      <div class="ff"><label>Name / Label</label><input type="text" id="f-ename" placeholder="e.g. Sony A7IV Body 1"></div>
+      <div class="ff"><label>Type</label><select id="f-etype2">${EQUIP_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div>
+      <div class="ff"><label>Model</label><input type="text" id="f-emodel" placeholder="Model number"></div>
+    </div>
+    <div class="fg fg-4 mt8">
+      <div class="ff"><label>Serial No.</label><input type="text" id="f-eserial" placeholder="S/N"></div>
+      <div class="ff"><label>Purchase Date</label><input type="date" id="f-epurchase"></div>
+      <div class="ff"><label>Next Service Due</label><input type="date" id="f-eservice"></div>
+      <div class="ff"><label>Assigned To</label><input type="text" id="f-eassigned" placeholder="Staff name"></div>
+    </div>
+    <div class="ff mt8"><label>Notes</label><input type="text" id="f-enotes" placeholder="Condition, accessories, etc."></div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveEquipment()">Save</button></div>`;
 
   return '';
 }
@@ -1305,6 +1517,10 @@ function saveWi(){
     deliveryDate:document.getElementById('f-del').value,
     deliveryTime:document.getElementById('f-deltime').value,
     notes:document.getElementById('f-notes').value,
+    galleryLink:document.getElementById('f-gallery')?.value||'',
+    watermarkSent:document.getElementById('f-watermark')?.value==='1',
+    finalDelivered:document.getElementById('f-finaldel')?.value==='1',
+    installments:[],
   });
   autoCreateCustomer(name,phone);
   save();closeShade();render();
@@ -1321,6 +1537,20 @@ function saveEv(){
   const eType=document.getElementById('f-etype').value;
   const eDate=document.getElementById('f-edate').value;
   const phone=document.getElementById('f-phone').value;
+  // Conflict detection
+  const conflictEvs=DB.events.filter(e=>e.eventDate===eDate&&e.name!==name);
+  if(conflictEvs.length){
+    const el=document.getElementById('conflict-alert');
+    if(el){
+      el.innerHTML=`<div class="conflict-warn">⚠️ <b>Conflict detected!</b> ${conflictEvs.length} event(s) already booked on <b>${eDate}</b>: ${conflictEvs.map(e=>e.name+' ('+e.eventType+')').join(', ')}. Please verify crew availability before booking.</div>`;
+      if(!confirm('CONFLICT: Another event is booked on '+eDate+'. Book anyway?'))return;
+    }
+  }
+  const refBy=document.getElementById('f-refby')?.value||'';
+  const commAmt=parseFloat(document.getElementById('f-commission')?.value)||0;
+  if(refBy&&commAmt>0){
+    DB.commissions.push({date:document.getElementById('f-date').value,eventName:name,refBy,amount:commAmt,paid:false,notes:''});
+  }
   DB.events.push({
     date:document.getElementById('f-date').value,name,phone,
     eventType:eType,eventDate:eDate,extraDates,
@@ -1332,6 +1562,9 @@ function saveEv(){
     payMode:document.getElementById('f-pay').value,
     terms:document.getElementById('f-terms').value,
     notes:document.getElementById('f-notes').value,
+    galleryLink:document.getElementById('f-gallery')?.value||'',
+    watermarkSent:false,finalDelivered:false,
+    installments:[{date:document.getElementById('f-date').value,amount:adv,mode:document.getElementById('f-pay').value,note:'Advance'}],
   });
   autoCreateCustomer(name,phone);
   save();closeShade();render();
@@ -1360,7 +1593,7 @@ function savePrice(){
 function saveCust(){
   const name=document.getElementById('f-cname').value.trim();
   if(!name){alert('Name required');return;}
-  DB.customers.push({name,phone:document.getElementById('f-cmob').value,whatsapp:document.getElementById('f-cwa').value,email:document.getElementById('f-cemail')?.value||'',address:document.getElementById('f-cadr').value,reviewDone:document.getElementById('f-crev').value==='1'});
+  DB.customers.push({name,phone:document.getElementById('f-cmob').value,whatsapp:document.getElementById('f-cwa').value,email:document.getElementById('f-cemail')?.value||'',address:document.getElementById('f-cadr').value,reviewDone:document.getElementById('f-crev').value==='1',birthday:document.getElementById('f-cbday')?.value||'',anniversary:document.getElementById('f-canniv')?.value||'',notes:document.getElementById('f-cnotes')?.value||'',timeline:[]});
   save();closeShade();render();
 }
 function saveQL(){
@@ -1374,6 +1607,24 @@ function saveQL(){
   save();
   ['ql-name','ql-phone','ql-amt','ql-adv','ql-bal','ql-del','ql-deltime','ql-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   render();
+}
+function saveStaff(){
+  const name=document.getElementById('f-sname').value.trim();
+  if(!name){alert('Name required');return;}
+  DB.staff.push({name,role:document.getElementById('f-srole').value,phone:document.getElementById('f-sphone').value,dailyRate:parseFloat(document.getElementById('f-srate').value)||0,available:document.getElementById('f-savail').value==='1',notes:document.getElementById('f-snotes').value});
+  save();closeShade();render();
+}
+function saveExpense(){
+  const amt=parseFloat(document.getElementById('f-expamt').value)||0;
+  if(!amt){alert('Amount required');return;}
+  DB.expenses.push({date:document.getElementById('f-expdate').value,category:document.getElementById('f-expcat').value,desc:document.getElementById('f-expdesc').value,amount:amt,vendor:document.getElementById('f-expvendor').value,notes:document.getElementById('f-expnotes').value});
+  save();closeShade();render();
+}
+function saveEquipment(){
+  const name=document.getElementById('f-ename').value.trim();
+  if(!name){alert('Name required');return;}
+  DB.equipment.push({name,type:document.getElementById('f-etype2').value,model:document.getElementById('f-emodel').value,serial:document.getElementById('f-eserial').value,purchaseDate:document.getElementById('f-epurchase').value,nextService:document.getElementById('f-eservice').value,assignedTo:document.getElementById('f-eassigned').value,notes:document.getElementById('f-enotes').value});
+  save();closeShade();render();
 }
 function editPrice(i){
   showAdd('price');
@@ -1505,6 +1756,22 @@ function renderAdmin(){
       </tr>`;
     }).join('')}</tbody>
   </table></div>
+  <div class="shdr" style="margin-top:20px"><div><div class="stitle">GST &amp; Invoice Configuration</div><div class="ssub">Fills into invoices and quotations generated from Orders/Events</div></div></div>
+  <div class="fc">
+    <div class="fg fg-2">
+      <div class="ff"><label>GSTIN (leave blank if not registered)</label><input type="text" id="cfg-gstin" value="${DB.gstConfig?.gstin||''}" placeholder="22AAAAA0000A1Z5"></div>
+      <div class="ff"><label>Business Name on Invoice</label><input type="text" id="cfg-bname" value="${DB.gstConfig?.businessName||'Tathastu Weddings'}" placeholder="Legal business name"></div>
+    </div>
+    <div class="fg fg-3 mt8">
+      <div class="ff"><label>Business Address</label><input type="text" id="cfg-badr" value="${DB.gstConfig?.address||''}" placeholder="Full address for invoice"></div>
+      <div class="ff"><label>HSN/SAC Code</label><input type="text" id="cfg-hsn" value="${DB.gstConfig?.hsnCode||'998382'}" placeholder="998382"></div>
+      <div class="ff"><label>GST Rate (%)</label><input type="number" id="cfg-gstrate" value="${DB.gstConfig?.taxRate||18}" min="0" max="28" step="0.5"></div>
+    </div>
+    <div class="fg fg-2 mt8">
+      <div class="ff"><label>Google Review Page Link</label><input type="url" id="cfg-glink" value="${DB.googleReviewLink||''}" placeholder="https://g.page/r/..."></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-g" onclick="saveGSTConfig()">Save GST &amp; Review Config</button></div>
+  </div>
   <div class="fc" style="border-color:var(--red-br);margin-top:20px">
     <div class="ftitle" style="color:var(--red)">Danger Zone</div>
     <div style="font-size:11px;color:var(--txm);margin-bottom:10px">These actions cannot be undone.</div>
@@ -1532,6 +1799,509 @@ function updateCost(i,field,val){
   if(!DB.pricing[i])return;
   DB.pricing[i][field]=parseFloat(val)||0;
   save();
+}
+function saveGSTConfig(){
+  DB.gstConfig={gstin:document.getElementById('cfg-gstin').value.trim(),businessName:document.getElementById('cfg-bname').value.trim(),address:document.getElementById('cfg-badr').value.trim(),hsnCode:document.getElementById('cfg-hsn').value.trim()||'998382',taxRate:parseFloat(document.getElementById('cfg-gstrate').value)||18};
+  DB.googleReviewLink=document.getElementById('cfg-glink').value.trim();
+  save();alert('GST & Review config saved!');render();
+}
+
+/* ─── CALENDAR VIEW ─── */
+let _calYear=new Date().getFullYear(),_calMonth=new Date().getMonth();
+function renderCalendar(){
+  const y=_calYear,m=_calMonth;
+  const firstDay=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const daysInPrev=new Date(y,m,0).getDate();
+  const monthName=new Date(y,m,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
+  const todayStr=today();
+  const allEvents=DB.events.filter(e=>e.eventDate);
+  const allDeliveries=DB.walkins.filter(o=>o.deliveryDate);
+  const blocked=DB.blockedDates.map(b=>b.date);
+  const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let cells='';
+  // Previous month days
+  for(let i=0;i<firstDay;i++){
+    const d=daysInPrev-firstDay+1+i;
+    cells+=`<div class="cal-day other-month"><div class="cal-dn">${d}</div></div>`;
+  }
+  // Current month days
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const isToday=dateStr===todayStr;
+    const isBlocked=blocked.includes(dateStr);
+    const dayEvs=allEvents.filter(e=>e.eventDate===dateStr||e.extraDates?.includes(dateStr));
+    const dayDels=allDeliveries.filter(o=>o.deliveryDate===dateStr);
+    cells+=`<div class="cal-day${isToday?' today':''}${isBlocked?' blocked':''}${(dayEvs.length||dayDels.length)?' has-event':''}">
+      <div class="cal-dn${isToday?' today-n':''}">${d}</div>
+      ${dayEvs.map(e=>`<div class="cal-ev" title="${e.name} - ${e.eventType}">${e.name.split(' ')[0]} ${e.eventType}</div>`).join('')}
+      ${dayDels.map(o=>`<div class="cal-ev wi" title="${o.name} - Delivery">${o.name.split(' ')[0]} 📦</div>`).join('')}
+      ${isBlocked?`<div class="cal-ev blk">${DB.blockedDates.find(b=>b.date===dateStr)?.reason||'Blocked'}</div>`:''}
+    </div>`;
+  }
+  // Fill remaining cells
+  const total=firstDay+daysInMonth;
+  const rem=(7-total%7)%7;
+  for(let i=1;i<=rem;i++) cells+=`<div class="cal-day other-month"><div class="cal-dn">${i}</div></div>`;
+  return `
+  <div class="shdr"><div><div class="stitle">Calendar View</div></div><button class="btn btn-g btn-sm" onclick="showBlockDate()">+ Block Date</button></div>
+  <div class="cal-nav">
+    <button class="btn btn-o btn-sm" onclick="_calMonth--;if(_calMonth<0){_calMonth=11;_calYear--;}render()">◀ Prev</button>
+    <div class="cal-month-lbl">${monthName}</div>
+    <button class="btn btn-o btn-sm" onclick="_calMonth++;if(_calMonth>11){_calMonth=0;_calYear++;}render()">Next ▶</button>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:8px;font-size:11px;flex-wrap:wrap">
+    <span><span class="cal-ev" style="display:inline-block;vertical-align:middle;margin-right:4px"> </span>Event</span>
+    <span><span class="cal-ev wi" style="display:inline-block;vertical-align:middle;margin-right:4px"> </span>Delivery</span>
+    <span><span class="cal-ev blk" style="display:inline-block;vertical-align:middle;margin-right:4px"> </span>Blocked</span>
+    <span><span style="display:inline-block;width:12px;height:12px;border:1px solid var(--gold);border-radius:2px;background:rgba(201,168,76,.07);vertical-align:middle;margin-right:4px"></span>Today</span>
+  </div>
+  <div class="cal-grid">
+    ${DAYS.map(d=>`<div class="cal-hdr-cell">${d}</div>`).join('')}
+    ${cells}
+  </div>`;
+}
+function showBlockDate(){
+  const shade=document.createElement('div');shade.className='shade';shade.id='shade';
+  shade.style='position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;overflow-y:auto;padding:20px';
+  shade.innerHTML=`<div class="modal" style="max-width:400px">
+    <div class="mtitle">Block a Date <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div class="ff"><label>Date</label><input type="date" id="bd-date"></div>
+    <div class="ff mt8"><label>Reason (e.g. Holiday, Personal Leave)</label><input type="text" id="bd-reason" placeholder="Reason"></div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveBlockDate()">Block Date</button></div>
+    <hr class="divider">
+    <div style="font-size:11px;color:var(--txm);margin-bottom:8px">Blocked Dates (${DB.blockedDates.length})</div>
+    ${DB.blockedDates.length?DB.blockedDates.map((b,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--br)"><span style="font-size:12px;flex:1"><b>${b.date}</b> — ${b.reason||'Blocked'}</span><button class="btn btn-d btn-sm" onclick="DB.blockedDates.splice(${i},1);save();closeShade();render()">✕</button></div>`).join(''):'<div class="empty">No blocked dates</div>'}
+  </div>`;
+  document.body.appendChild(shade);
+}
+function checkConflict(){
+  const eDate=document.getElementById('f-edate')?.value;
+  const el=document.getElementById('conflict-alert');if(!el||!eDate)return;
+  const blocked=DB.blockedDates.find(b=>b.date===eDate);
+  const conflicts=DB.events.filter(e=>e.eventDate===eDate);
+  let html='';
+  if(blocked)html+=`<div class="conflict-warn">🔴 <b>Date Blocked:</b> ${eDate} is marked as unavailable — ${blocked.reason||'no reason given'}.</div>`;
+  if(conflicts.length)html+=`<div class="conflict-warn">⚠️ <b>Scheduling Conflict:</b> ${conflicts.length} event(s) already on <b>${eDate}</b>: ${conflicts.map(e=>e.name+' ('+e.eventType+')').join(', ')}.</div>`;
+  el.innerHTML=html;
+}
+function saveBlockDate(){
+  const d=document.getElementById('bd-date').value;
+  if(!d){alert('Date required');return;}
+  DB.blockedDates.push({date:d,reason:document.getElementById('bd-reason').value});
+  save();closeShade();render();
+}
+
+/* ─── STAFF MANAGEMENT ─── */
+const STAFF_ROLES=['Photographer','Videographer','Drone Operator','Editor','Assistant','Manager','Other'];
+function renderStaff(){
+  return `
+  <div class="shdr"><div><div class="stitle">Staff &amp; Crew Roster</div><div class="ssub">${DB.staff.length} members registered</div></div><button class="btn btn-g btn-sm" onclick="showAdd('staff')">+ Add Staff</button></div>
+  ${DB.staff.length?`<div class="staff-grid">${DB.staff.map((s,i)=>{
+    const initial=(s.name||'?')[0].toUpperCase();
+    const assignedEvs=DB.events.filter(e=>e.assignedStaff&&e.assignedStaff.includes(s.name));
+    return`<div class="staff-card">
+      <div class="staff-avatar">${initial}</div>
+      <div class="staff-name">${s.name}</div>
+      <div class="staff-role"><span class="bdg bdg-muted">${s.role||'—'}</span></div>
+      <div class="staff-rate">${s.dailyRate?fmtINR(s.dailyRate)+' / day':''}</div>
+      ${s.phone?`<div style="font-size:11px;margin-top:4px">${waLink(s.phone)}</div>`:''}
+      <div style="font-size:10px;color:var(--txm);margin-top:4px">Assigned: ${assignedEvs.length} events</div>
+      ${s.available===false?'<span class="bdg bdg-red" style="margin-top:6px;display:inline-block">Unavailable</span>':'<span class="bdg bdg-grn" style="margin-top:6px;display:inline-block">Available</span>'}
+      ${s.notes?`<div style="font-size:10px;color:var(--txm);margin-top:4px">${s.notes}</div>`:''}
+      <div style="display:flex;gap:4px;margin-top:8px">
+        <button class="btn btn-o btn-sm" onclick="editStaff(${i})">Edit</button>
+        <button class="btn btn-d btn-sm" onclick="delStaff(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`:'<div class="empty">No staff registered yet. Add your photographers, videographers and crew.</div>'}
+  <div class="shdr" style="margin-top:16px"><div><div class="stitle">Assignment History</div></div></div>
+  <div class="tw"><table style="table-layout:auto">
+    <thead><tr><th>Event</th><th>Date</th><th>Type</th><th>Staff Assigned</th></tr></thead>
+    <tbody>${DB.events.filter(e=>e.assignedStaff&&e.assignedStaff.length).map(e=>`<tr>
+      <td><b>${e.name}</b></td><td>${e.eventDate||'—'}</td>
+      <td><span class="bdg bdg-g">${e.eventType}</span></td>
+      <td style="font-size:11px">${e.assignedStaff.join(', ')}</td>
+    </tr>`).join('')||'<tr><td colspan="4" class="empty">No staff assigned to events yet</td></tr>'}</tbody>
+  </table></div>`;
+}
+function delStaff(i){if(confirm('Remove this staff member?')){DB.staff.splice(i,1);save();render();}}
+function editStaff(i){
+  showAdd('staff');
+  setTimeout(()=>{
+    const s=DB.staff[i];
+    document.getElementById('f-sname').value=s.name||'';
+    document.getElementById('f-srole').value=s.role||STAFF_ROLES[0];
+    document.getElementById('f-sphone').value=s.phone||'';
+    document.getElementById('f-srate').value=s.dailyRate||0;
+    document.getElementById('f-savail').value=s.available===false?'0':'1';
+    document.getElementById('f-snotes').value=s.notes||'';
+    const btn=document.querySelector('#shade .btn.btn-g');
+    if(btn)btn.onclick=()=>{
+      DB.staff[i]={name:document.getElementById('f-sname').value.trim(),role:document.getElementById('f-srole').value,phone:document.getElementById('f-sphone').value,dailyRate:parseFloat(document.getElementById('f-srate').value)||0,available:document.getElementById('f-savail').value==='1',notes:document.getElementById('f-snotes').value};
+      save();closeShade();render();
+    };
+  },150);
+}
+
+/* ─── FINANCE: EXPENSES, P&L, COMMISSIONS ─── */
+const EXPENSE_CATS=['Equipment','Travel','Fuel','Printing','Studio Rent','Software','Marketing','Utilities','Salary','Commission','Other'];
+function renderFinance(){
+  const expTotByCat={};
+  DB.expenses.forEach(e=>{expTotByCat[e.category]=(expTotByCat[e.category]||0)+(parseFloat(e.amount)||0);});
+  const totalExp=DB.expenses.reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+  const now=new Date();
+  // Last 6 months P&L
+  const months6=[];
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months6.push({year:d.getFullYear(),month:d.getMonth()+1,lbl:d.toLocaleString('en-IN',{month:'short'})});}
+  const allOrd=[...DB.walkins,...DB.events];
+  const maxBar=Math.max(1,...months6.map(m=>{
+    const inc=allOrd.filter(o=>{const d=new Date(o.eventDate||o.date);return d.getFullYear()===m.year&&d.getMonth()+1===m.month;}).reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+    const exp=DB.expenses.filter(e=>{if(!e.date)return false;const d=new Date(e.date);return d.getFullYear()===m.year&&d.getMonth()+1===m.month;}).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+    return Math.max(inc,exp);
+  }));
+  const commPending=DB.commissions.filter(c=>!c.paid);
+  return `
+  <div class="shdr"><div><div class="stitle">Finance — Expenses &amp; P&L</div></div><button class="btn btn-g btn-sm" onclick="showAdd('expense')">+ Add Expense</button></div>
+  <div class="fin-stat">
+    <div class="sc"><div class="sc-lbl">Total Expenses</div><div class="sc-val r">${fmtINR(totalExp)}</div></div>
+    <div class="sc"><div class="sc-lbl">Income (All Time)</div><div class="sc-val g">${fmtINR(allOrd.reduce((a,o)=>a+(parseFloat(o.amount)||0),0))}</div></div>
+    <div class="sc"><div class="sc-lbl">Net Profit</div><div class="sc-val ${(allOrd.reduce((a,o)=>a+(parseFloat(o.amount)||0),0)-totalExp)>=0?'gr':'r'}">${fmtINR(allOrd.reduce((a,o)=>a+(parseFloat(o.amount)||0),0)-totalExp)}</div></div>
+    <div class="sc"><div class="sc-lbl">Commission Pending</div><div class="sc-val r">${fmtINR(commPending.reduce((a,c)=>a+(parseFloat(c.amount)||0),0))}</div></div>
+  </div>
+  <div class="shdr"><div><div class="stitle">Monthly Income vs Expenses (6 Months)</div></div></div>
+  <div class="fc" style="padding:14px">
+    <div class="bar-chart-wrap">${months6.map(m=>{
+      const inc=allOrd.filter(o=>{const d=new Date(o.eventDate||o.date);return d.getFullYear()===m.year&&d.getMonth()+1===m.month;}).reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+      const exp=DB.expenses.filter(e=>{if(!e.date)return false;const d=new Date(e.date);return d.getFullYear()===m.year&&d.getMonth()+1===m.month;}).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+      const iH=Math.round((inc/maxBar)*90);const eH=Math.round((exp/maxBar)*90);
+      return`<div class="bar-col">
+        <div style="display:flex;gap:2px;align-items:flex-end;height:90px">
+          <div class="bar-fill" style="height:${iH}px;background:var(--gold-dk);flex:1;border-radius:2px 2px 0 0" title="${fmtINR(inc)}"></div>
+          <div class="bar-fill" style="height:${eH}px;background:var(--red-bg);border:1px solid var(--red-br);flex:1;border-radius:2px 2px 0 0" title="${fmtINR(exp)}"></div>
+        </div>
+        <div class="bar-lbl">${m.lbl}</div>
+      </div>`;
+    }).join('')}</div>
+    <div style="margin-top:8px;font-size:10px;color:var(--txm);display:flex;gap:14px"><span><span style="display:inline-block;width:10px;height:10px;background:var(--gold-dk);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Income</span><span><span style="display:inline-block;width:10px;height:10px;background:var(--red-bg);border:1px solid var(--red-br);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Expenses</span></div>
+  </div>
+  <div class="shdr" style="margin-top:14px"><div><div class="stitle">Expense Log</div></div></div>
+  <div class="tw"><table style="table-layout:auto">
+    <thead><tr><th style="width:90px">Date</th><th>Description</th><th style="width:100px">Category</th><th style="width:80px">Amount</th><th style="width:100px">Vendor</th><th style="width:60px">Actions</th></tr></thead>
+    <tbody>${DB.expenses.length?[...DB.expenses].reverse().map((e,idx)=>{const i=DB.expenses.length-1-idx;return`<tr>
+      <td>${e.date||'—'}</td>
+      <td>${e.desc||'—'}<div style="font-size:10px;color:var(--txm)">${e.notes||''}</div></td>
+      <td><span class="bdg bdg-muted">${e.category||'—'}</span></td>
+      <td class="bal-r">${fmtINR(e.amount)}</td>
+      <td style="font-size:11px;color:var(--txm)">${e.vendor||'—'}</td>
+      <td><button class="btn btn-d btn-sm" onclick="delExpense(${i})">✕</button></td>
+    </tr>`;}).join(''):'<tr><td colspan="6" class="empty">No expenses logged yet</td></tr>'}</tbody>
+  </table></div>
+  <div class="shdr" style="margin-top:14px"><div><div class="stitle">Commission Tracker</div></div></div>
+  <div class="tw"><table style="table-layout:auto">
+    <thead><tr><th>Date</th><th>Event</th><th>Referred By</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>${DB.commissions.length?DB.commissions.map((c,i)=>`<tr>
+      <td>${c.date||'—'}</td>
+      <td>${c.eventName||'—'}</td>
+      <td>${c.refBy||'—'}</td>
+      <td class="amt">${fmtINR(c.amount)}</td>
+      <td>${c.paid?'<span class="bdg bdg-grn">Paid</span>':'<span class="bdg bdg-amb">Pending</span>'}</td>
+      <td style="display:flex;gap:4px">${!c.paid?`<button class="btn btn-o btn-sm" onclick="DB.commissions[${i}].paid=true;save();render()" style="border-color:var(--grn-br);color:var(--grn)">Mark Paid</button>`:''}
+      <button class="btn btn-d btn-sm" onclick="if(confirm('Delete?')){DB.commissions.splice(${i},1);save();render();}">✕</button></td>
+    </tr>`).join(''):'<tr><td colspan="6" class="empty">No commissions tracked</td></tr>'}</tbody>
+  </table></div>`;
+}
+function delExpense(i){if(confirm('Delete this expense?')){DB.expenses.splice(i,1);save();render();}}
+
+/* ─── EQUIPMENT TRACKER ─── */
+const EQUIP_TYPES=['Camera Body','Lens','Drone','Tripod','Lighting','Memory Card','Stabilizer','Microphone','Hard Drive','Other'];
+function renderEquipment(){
+  const overdueService=DB.equipment.filter(e=>e.nextService&&daysFrom(e.nextService)!==null&&daysFrom(e.nextService)<=0);
+  const dueSoon=DB.equipment.filter(e=>e.nextService&&daysFrom(e.nextService)!==null&&daysFrom(e.nextService)>0&&daysFrom(e.nextService)<=30);
+  return `
+  <div class="shdr"><div><div class="stitle">Equipment &amp; Gear Tracker</div><div class="ssub">${DB.equipment.length} items · ${overdueService.length} service overdue · ${dueSoon.length} due soon</div></div><button class="btn btn-g btn-sm" onclick="showAdd('equipment')">+ Add Equipment</button></div>
+  ${overdueService.length?`<div class="conflict-warn">⚠️ Service overdue for: ${overdueService.map(e=>e.name).join(', ')}</div>`:''}
+  ${DB.equipment.length?`<div class="eq-grid">${DB.equipment.map((e,i)=>{
+    const sd=daysFrom(e.nextService);
+    let svcClass='',svcLbl='';
+    if(e.nextService){if(sd<=0){svcClass='color:var(--red)';svcLbl='Overdue!';}else if(sd<=30){svcClass='color:var(--amb)';svcLbl='Due in '+sd+'d';}else{svcClass='color:var(--grn)';svcLbl='Due '+e.nextService;}}
+    return`<div class="eq-card">
+      <div class="eq-name">${e.name}</div>
+      <div class="eq-type"><span class="bdg bdg-muted">${e.type||'—'}</span>${e.model?' · <span style="font-size:10px;color:var(--txm)">'+e.model+'</span>':''}</div>
+      ${e.serial?`<div style="font-size:10px;color:var(--txm);margin-top:3px">S/N: ${e.serial}</div>`:''}
+      ${e.purchaseDate?`<div style="font-size:10px;color:var(--txm);margin-top:2px">Purchased: ${e.purchaseDate}</div>`:''}
+      ${e.nextService?`<div class="eq-service" style="${svcClass}">🔧 Service: ${svcLbl}</div>`:''}
+      ${e.assignedTo?`<div style="font-size:10px;color:var(--txm);margin-top:3px">Assigned: ${e.assignedTo}</div>`:''}
+      ${e.notes?`<div style="font-size:10px;color:var(--txm);margin-top:3px">${e.notes}</div>`:''}
+      <div style="display:flex;gap:4px;margin-top:8px">
+        <button class="btn btn-o btn-sm" onclick="editEquipment(${i})">Edit</button>
+        <button class="btn btn-d btn-sm" onclick="delEquipment(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`:'<div class="empty">No equipment registered. Add cameras, lenses, drones, and other gear.</div>'}`;
+}
+function delEquipment(i){if(confirm('Remove this equipment?')){DB.equipment.splice(i,1);save();render();}}
+function editEquipment(i){
+  showAdd('equipment');
+  setTimeout(()=>{
+    const e=DB.equipment[i];
+    document.getElementById('f-ename').value=e.name||'';
+    document.getElementById('f-etype2').value=e.type||EQUIP_TYPES[0];
+    document.getElementById('f-emodel').value=e.model||'';
+    document.getElementById('f-eserial').value=e.serial||'';
+    document.getElementById('f-epurchase').value=e.purchaseDate||'';
+    document.getElementById('f-eservice').value=e.nextService||'';
+    document.getElementById('f-eassigned').value=e.assignedTo||'';
+    document.getElementById('f-enotes').value=e.notes||'';
+    const btn=document.querySelector('#shade .btn.btn-g');
+    if(btn)btn.onclick=()=>saveEquipmentEdit(i);
+  },150);
+}
+function saveEquipmentEdit(i){
+  DB.equipment[i]={name:document.getElementById('f-ename').value.trim(),type:document.getElementById('f-etype2').value,model:document.getElementById('f-emodel').value,serial:document.getElementById('f-eserial').value,purchaseDate:document.getElementById('f-epurchase').value,nextService:document.getElementById('f-eservice').value,assignedTo:document.getElementById('f-eassigned').value,notes:document.getElementById('f-enotes').value};
+  save();closeShade();render();
+}
+
+/* ─── EDIT WALK-IN ─── */
+function editWi(i){
+  const o=DB.walkins[i];if(!o)return;
+  showAdd('walkin');
+  setTimeout(()=>{
+    document.getElementById('f-date').value=o.date||'';
+    document.getElementById('f-name').value=o.name||'';
+    document.getElementById('f-phone').value=o.phone||'';
+    document.getElementById('f-svc').value=o.service||WALKIN_SVC[0];
+    document.getElementById('f-status').value=o.status||'New Order';
+    document.getElementById('f-del').value=o.deliveryDate||'';
+    document.getElementById('f-amt').value=o.amount||0;
+    document.getElementById('f-adv').value=o.advance||0;
+    document.getElementById('f-bal').value=o.balance||0;
+    document.getElementById('f-pay').value=o.payMode||'Cash';
+    document.getElementById('f-deltime').value=o.deliveryTime||'';
+    document.getElementById('f-urg').value=o.urgent?'Yes':'No';
+    document.getElementById('f-notes').value=o.notes||'';
+    if(document.getElementById('f-gallery'))document.getElementById('f-gallery').value=o.galleryLink||'';
+    if(document.getElementById('f-watermark'))document.getElementById('f-watermark').value=o.watermarkSent?'1':'0';
+    if(document.getElementById('f-finaldel'))document.getElementById('f-finaldel').value=o.finalDelivered?'1':'0';
+    const title=document.querySelector('#shade .mtitle');
+    if(title)title.firstChild.textContent='Edit Walk-in Order ';
+    const btn=document.querySelector('#shade .btn.btn-g');
+    if(btn)btn.onclick=()=>{
+      const name=document.getElementById('f-name').value.trim();
+      if(!name){alert('Customer name required');return;}
+      const amt=parseFloat(document.getElementById('f-amt').value)||0;
+      const adv=parseFloat(document.getElementById('f-adv').value)||0;
+      DB.walkins[i]={...DB.walkins[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,service:document.getElementById('f-svc').value,status:document.getElementById('f-status').value,amount:amt,advance:adv,balance:Math.max(0,amt-adv),payMode:document.getElementById('f-pay').value,urgent:document.getElementById('f-urg').value==='Yes',deliveryDate:document.getElementById('f-del').value,deliveryTime:document.getElementById('f-deltime').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||'',watermarkSent:document.getElementById('f-watermark')?.value==='1',finalDelivered:document.getElementById('f-finaldel')?.value==='1'};
+      save();closeShade();render();
+    };
+  },150);
+}
+
+/* ─── EDIT EVENT ─── */
+function editEv(i){
+  const o=DB.events[i];if(!o)return;
+  showAdd('event');
+  setTimeout(()=>{
+    document.getElementById('f-date').value=o.date||'';
+    document.getElementById('f-name').value=o.name||'';
+    document.getElementById('f-phone').value=o.phone||'';
+    document.getElementById('f-etype').value=o.eventType||BIG_SVC[0];
+    document.getElementById('f-guests').value=o.guests||0;
+    document.getElementById('f-status').value=o.status||'New Order';
+    document.getElementById('f-edate').value=o.eventDate||'';
+    document.getElementById('f-venue').value=o.venue||'';
+    document.getElementById('f-amt').value=o.amount||0;
+    document.getElementById('f-adv').value=o.advance||0;
+    document.getElementById('f-bal').value=o.balance||0;
+    document.getElementById('f-pay').value=o.payMode||'Cash';
+    document.getElementById('f-terms').value=o.terms||'';
+    document.getElementById('f-notes').value=o.notes||'';
+    if(document.getElementById('f-gallery'))document.getElementById('f-gallery').value=o.galleryLink||'';
+    [['pt','f-pt'],['pc','f-pc'],['vt','f-vt'],['vc','f-vc'],['ph','f-ph'],['vh','f-vh'],['vv','f-vv'],['v3','f-v3'],['dr','f-dr'],['ac','f-ac']].forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.value=o[k]||0;});
+    // Extra date-venue pairs
+    if(o.extraDates&&o.extraDates.length){
+      o.extraDates.forEach((d,j)=>{
+        addDateVenueRow();
+        setTimeout(()=>{
+          const pairs=document.querySelectorAll('.extra-dv-pair');
+          const lastPair=pairs[pairs.length-1];
+          if(lastPair){lastPair.querySelector('.extra-date').value=d||'';lastPair.querySelector('.extra-venue').value=(o.extraVenues&&o.extraVenues[j])||'';}
+        },50);
+      });
+    }
+    const title=document.querySelector('#shade .mtitle');
+    if(title)title.firstChild.textContent='Edit Event Booking ';
+    const btn=document.querySelector('#shade .btn.btn-g');
+    if(btn)btn.onclick=()=>{
+      const name=document.getElementById('f-name').value.trim();
+      if(!name){alert('Customer name required');return;}
+      const amt=parseFloat(document.getElementById('f-amt').value)||0;
+      const adv=parseFloat(document.getElementById('f-adv').value)||0;
+      const crew={pt:+document.getElementById('f-pt').value,pc:+document.getElementById('f-pc').value,vt:+document.getElementById('f-vt').value,vc:+document.getElementById('f-vc').value,ph:+document.getElementById('f-ph').value,vh:+document.getElementById('f-vh').value,vv:+document.getElementById('f-vv').value,v3:+document.getElementById('f-v3').value,dr:+document.getElementById('f-dr').value,ac:+document.getElementById('f-ac').value};
+      const extraPairs=[...document.querySelectorAll('.extra-dv-pair')].map(el=>({date:el.querySelector('.extra-date')?.value||'',venue:el.querySelector('.extra-venue')?.value||''})).filter(p=>p.date||p.venue);
+      DB.events[i]={...DB.events[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,eventType:document.getElementById('f-etype').value,eventDate:document.getElementById('f-edate').value,extraDates:extraPairs.map(p=>p.date),venue:document.getElementById('f-venue').value,extraVenues:extraPairs.map(p=>p.venue),guests:parseInt(document.getElementById('f-guests').value)||0,...crew,amount:amt,advance:adv,balance:Math.max(0,amt-adv),status:document.getElementById('f-status').value,payMode:document.getElementById('f-pay').value,terms:document.getElementById('f-terms').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||''};
+      save();closeShade();render();
+    };
+  },150);
+}
+
+/* ─── PAYMENT INSTALLMENTS MODAL ─── */
+function showInstallments(evIdx){
+  const o=DB.events[evIdx];if(!o)return;
+  const shade=document.createElement('div');shade.className='shade';shade.id='shade';
+  shade.style='position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;overflow-y:auto;padding:20px';
+  const totalPaid=(o.installments||[]).reduce((a,p)=>a+(parseFloat(p.amount)||0),0);
+  const remaining=(parseFloat(o.amount)||0)-totalPaid;
+  shade.innerHTML=`<div class="modal" style="max-width:520px">
+    <div class="mtitle">Payment Tracker — ${o.name} <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div style="display:flex;gap:14px;margin-bottom:12px;font-size:12px">
+      <span>Total: <b class="amt">${fmtINR(o.amount)}</b></span>
+      <span>Paid: <b style="color:var(--grn)">${fmtINR(totalPaid)}</b></span>
+      <span>Remaining: <b class="${remaining>0?'bal-r':'bal-g'}">${fmtINR(Math.max(0,remaining))}</b></span>
+    </div>
+    <div id="inst-list">${renderInstList(o.installments||[])}</div>
+    <hr class="divider">
+    <div class="csub">Add Payment</div>
+    <div class="fg fg-3">
+      <div class="ff"><label>Date</label><input type="date" id="inst-date" value="${today()}"></div>
+      <div class="ff"><label>Amount (₹)</label><input type="number" id="inst-amt" placeholder="0"></div>
+      <div class="ff"><label>Mode</label><select id="inst-mode">${PAY_MODES.map(p=>`<option>${p}</option>`).join('')}</select></div>
+    </div>
+    <div class="ff mt8"><label>Note</label><input type="text" id="inst-note" placeholder="e.g. 2nd installment"></div>
+    <div class="btn-row">
+      <button class="btn btn-o" onclick="closeShade()">Close</button>
+      <button class="btn btn-g" onclick="addInstallment(${evIdx})">Add Payment</button>
+    </div>
+  </div>`;
+  document.body.appendChild(shade);
+}
+function renderInstList(insts){
+  if(!insts.length)return'<div class="empty" style="padding:10px">No payments recorded</div>';
+  return insts.map((p,i)=>`<div class="inst-row"><span style="flex:1"><b>${p.date||'—'}</b> · ${p.note||'Payment'}</span><span class="bdg bdg-muted">${p.mode||'—'}</span><span class="amt" style="margin-left:8px">${fmtINR(p.amount)}</span></div>`).join('');
+}
+function addInstallment(evIdx){
+  const o=DB.events[evIdx];if(!o)return;
+  const amt=parseFloat(document.getElementById('inst-amt').value)||0;
+  if(!amt){alert('Amount required');return;}
+  if(!o.installments)o.installments=[];
+  o.installments.push({date:document.getElementById('inst-date').value,amount:amt,mode:document.getElementById('inst-mode').value,note:document.getElementById('inst-note').value});
+  const totalPaid=o.installments.reduce((a,p)=>a+(parseFloat(p.amount)||0),0);
+  o.advance=Math.min(totalPaid,parseFloat(o.amount)||0);
+  o.balance=Math.max(0,(parseFloat(o.amount)||0)-totalPaid);
+  save();
+  document.getElementById('inst-list').innerHTML=renderInstList(o.installments);
+  const totalPd=(o.installments).reduce((a,p)=>a+(parseFloat(p.amount)||0),0);
+  document.querySelector('#shade .modal>div:first-of-type+div').innerHTML=`<span>Total: <b class="amt">${fmtINR(o.amount)}</b></span>&nbsp;&nbsp;<span>Paid: <b style="color:var(--grn)">${fmtINR(totalPd)}</b></span>&nbsp;&nbsp;<span>Remaining: <b class="${(parseFloat(o.amount)-totalPd)>0?'bal-r':'bal-g'}">${fmtINR(Math.max(0,parseFloat(o.amount)-totalPd))}</b></span>`;
+  document.getElementById('inst-amt').value='';
+  document.getElementById('inst-note').value='';
+}
+
+/* ─── INVOICE / QUOTATION GENERATOR ─── */
+function showQuotation(type,idx){
+  const o=type==='walkin'?DB.walkins[idx]:DB.events[idx];if(!o)return;
+  const g=DB.gstConfig;
+  const taxRate=parseFloat(g.taxRate)||18;
+  const subtotal=parseFloat(o.amount)||0;
+  const taxAmt=Math.round(subtotal*taxRate/100);
+  const total=subtotal+taxAmt;
+  const rNo=type==='walkin'?'TW-INV-'+String(idx+1).padStart(4,'0'):'TW-EV-INV-'+String(idx+1).padStart(4,'0');
+  const validTill=new Date();validTill.setDate(validTill.getDate()+15);
+  const validStr=validTill.toISOString().split('T')[0];
+  const win=window.open('','_blank','width=520,height=800');
+  win.document.write('<!DOCTYPE html><html><head><title>Invoice '+rNo+'</title><style>'+
+    '*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px;font-size:12px;color:#111}'+
+    '.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #C9A84C;padding-bottom:14px;margin-bottom:14px}'+
+    '.brand{font-family:Georgia,serif;font-size:20px;font-weight:700;color:#8B6914;letter-spacing:1px}'+
+    '.brand-sub{font-size:10px;color:#777;margin-top:2px}'+
+    '.inv-tag{text-align:right}.inv-tag h2{font-size:16px;font-weight:700;letter-spacing:3px;color:#C9A84C}'+
+    '.inv-tag p{font-size:10px;color:#777;margin-top:2px}'+
+    '.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}'+
+    '.sec-lbl{font-size:9px;font-weight:700;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:6px}'+
+    '.bill-name{font-size:14px;font-weight:700;margin-bottom:3px}'+
+    '.bill-detail{font-size:11px;color:#555;margin-bottom:2px}'+
+    'table{width:100%;border-collapse:collapse;margin:14px 0}'+
+    'th{background:#F5F0E8;padding:7px 10px;text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#777;border-bottom:2px solid #C9A84C}'+
+    'td{padding:8px 10px;border-bottom:1px solid #eee;font-size:12px;vertical-align:top}'+
+    '.tot-box{background:#F5F0E8;border-radius:6px;padding:12px 14px;max-width:240px;margin-left:auto}'+
+    '.tot-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}'+
+    '.tot-row.final{font-size:14px;font-weight:700;border-top:2px solid #C9A84C;margin-top:6px;padding-top:8px}'+
+    '.validity{background:#FFF8E8;border:1px solid #E8CC80;border-radius:5px;padding:8px 12px;font-size:11px;color:#8B6914;margin-top:12px}'+
+    '.footer{text-align:center;margin-top:18px;font-size:10px;color:#777;border-top:1px solid #ddd;padding-top:10px;line-height:1.7}'+
+    '.gstin-box{background:#f9f9f9;border:1px solid #ddd;border-radius:4px;padding:6px 10px;font-size:10px;color:#555;margin-bottom:14px}'+
+    '.np{text-align:center;margin-top:14px}@media print{.np{display:none}}'+
+  '</style></head><body>'+
+  '<div class="hdr">'+
+    '<div><div class="brand">Tathastu Weddings</div><div class="brand-sub">Photography &amp; Videography Studio</div>'+(g.address?'<div style="font-size:10px;color:#777;margin-top:2px">'+g.address+'</div>':'')+'</div>'+
+    '<div class="inv-tag"><h2>INVOICE</h2><p>No: '+rNo+'</p><p>Date: '+today()+'</p></div>'+
+  '</div>'+
+  (g.gstin?'<div class="gstin-box">GSTIN: <b>'+g.gstin+'</b> &nbsp;·&nbsp; HSN/SAC: <b>'+g.hsnCode+'</b></div>':'')+
+  '<div class="two-col">'+
+    '<div><div class="sec-lbl">Bill To</div><div class="bill-name">'+o.name+'</div>'+(o.phone?'<div class="bill-detail">📞 '+o.phone+'</div>':'')+
+    (type==='event'&&o.venue?'<div class="bill-detail">📍 '+o.venue+'</div>':'')+'</div>'+
+    '<div><div class="sec-lbl">Details</div>'+
+    (type==='event'?'<div class="bill-detail">Event: '+o.eventType+'</div><div class="bill-detail">Date: '+(o.eventDate||'TBD')+'</div>':'<div class="bill-detail">Service: '+o.service+'</div>'+(o.deliveryDate?'<div class="bill-detail">Delivery: '+o.deliveryDate+'</div>':''))+'</div>'+
+  '</div>'+
+  '<table><thead><tr><th style="width:50%">Description</th><th>HSN/SAC</th><th>Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>'+
+    '<tr><td>'+(type==='event'?o.eventType+' Photography &amp; Videography Package':'Professional Photography — '+o.service)+'<br><small style="color:#777">'+(o.notes||'As per discussion')+'</small></td>'+
+    '<td>'+g.hsnCode+'</td><td>1</td><td style="text-align:right">&#8377;'+subtotal.toLocaleString('en-IN')+'</td></tr>'+
+  '</tbody></table>'+
+  '<div class="tot-box">'+
+    '<div class="tot-row"><span>Subtotal</span><span>&#8377;'+subtotal.toLocaleString('en-IN')+'</span></div>'+
+    (g.gstin?'<div class="tot-row"><span>CGST @'+(taxRate/2)+'%</span><span>&#8377;'+(taxAmt/2).toLocaleString('en-IN')+'</span></div><div class="tot-row"><span>SGST @'+(taxRate/2)+'%</span><span>&#8377;'+(taxAmt/2).toLocaleString('en-IN')+'</span></div>':'<div class="tot-row" style="font-size:10px;color:#888"><span>GST not applicable</span><span>—</span></div>')+
+    '<div class="tot-row final"><span>TOTAL</span><span>&#8377;'+(g.gstin?total:subtotal).toLocaleString('en-IN')+'</span></div>'+
+    '<div class="tot-row" style="color:#080"><span>Advance Paid</span><span>&#8377;'+(parseFloat(o.advance)||0).toLocaleString('en-IN')+'</span></div>'+
+    '<div class="tot-row" style="color:#c00;font-weight:700"><span>Balance Due</span><span>&#8377;'+Math.max(0,(parseFloat(o.balance)||0)+(g.gstin?taxAmt:0)).toLocaleString('en-IN')+'</span></div>'+
+  '</div>'+
+  '<div class="validity">📅 This quotation is valid until <b>'+validStr+'</b>. Contact us to confirm your booking.</div>'+
+  (o.terms?'<div style="margin-top:10px;font-size:10px;color:#777;border:1px dashed #ddd;padding:8px;border-radius:4px">Terms: '+o.terms+'</div>':'')+
+  '<div class="footer"><b>Thank you for choosing Tathastu Weddings!</b><br>We look forward to capturing your precious moments. ✨<br>'+(g.businessName||'Tathastu Weddings')+' | Wedding &amp; Portrait Photography</div>'+
+  '<div class="np"><button onclick="window.print()" style="background:#C9A84C;color:#180F00;border:none;padding:9px 24px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700;margin-top:4px">🖶 Print / Save as PDF</button></div>'+
+  '</body></html>');
+  win.document.close();
+}
+
+/* ─── CUSTOMER NOTES / TIMELINE ─── */
+function showCustDetail(i){
+  const c=DB.customers[i];if(!c)return;
+  const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone&&c.phone&&o.phone.replace(/\D/g,'')===c.phone.replace(/\D/g,''));
+  const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+  const shade=document.createElement('div');shade.className='shade';shade.id='shade';
+  shade.style='position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;overflow-y:auto;padding:20px';
+  shade.innerHTML=`<div class="modal" style="max-width:560px">
+    <div class="mtitle">${c.name} — Profile <button class="mclose" onclick="closeShade()">✕</button></div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;font-size:12px">
+      <span>${custLoyaltyTier(spent)} · ${fmtINR(spent)} total spent</span>
+      ${c.phone?`<span>${waLink(c.phone)}</span>`:''}
+      ${c.birthday?`<span>🎂 ${c.birthday}</span>`:''}
+      ${c.anniversary?`<span>💑 ${c.anniversary}</span>`:''}
+      ${c.email?`<span>✉ ${c.email}</span>`:''}
+    </div>
+    ${c.notes?`<div style="background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px">${c.notes}</div>`:''}
+    ${DB.googleReviewLink?`<div style="margin-bottom:10px"><a href="${DB.googleReviewLink}" target="_blank" class="btn btn-o btn-sm" style="text-decoration:none;display:inline-block">⭐ Open Google Review Page</a> ${c.reviewDone?'<span class="bdg bdg-grn">✓ Review Done</span>':'<button class="btn btn-o btn-sm" onclick="DB.customers[${i}].reviewDone=true;save();closeShade();render()">Mark Review Done</button>'}</div>`:''}
+    <div class="shdr" style="margin-top:0"><div><div class="stitle" style="font-size:14px">Order History</div></div></div>
+    <div style="font-size:12px">${cOrders.length?cOrders.map(o=>`<div style="padding:5px 0;border-bottom:1px solid var(--br)"><b>${o.eventDate||o.deliveryDate||o.date||'—'}</b> · ${o.service||o.eventType||'—'} · ${fmtINR(o.amount)} ${parseFloat(o.balance)>0?'<span class="bal-r">(bal: '+fmtINR(o.balance)+')</span>':'<span class="bal-g">✓ Paid</span>'}</div>`).join(''):'<div class="empty">No orders yet</div>'}</div>
+    <div class="csub">Add Timeline Note</div>
+    <div class="fg fg-2">
+      <div class="ff"><label>Date</label><input type="date" id="tl-date" value="${today()}"></div>
+      <div class="ff"><label>Note</label><input type="text" id="tl-note" placeholder="Call, meeting, complaint, etc."></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-o btn-sm" onclick="addCustNote(${i})">Add Note</button></div>
+    <div id="tl-list" style="margin-top:10px">${renderCustTimeline(c.timeline||[])}</div>
+    <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Close</button></div>
+  </div>`;
+  document.body.appendChild(shade);
+}
+function renderCustTimeline(tl){
+  if(!tl||!tl.length)return'<div style="font-size:11px;color:var(--txm)">No notes yet</div>';
+  return`<div>${[...tl].reverse().map(t=>`<div class="tl-item"><div class="tl-dot"></div><div class="tl-text">${t.note}</div><div class="tl-date">${t.date||''}</div></div>`).join('')}</div>`;
+}
+function addCustNote(i){
+  const note=document.getElementById('tl-note').value.trim();if(!note)return;
+  if(!DB.customers[i].timeline)DB.customers[i].timeline=[];
+  DB.customers[i].timeline.push({date:document.getElementById('tl-date').value,note});
+  save();
+  document.getElementById('tl-list').innerHTML=renderCustTimeline(DB.customers[i].timeline);
+  document.getElementById('tl-note').value='';
 }
 
 function attachEvents(){}
