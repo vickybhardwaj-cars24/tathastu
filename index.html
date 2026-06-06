@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tathastu Weddings — Studio Management</title>
+  <link rel="icon" type="image/png" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
@@ -26,7 +27,26 @@ const WORKER_URL = 'https://tathastu.vicky-bhardwaj.workers.dev';
   --blu:#60A8E0;--blu-bg:rgba(96,168,224,.1);--blu-br:rgba(96,168,224,.25);
   --r:8px;
 }
-body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-size:13.5px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+body.light{
+  --gold:#A07820;--gold-lt:#7A5C10;--gold-dk:#C9A84C;
+  --ink:#F5F0E8;--s1:#FFFFFF;--s2:#F0EBE0;--s3:#E8E0D0;
+  --br:#D8CEB8;--tx:#1A1208;--txm:#6B5C3E;
+  --red:#C84040;--red-bg:rgba(200,64,64,.08);--red-br:rgba(200,64,64,.25);
+  --grn:#2A9448;--grn-bg:rgba(42,148,72,.08);--grn-br:rgba(42,148,72,.25);
+  --amb:#B87010;--amb-bg:rgba(184,112,16,.08);--amb-br:rgba(184,112,16,.25);
+  --blu:#2870B0;--blu-bg:rgba(40,112,176,.08);--blu-br:rgba(40,112,176,.25);
+}
+body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-size:13.5px;line-height:1.5;min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
+/* light mode overrides */
+body.light .login-box,body.light .modal{box-shadow:0 8px 40px rgba(0,0,0,.12)}
+body.light .ff input,body.light .ff select,body.light .ff textarea,body.light .sinp,body.light .fsel,body.light .ci input{background:var(--s1);color:var(--tx)}
+body.light .ff select option,body.light .fsel option{background:var(--s1);color:var(--tx)}
+body.light .ac-drop{background:var(--s1)}
+body.light .btn-o{color:var(--txm)}
+body.light #cust-found-chip{background:rgba(42,148,72,.08)}
+/* theme toggle button */
+.btn-theme{background:transparent;border:1px solid var(--br);border-radius:var(--r);color:var(--txm);cursor:pointer;font-size:14px;padding:5px 10px;line-height:1;transition:border-color .15s,color .15s}
+.btn-theme:hover{border-color:var(--gold);color:var(--gold)}
 .hdr{display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--br);background:var(--s1)}
 .logo-ring{width:54px;height:54px;border-radius:50%;border:2px solid var(--gold);background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
 .logo-ring svg{width:44px;height:44px}
@@ -298,6 +318,7 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
   <div class="hdr-right">
     <div class="date-chip">Today <b id="hdr-date"></b></div>
     <div id="sync-status"><span class="sync-dot ok" id="sync-dot"></span><span id="sync-txt">Synced</span></div>
+    <button class="btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
     <button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button>
     <button class="btn btn-g btn-sm" onclick="showAdd('walkin')">+ Walk-in</button>
     <button class="btn btn-g btn-sm" onclick="showAdd('event')">+ Event</button>
@@ -1515,6 +1536,17 @@ function updateCost(i,field,val){
 
 function attachEvents(){}
 
+/* ─── THEME ─── */
+function toggleTheme(){
+  const isLight=document.body.classList.toggle('light');
+  localStorage.setItem('tw_theme',isLight?'light':'dark');
+  document.getElementById('theme-btn').textContent=isLight?'☀️':'🌙';
+}
+function applyTheme(){
+  const saved=localStorage.getItem('tw_theme');
+  if(saved==='light'){document.body.classList.add('light');const b=document.getElementById('theme-btn');if(b)b.textContent='☀️';}
+}
+
 /* ─── BACKFILL CUSTOMER PROFILES FROM ALL ORDERS ─── */
 function backfillCustomers(){
   let added=0;
@@ -1722,6 +1754,7 @@ function printEventReceipt(idx){
 
 /* ── Startup ── */
 (function init(){
+  applyTheme();
   document.getElementById('hdr-date').textContent=
     new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   if(!workerAvailable()){
