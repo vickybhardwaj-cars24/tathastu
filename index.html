@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tathastu Weddings — Studio Management</title>
+  <link rel="icon" type="image/png" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
@@ -26,7 +27,26 @@ const WORKER_URL = 'https://tathastu.vicky-bhardwaj.workers.dev';
   --blu:#60A8E0;--blu-bg:rgba(96,168,224,.1);--blu-br:rgba(96,168,224,.25);
   --r:8px;
 }
-body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-size:13.5px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+body.light{
+  --gold:#A07820;--gold-lt:#7A5C10;--gold-dk:#C9A84C;
+  --ink:#F5F0E8;--s1:#FFFFFF;--s2:#F0EBE0;--s3:#E8E0D0;
+  --br:#D8CEB8;--tx:#1A1208;--txm:#6B5C3E;
+  --red:#C84040;--red-bg:rgba(200,64,64,.08);--red-br:rgba(200,64,64,.25);
+  --grn:#2A9448;--grn-bg:rgba(42,148,72,.08);--grn-br:rgba(42,148,72,.25);
+  --amb:#B87010;--amb-bg:rgba(184,112,16,.08);--amb-br:rgba(184,112,16,.25);
+  --blu:#2870B0;--blu-bg:rgba(40,112,176,.08);--blu-br:rgba(40,112,176,.25);
+}
+body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-size:13.5px;line-height:1.5;min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
+/* light mode overrides */
+body.light .login-box,body.light .modal{box-shadow:0 8px 40px rgba(0,0,0,.12)}
+body.light .ff input,body.light .ff select,body.light .ff textarea,body.light .sinp,body.light .fsel,body.light .ci input{background:var(--s1);color:var(--tx)}
+body.light .ff select option,body.light .fsel option{background:var(--s1);color:var(--tx)}
+body.light .ac-drop{background:var(--s1)}
+body.light .btn-o{color:var(--txm)}
+body.light #cust-found-chip{background:rgba(42,148,72,.08)}
+/* theme toggle button */
+.btn-theme{background:transparent;border:1px solid var(--br);border-radius:var(--r);color:var(--txm);cursor:pointer;font-size:14px;padding:5px 10px;line-height:1;transition:border-color .15s,color .15s}
+.btn-theme:hover{border-color:var(--gold);color:var(--gold)}
 .hdr{display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--br);background:var(--s1)}
 .logo-ring{width:54px;height:54px;border-radius:50%;border:2px solid var(--gold);background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
 .logo-ring svg{width:44px;height:44px}
@@ -227,6 +247,25 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
 .ps-val{font-size:15px;font-weight:600;font-family:'Cormorant Garamond',serif;color:var(--gold)}
 /* ADMIN TAB */
 #tab-admin{font-size:16px;opacity:0.5}
+/* URGENT TOGGLE */
+.btn-urg{background:rgba(224,112,112,.15);border:1px solid var(--red-br);color:var(--red);font-size:10px;padding:3px 7px;border-radius:4px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap}
+.btn-urg.off{background:rgba(96,168,224,.10);border-color:rgba(96,168,224,.25);color:var(--blu)}
+/* LINKED DATE-VENUE */
+.dv-pair{background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:8px 10px;margin-top:6px}
+.dv-pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+/* AUTOCOMPLETE */
+.ac-wrap{position:relative}
+.ac-drop{position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--gold);border-radius:6px;z-index:500;max-height:160px;overflow-y:auto;margin-top:2px}
+.ac-item{padding:7px 10px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--br)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover{background:var(--s3);color:var(--gold)}
+/* CUSTOMER FOUND CHIP */
+#cust-found-chip{background:var(--grn-bg);border:1px solid var(--grn-br);border-radius:6px;padding:6px 12px;font-size:11px;gap:8px;align-items:center;margin-top:6px;display:none;flex-wrap:wrap}
+/* MSG TEMPLATE MODAL */
+.msg-tmpl{background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:10px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.msg-tmpl:hover{border-color:var(--gold)}
+.msg-tmpl-title{font-size:11px;font-weight:500;color:var(--gold);margin-bottom:4px}
+.msg-tmpl-body{font-size:11px;color:var(--txm);line-height:1.5}
 </style>
 
 <!-- LOGIN OVERLAY -->
@@ -279,6 +318,7 @@ body{background:var(--ink);color:var(--tx);font-family:'Outfit',sans-serif;font-
   <div class="hdr-right">
     <div class="date-chip">Today <b id="hdr-date"></b></div>
     <div id="sync-status"><span class="sync-dot ok" id="sync-dot"></span><span id="sync-txt">Synced</span></div>
+    <button class="btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
     <button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button>
     <button class="btn btn-g btn-sm" onclick="showAdd('walkin')">+ Walk-in</button>
     <button class="btn btn-g btn-sm" onclick="showAdd('event')">+ Event</button>
@@ -463,6 +503,7 @@ async function loadFromWorker(){
     DB.pricing     = data.pricing     || getDefaultPricing();
     DB.customers   = data.customers   || [];
     DB.priceConfig = data.priceConfig || {mrpMultiplier:2.5,customerMultiplier:2.0};
+    backfillCustomers();
     localStorage.setItem('tw_db',JSON.stringify(DB));
     setSyncStatus('ok');
     render();
@@ -481,6 +522,7 @@ function loadFromCache(){
       DB.priceConfig = d.priceConfig || {mrpMultiplier:2.5,customerMultiplier:2.0};
     }catch{}
   }
+  backfillCustomers();
   setSyncStatus('err');
   render();
 }
@@ -588,76 +630,105 @@ function renderDash(){
 }
 
 /* ─── WALK-INS ─── */
-function renderWalkins(){
+const WI_TABLE_HDR=`<thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:36px">WA</th><th style="width:148px">Actions</th></tr></thead>`;
+const WA_SVG14=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
+function wiRows(list){
+  return list.length?list.map(o=>{
+    const ri=DB.walkins.indexOf(o);
+    const nm=o.name.replace(/'/g,"\\'");
+    return`<tr>
+      <td>${o.date||'—'}</td>
+      <td><b style="font-size:12px">${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
+      <td><span class="bdg bdg-muted">${o.service||'—'}</span></td>
+      <td class="amt">${fmtINR(o.amount)}</td>
+      <td class="amt">${fmtINR(o.advance)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
+      <td>${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${nm}','walkin','${o.service||''}','${o.deliveryDate||''}')" title="WhatsApp">${WA_SVG14}</button>`:'—'}</td>
+      <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap"><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button><button class="btn-urg btn-sm ${o.urgent?'':'off'}" onclick="toggleUrgent(${ri})">${o.urgent?'🔴 Urgent':'⚪ Normal'}</button><button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="10" class="empty">No orders found</td></tr>';
+}
+function getWiList(){
   const q=(window._wq||'').toLowerCase();
   const sf=window._wf||'';
   let list=[...DB.walkins].reverse();
   if(q) list=list.filter(o=>(o.name||'').toLowerCase().includes(q)||(o.phone||'').includes(q)||(o.service||'').toLowerCase().includes(q));
   if(sf) list=list.filter(o=>o.service===sf);
+  return list;
+}
+function renderWalkinsOnly(){
+  const wrap=document.getElementById('wi-table-wrap');
+  if(!wrap){render();return;}
+  wrap.innerHTML=`<div class="tw"><table>${WI_TABLE_HDR}<tbody>${wiRows(getWiList())}</tbody></table></div>`;
+  setTimeout(()=>{const inp=document.getElementById('wi-search');if(inp){const p=inp.value.length;inp.focus();try{inp.setSelectionRange(p,p);}catch(e){}}},0);
+}
+function renderWalkins(){
+  const sf=window._wf||'';
   return `
   <div class="shdr"><div><div class="stitle">Walk-in Orders</div></div><button class="btn btn-g btn-sm" onclick="showAdd('walkin')">+ Add Order</button></div>
   <div class="srow">
-    <input class="sinp" placeholder="Search name, phone, service…" value="${window._wq||''}" oninput="window._wq=this.value;render()">
+    <input class="sinp" id="wi-search" placeholder="Search name, phone, service…" value="${window._wq||''}" oninput="window._wq=this.value;renderWalkinsOnly()">
     <select class="fsel" onchange="window._wf=this.value;render()">
       <option value="">All Services</option>
       ${WALKIN_SVC.map(s=>`<option ${sf===s?'selected':''}>${s}</option>`).join('')}
     </select>
   </div>
-  <div class="tw"><table>
-    <thead><tr><th style="width:76px">Date</th><th style="width:115px">Customer</th><th style="width:96px">Service</th><th style="width:60px">Amount</th><th style="width:60px">Advance</th><th style="width:60px">Balance</th><th style="width:70px">Status</th><th style="width:76px">Delivery</th><th style="width:36px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></th><th style="width:78px">Actions</th></tr></thead>
-    <tbody>${list.length?list.map(o=>{
-      const ri=DB.walkins.indexOf(o);
-      return`<tr>
-        <td>${o.date||'—'}</td>
-        <td><b style="font-size:12px">${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
-        <td><span class="bdg bdg-muted">${o.service||'—'}</span></td>
-        <td class="amt">${fmtINR(o.amount)}</td>
-        <td class="amt">${fmtINR(o.advance)}</td>
-        <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
-        <td>${statusBadge(o.status)}</td>
-        <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
-        <td>${o.phone?`<button class="btn-wa" onclick="wa('${o.phone}','${o.name}','${o.service}','${o.deliveryDate||''}')" title="Send WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>`:'—'}</td>
-        <td style="white-space:normal"><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button>&nbsp;<button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
-      </tr>`;
-    }).join(''):'<tr><td colspan="10" class="empty">No orders found</td></tr>'}</tbody>
-  </table></div>`;
+  <div id="wi-table-wrap"><div class="tw"><table>${WI_TABLE_HDR}<tbody>${wiRows(getWiList())}</tbody></table></div></div>`;
 }
 
 /* ─── EVENTS ─── */
-function renderEvents(){
+const EV_TABLE_HDR=`<thead><tr><th style="width:76px">Booked</th><th style="width:115px">Customer</th><th style="width:88px">Type</th><th style="width:96px">Event Date</th><th style="width:88px">Venue</th><th>Crew</th><th style="width:60px">Amount</th><th style="width:60px">Balance</th><th style="width:68px">Status</th><th style="width:120px">Actions</th></tr></thead>`;
+function evRows(list){
+  return list.length?list.map(o=>{
+    const ri=DB.events.indexOf(o);
+    const d=daysFrom(o.eventDate);
+    const soon=d!==null&&d>=0&&d<=3;
+    const nm=o.name.replace(/'/g,"\\'");
+    return`<tr>
+      <td>${o.date||'—'}</td>
+      <td><b style="font-size:12px">${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
+      <td><span class="bdg bdg-g">${o.eventType}</span></td>
+      <td><b style="${soon?'color:var(--amb)':''}">${o.eventDate||'—'}</b>${soon?` <span class="bdg bdg-urg">${d===0?'TODAY':'In '+d+'d'}</span>`:''}</td>
+      <td style="font-size:11px;color:var(--txm)">${o.venue||'—'}${o.extraVenues&&o.extraVenues.length?'<div class="phone">+'+o.extraVenues.length+' more</div>':''}</td>
+      <td style="font-size:10px;color:var(--txm);max-width:100px;overflow:hidden;text-overflow:ellipsis">${crewSum(o)}</td>
+      <td class="amt">${fmtINR(o.amount)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td style="white-space:normal;display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn-print btn-sm" onclick="printEventReceipt(${ri})">Receipt</button>
+        ${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${nm}','event','${o.eventType||''}','${o.eventDate||''}')" title="WhatsApp">${WA_SVG14}</button>`:''}
+        <button class="btn btn-d btn-sm" onclick="delEv(${ri})">✕</button>
+      </td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="10" class="empty">No events found</td></tr>';
+}
+function getEvList(){
   const q=(window._eq||'').toLowerCase();
   const sf=window._ef||'';
   let list=[...DB.events].reverse();
   if(q) list=list.filter(o=>(o.name||'').toLowerCase().includes(q)||(o.phone||'').includes(q)||(o.eventType||'').toLowerCase().includes(q));
   if(sf) list=list.filter(o=>o.eventType===sf);
+  return list;
+}
+function renderEventsOnly(){
+  const wrap=document.getElementById('ev-table-wrap');
+  if(!wrap){render();return;}
+  wrap.innerHTML=`<div class="tw"><table>${EV_TABLE_HDR}<tbody>${evRows(getEvList())}</tbody></table></div>`;
+  setTimeout(()=>{const inp=document.getElementById('ev-search');if(inp){const p=inp.value.length;inp.focus();try{inp.setSelectionRange(p,p);}catch(e){}}},0);
+}
+function renderEvents(){
+  const sf=window._ef||'';
   return `
   <div class="shdr"><div><div class="stitle">Event Bookings</div></div><button class="btn btn-g btn-sm" onclick="showAdd('event')">+ Add Event</button></div>
   <div class="srow">
-    <input class="sinp" placeholder="Search name, phone, event type…" value="${window._eq||''}" oninput="window._eq=this.value;render()">
+    <input class="sinp" id="ev-search" placeholder="Search name, phone, event type…" value="${window._eq||''}" oninput="window._eq=this.value;renderEventsOnly()">
     <select class="fsel" onchange="window._ef=this.value;render()">
       <option value="">All Events</option>${BIG_SVC.map(s=>`<option ${sf===s?'selected':''}>${s}</option>`).join('')}
     </select>
   </div>
-  <div class="tw"><table>
-    <thead><tr><th style="width:76px">Booked</th><th style="width:115px">Customer</th><th style="width:88px">Type</th><th style="width:96px">Event Date</th><th style="width:88px">Venue</th><th>Crew</th><th style="width:60px">Amount</th><th style="width:60px">Balance</th><th style="width:68px">Status</th><th style="width:40px"></th></tr></thead>
-    <tbody>${list.length?list.map(o=>{
-      const ri=DB.events.indexOf(o);
-      const d=daysFrom(o.eventDate);
-      const soon=d!==null&&d>=0&&d<=3;
-      return`<tr>
-        <td>${o.date||'—'}</td>
-        <td><b style="font-size:12px">${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
-        <td><span class="bdg bdg-g">${o.eventType}</span></td>
-        <td><b style="${soon?'color:var(--amb)':''}">${o.eventDate||'—'}</b>${soon?` <span class="bdg bdg-urg">${d===0?'TODAY':'In '+d+'d'}</span>`:''}</td>
-        <td style="font-size:11px;color:var(--txm)">${o.venue||'—'}</td>
-        <td style="font-size:10px;color:var(--txm);max-width:100px;overflow:hidden;text-overflow:ellipsis">${crewSum(o)}</td>
-        <td class="amt">${fmtINR(o.amount)}</td>
-        <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
-        <td>${statusBadge(o.status)}</td>
-        <td><button class="btn btn-d btn-sm" onclick="delEv(${ri})">✕</button></td>
-      </tr>`;
-    }).join(''):'<tr><td colspan="10" class="empty">No events found</td></tr>'}</tbody>
-  </table></div>`;
+  <div id="ev-table-wrap"><div class="tw"><table>${EV_TABLE_HDR}<tbody>${evRows(getEvList())}</tbody></table></div></div>`;
 }
 
 /* ─── TASKS ─── */
@@ -710,7 +781,7 @@ function renderPricing(){
     return a+Math.round((p.cost||0)*mrpM)-Math.round((p.cost||0)*custM)+Math.round((p.frameCost||0)*mrpM)-Math.round((p.frameCost||0)*custM);
   },0);
   return `
-  <div class="shdr"><div><div class="stitle">Photo Frame Pricing</div><div class="ssub">MRP = cost × ${mrpM} &nbsp;·&nbsp; Customer Price = cost × ${custM} &nbsp;·&nbsp; Computed at display time</div></div><button class="btn btn-g btn-sm" onclick="showAdd('price')">+ Add Size</button></div>
+  <div class="shdr"><div><div class="stitle">Photo Frame Pricing</div><div class="ssub">MRP = cost × ${mrpM} (150% margin) &nbsp;·&nbsp; Customer Price = MRP × 0.8 (20% off) &nbsp;·&nbsp; i.e. cost × ${custM}</div></div><button class="btn btn-g btn-sm" onclick="showAdd('price')">+ Add Size</button></div>
   <div class="price-tabs">
     <div class="ptab-group">
       <span class="ptab-group-lbl">Group:</span>
@@ -763,28 +834,48 @@ function renderPricing(){
 function renderCustomers(){
   const q=(window._cq||'').toLowerCase();
   let list=[...DB.customers];
-  if(q) list=list.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
+  if(q) list=list.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.email||'').toLowerCase().includes(q));
+  const ordersWithNoProfile=[...DB.walkins,...DB.events].filter(o=>o.name&&o.phone&&!DB.customers.find(c=>c.phone&&c.phone.replace(/\D/g,'')===o.phone.replace(/\D/g,''))).length;
   return `
-  <div class="shdr"><div><div class="stitle">Customer Profiles</div></div><button class="btn btn-g btn-sm" onclick="showAdd('customer')">+ Add Customer</button></div>
-  <div class="srow"><input class="sinp" placeholder="Search by name or phone…" value="${window._cq||''}" oninput="window._cq=this.value;render()"></div>
+  <div class="shdr"><div><div class="stitle">Customer Profiles</div><div class="ssub">${DB.customers.length} profiles${ordersWithNoProfile>0?` · <span style="color:var(--amb)">${ordersWithNoProfile} orders without a profile</span>`:''}</div></div><div style="display:flex;gap:6px">${ordersWithNoProfile>0?`<button class="btn btn-o btn-sm" onclick="backfillCustomers()" style="border-color:var(--amb-br);color:var(--amb)">⟳ Sync ${ordersWithNoProfile} from Orders</button>`:''}<button class="btn btn-g btn-sm" onclick="showAdd('customer')">+ Add Customer</button></div></div>
+  <div class="srow"><input class="sinp" id="cust-search" placeholder="Search by name, phone or email…" value="${window._cq||''}" oninput="window._cq=this.value;renderCustOnly()"></div>
+  <div id="cust-table-wrap">
   <div class="tw"><table>
-    <thead><tr><th style="width:130px">Name</th><th style="width:115px">Phone</th><th>Address</th><th style="width:58px">Orders</th><th style="width:70px">Total Spent</th><th style="width:70px">Pending</th><th style="width:70px">Review</th><th style="width:40px"></th></tr></thead>
-    <tbody>${list.length?list.map((c,i)=>{
-      const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone===c.phone);
-      const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
-      const pending=cOrders.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
-      return`<tr>
-        <td><b style="font-size:12px">${c.name}</b></td>
-        <td>${waLink(c.phone||c.whatsapp)}</td>
-        <td style="font-size:11px;color:var(--txm)">${c.address||'—'}</td>
-        <td style="text-align:center">${cOrders.length}</td>
-        <td class="amt">${fmtINR(spent)}</td>
-        <td class="${pending>0?'bal-r':'bal-g'}">${fmtINR(pending)}</td>
-        <td>${c.reviewDone?'<span class="bdg bdg-grn">✓ Done</span>':'<span class="bdg bdg-amb">Pending</span>'}</td>
-        <td><button class="btn btn-d btn-sm" onclick="delCust(${i})">✕</button></td>
-      </tr>`;
-    }).join(''):'<tr><td colspan="8" class="empty">No customers yet</td></tr>'}</tbody>
-  </table></div>`;
+    <thead><tr><th style="width:130px">Name</th><th style="width:115px">Phone</th><th style="width:140px">Email</th><th>Address</th><th style="width:50px">Orders</th><th style="width:68px">Spent</th><th style="width:68px">Pending</th><th style="width:68px">Review</th><th style="width:82px">Actions</th></tr></thead>
+    <tbody>${custTableRows(list)}</tbody>
+  </table></div>
+  </div>`;
+}
+function custTableRows(list){
+  return list.length?list.map(c=>{
+    const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone&&c.phone&&o.phone.replace(/\D/g,'')===c.phone.replace(/\D/g,''));
+    const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+    const pending=cOrders.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
+    const ri=DB.customers.indexOf(c);
+    const waBtn=c.phone?`<button class="btn-wa btn-sm" onclick="showMsgTemplates('${c.phone}','${c.name.replace(/'/g,"\\'")}','customer')" title="WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button> `:'';
+    return`<tr>
+      <td><b style="font-size:12px">${c.name}</b></td>
+      <td>${waLink(c.phone||c.whatsapp)}</td>
+      <td style="font-size:10px;color:var(--txm)">${c.email||'—'}</td>
+      <td style="font-size:11px;color:var(--txm)">${c.address||'—'}</td>
+      <td style="text-align:center">${cOrders.length}</td>
+      <td class="amt">${fmtINR(spent)}</td>
+      <td class="${pending>0?'bal-r':'bal-g'}">${fmtINR(pending)}</td>
+      <td>${c.reviewDone?'<span class="bdg bdg-grn">✓ Done</span>':'<span class="bdg bdg-amb">Pending</span>'}</td>
+      <td style="white-space:normal">${waBtn}<button class="btn btn-d btn-sm" onclick="delCust(${ri})">✕</button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="9" class="empty">No customers found</td></tr>';
+}
+function renderCustOnly(){
+  const wrap=document.getElementById('cust-table-wrap');
+  if(!wrap){render();return;}
+  const q=(window._cq||'').toLowerCase();
+  let list=[...DB.customers];
+  if(q) list=list.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.email||'').toLowerCase().includes(q));
+  wrap.innerHTML=`<div class="tw"><table>
+    <thead><tr><th style="width:130px">Name</th><th style="width:115px">Phone</th><th style="width:140px">Email</th><th>Address</th><th style="width:50px">Orders</th><th style="width:68px">Spent</th><th style="width:68px">Pending</th><th style="width:68px">Review</th><th style="width:82px">Actions</th></tr></thead>
+    <tbody>${custTableRows(list)}</tbody></table></div>`;
+  setTimeout(()=>{const inp=document.getElementById('cust-search');if(inp){const p=inp.value.length;inp.focus();try{inp.setSelectionRange(p,p);}catch(e){}}},0);
 }
 
 /* ─── PENDING ─── */
@@ -814,7 +905,7 @@ function renderDelivery(){
   return `
   <div class="shdr"><div><div class="stitle">Delivery Tracker</div></div></div>
   <div class="tw"><table>
-    <thead><tr><th style="width:88px">Date</th><th style="width:68px">Time</th><th style="width:128px">Customer</th><th style="width:78px">Type</th><th style="width:76px">Status</th><th style="width:58px">Balance</th><th>Notes</th></tr></thead>
+    <thead><tr><th style="width:88px">Date</th><th style="width:68px">Time</th><th style="width:128px">Customer</th><th style="width:78px">Type</th><th style="width:76px">Status</th><th style="width:58px">Balance</th><th>Notes</th><th style="width:68px">WA</th></tr></thead>
     <tbody>${all.length?all.map(o=>{
       const d=new Date(o.deliveryDate);d.setHours(0,0,0,0);
       const diff=Math.ceil((d-n)/86400000);
@@ -822,6 +913,7 @@ function renderDelivery(){
       if(diff<0){cls='bdg-red';lbl='Overdue '+Math.abs(diff)+'d';}
       else if(diff===0){cls='bdg-amb';lbl='Today';}
       else if(diff<=2){cls='bdg-amb';lbl='In '+diff+'d';}
+      const svcOrType=o._t==='Walk-in'?(o.service||'order'):o._t;
       return`<tr>
         <td><b>${o.deliveryDate}</b></td>
         <td style="font-size:11px;color:var(--txm)">${o.deliveryTime||'—'}</td>
@@ -830,8 +922,9 @@ function renderDelivery(){
         <td><span class="bdg ${cls}">${lbl}</span></td>
         <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
         <td style="font-size:11px;color:var(--txm)">${o.notes||'—'}</td>
+        <td>${o.phone?`<button class="btn-wa" onclick="waDelivery('${o.phone}','${o.name.replace(/'/g,"\\'")}','${svcOrType.replace(/'/g,"\\'")}','${o.deliveryDate||''}')" title="Send delivery notification"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="display:block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>`:'—'}</td>
       </tr>`;
-    }).join(''):'<tr><td colspan="7" class="empty">No deliveries tracked yet</td></tr>'}</tbody>
+    }).join(''):'<tr><td colspan="8" class="empty">No deliveries tracked yet</td></tr>'}</tbody>
   </table></div>`;
 }
 
@@ -890,7 +983,7 @@ function renderQuickLog(){
     <div class="ql-title">New Entry</div>
     <div class="fg fg-3 mt8">
       <div class="ff"><label>Customer Name</label><input type="text" id="ql-name" placeholder="Full name"></div>
-      <div class="ff"><label>Phone</label><input type="tel" id="ql-phone" placeholder="Mobile number"></div>
+      <div class="ff"><label>Phone</label><input type="tel" id="ql-phone" placeholder="Mobile — name auto-fills" oninput="lookupCustomer(this.value,'ql-name')"></div>
       <div class="ff"><label>Work Type</label><select id="ql-svc">${[...WALKIN_SVC,...BIG_SVC].map(s=>`<option>${s}</option>`).join('')}</select></div>
     </div>
     <div class="fg fg-4 mt8">
@@ -942,9 +1035,10 @@ function buildForm(type){
     <div class="mtitle">New Walk-in Order <button class="mclose" onclick="closeShade()">✕</button></div>
     <div class="fg fg-3">
       <div class="ff"><label>Date</label><input type="date" id="f-date" value="${today()}"></div>
-      <div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name"></div>
-      <div class="ff"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile"></div>
+      <div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name or search…" oninput="acName(this,'f-phone','walkin')"><div id="ac-name-drop" class="ac-drop" style="display:none"></div></div>
+      <div class="ff ac-wrap"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile — name auto-fills" oninput="lookupCustomer(this.value,'f-name')"><div id="ac-phone-drop" class="ac-drop" style="display:none"></div></div>
     </div>
+    <div id="cust-found-chip"></div>
     <div class="fg fg-3 mt8">
       <div class="ff"><label>Service</label><select id="f-svc">${WALKIN_SVC.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="ff"><label>Status</label><select id="f-status">${ORDER_STATUS.map(s=>`<option>${s}</option>`).join('')}</select></div>
@@ -967,27 +1061,25 @@ function buildForm(type){
     <div class="mtitle">New Event Booking <button class="mclose" onclick="closeShade()">✕</button></div>
     <div class="fg fg-3">
       <div class="ff"><label>Booking Date</label><input type="date" id="f-date" value="${today()}"></div>
-      <div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name"></div>
-      <div class="ff"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile"></div>
+      <div class="ff"><label>Customer Name</label><input type="text" id="f-name" placeholder="Full name or search…" oninput="acName(this,'f-phone','event')"><div id="ac-name-drop" class="ac-drop" style="display:none"></div></div>
+      <div class="ff ac-wrap"><label>Phone</label><input type="tel" id="f-phone" placeholder="Mobile — name auto-fills" oninput="lookupCustomer(this.value,'f-name')"><div id="ac-phone-drop" class="ac-drop" style="display:none"></div></div>
     </div>
+    <div id="cust-found-chip"></div>
     <div class="fg fg-3 mt8">
       <div class="ff"><label>Event Type</label><select id="f-etype">${BIG_SVC.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="ff"><label>Guest Count (approx)</label><input type="number" id="f-guests" placeholder="e.g. 150" min="0" oninput="updateCrewFeedback()"></div>
       <div class="ff"><label>Status</label><select id="f-status">${ORDER_STATUS.map(s=>`<option>${s}</option>`).join('')}</select></div>
     </div>
     <div class="divider"></div>
-    <div class="csub">Event Dates</div>
-    <div style="display:flex;gap:8px;align-items:flex-end">
-      <div class="ff" style="flex:1"><label>Primary Date</label><input type="date" id="f-edate"></div>
+    <div class="csub">Event Dates &amp; Venues (linked)</div>
+    <div class="dv-pair">
+      <div class="dv-pair-grid">
+        <div class="ff"><label>Primary Date</label><input type="date" id="f-edate"></div>
+        <div class="ff"><label>Primary Venue</label><input type="text" id="f-venue" placeholder="Venue / City"></div>
+      </div>
     </div>
-    <div id="extra-dates"></div>
-    <button type="button" class="btn btn-o btn-sm mt4" onclick="addDateRow()">+ Add Another Date</button>
-    <div class="csub" style="margin-top:12px">Venues</div>
-    <div style="display:flex;gap:8px;align-items:flex-end">
-      <div class="ff" style="flex:1"><label>Primary Venue</label><input type="text" id="f-venue" placeholder="Venue / City"></div>
-    </div>
-    <div id="extra-venues"></div>
-    <button type="button" class="btn btn-o btn-sm mt4" onclick="addVenueRow()">+ Add Another Venue</button>
+    <div id="extra-date-venues"></div>
+    <button type="button" class="btn btn-o btn-sm mt4" onclick="addDateVenueRow()">+ Add Another Date &amp; Venue</button>
     <div class="divider"></div>
     <div class="csub">Crew Configuration</div>
     <div class="crew-g">
@@ -1051,7 +1143,8 @@ function buildForm(type){
       <div class="ff"><label>Mobile</label><input type="tel" id="f-cmob" placeholder="Mobile number"></div>
       <div class="ff"><label>WhatsApp (if diff)</label><input type="tel" id="f-cwa" placeholder="WhatsApp number"></div>
     </div>
-    <div class="fg fg-2 mt8">
+    <div class="fg fg-3 mt8">
+      <div class="ff"><label>Email ID</label><input type="email" id="f-cemail" placeholder="customer@email.com"></div>
       <div class="ff"><label>Address</label><input type="text" id="f-cadr" placeholder="Area / locality"></div>
       <div class="ff"><label>Google Review Done?</label><select id="f-crev"><option value="0">No</option><option value="1">Yes</option></select></div>
     </div>
@@ -1201,9 +1294,9 @@ function saveWi(){
   if(!name){alert('Customer name required');return;}
   const amt=parseFloat(document.getElementById('f-amt').value)||0;
   const adv=parseFloat(document.getElementById('f-adv').value)||0;
+  const phone=document.getElementById('f-phone').value;
   DB.walkins.push({
-    date:document.getElementById('f-date').value,name,
-    phone:document.getElementById('f-phone').value,
+    date:document.getElementById('f-date').value,name,phone,
     service:document.getElementById('f-svc').value,
     status:document.getElementById('f-status').value,
     amount:amt,advance:adv,balance:Math.max(0,amt-adv),
@@ -1213,6 +1306,7 @@ function saveWi(){
     deliveryTime:document.getElementById('f-deltime').value,
     notes:document.getElementById('f-notes').value,
   });
+  autoCreateCustomer(name,phone);
   save();closeShade();render();
 }
 function saveEv(){
@@ -1221,13 +1315,14 @@ function saveEv(){
   const amt=parseFloat(document.getElementById('f-amt').value)||0;
   const adv=parseFloat(document.getElementById('f-adv').value)||0;
   const crew={pt:+document.getElementById('f-pt').value,pc:+document.getElementById('f-pc').value,vt:+document.getElementById('f-vt').value,vc:+document.getElementById('f-vc').value,ph:+document.getElementById('f-ph').value,vh:+document.getElementById('f-vh').value,vv:+document.getElementById('f-vv').value,v3:+document.getElementById('f-v3').value,dr:+document.getElementById('f-dr').value,ac:+document.getElementById('f-ac').value};
-  const extraDates=[...document.querySelectorAll('.extra-date')].map(i=>i.value).filter(Boolean);
-  const extraVenues=[...document.querySelectorAll('.extra-venue')].map(i=>i.value).filter(Boolean);
+  const extraPairs=[...document.querySelectorAll('.extra-dv-pair')].map(el=>({date:el.querySelector('.extra-date')?.value||'',venue:el.querySelector('.extra-venue')?.value||''})).filter(p=>p.date||p.venue);
+  const extraDates=extraPairs.map(p=>p.date);
+  const extraVenues=extraPairs.map(p=>p.venue);
   const eType=document.getElementById('f-etype').value;
   const eDate=document.getElementById('f-edate').value;
+  const phone=document.getElementById('f-phone').value;
   DB.events.push({
-    date:document.getElementById('f-date').value,name,
-    phone:document.getElementById('f-phone').value,
+    date:document.getElementById('f-date').value,name,phone,
     eventType:eType,eventDate:eDate,extraDates,
     venue:document.getElementById('f-venue').value,extraVenues,
     guests:parseInt(document.getElementById('f-guests').value)||0,
@@ -1238,6 +1333,7 @@ function saveEv(){
     terms:document.getElementById('f-terms').value,
     notes:document.getElementById('f-notes').value,
   });
+  autoCreateCustomer(name,phone);
   save();closeShade();render();
   showBookingConfirm(name,eType,eDate);
 }
@@ -1264,7 +1360,7 @@ function savePrice(){
 function saveCust(){
   const name=document.getElementById('f-cname').value.trim();
   if(!name){alert('Name required');return;}
-  DB.customers.push({name,phone:document.getElementById('f-cmob').value,whatsapp:document.getElementById('f-cwa').value,address:document.getElementById('f-cadr').value,reviewDone:document.getElementById('f-crev').value==='1'});
+  DB.customers.push({name,phone:document.getElementById('f-cmob').value,whatsapp:document.getElementById('f-cwa').value,email:document.getElementById('f-cemail')?.value||'',address:document.getElementById('f-cadr').value,reviewDone:document.getElementById('f-crev').value==='1'});
   save();closeShade();render();
 }
 function saveQL(){
@@ -1272,7 +1368,9 @@ function saveQL(){
   if(!name){alert('Customer name required');return;}
   const amt=parseFloat(document.getElementById('ql-amt').value)||0;
   const adv=parseFloat(document.getElementById('ql-adv').value)||0;
-  DB.walkins.push({date:document.getElementById('ql-date').value,name,phone:document.getElementById('ql-phone').value,service:document.getElementById('ql-svc').value,status:'New Order',amount:amt,advance:adv,balance:Math.max(0,amt-adv),deliveryDate:document.getElementById('ql-del').value,deliveryTime:document.getElementById('ql-deltime').value,notes:document.getElementById('ql-note').value});
+  const phone=document.getElementById('ql-phone').value;
+  DB.walkins.push({date:document.getElementById('ql-date').value,name,phone,service:document.getElementById('ql-svc').value,status:'New Order',amount:amt,advance:adv,balance:Math.max(0,amt-adv),deliveryDate:document.getElementById('ql-del').value,deliveryTime:document.getElementById('ql-deltime').value,notes:document.getElementById('ql-note').value});
+  autoCreateCustomer(name,phone);
   save();
   ['ql-name','ql-phone','ql-amt','ql-adv','ql-bal','ql-del','ql-deltime','ql-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   render();
@@ -1438,8 +1536,225 @@ function updateCost(i,field,val){
 
 function attachEvents(){}
 
+/* ─── THEME ─── */
+function toggleTheme(){
+  const isLight=document.body.classList.toggle('light');
+  localStorage.setItem('tw_theme',isLight?'light':'dark');
+  document.getElementById('theme-btn').textContent=isLight?'☀️':'🌙';
+}
+function applyTheme(){
+  const saved=localStorage.getItem('tw_theme');
+  if(saved==='light'){document.body.classList.add('light');const b=document.getElementById('theme-btn');if(b)b.textContent='☀️';}
+}
+
+/* ─── BACKFILL CUSTOMER PROFILES FROM ALL ORDERS ─── */
+function backfillCustomers(){
+  let added=0;
+  [...DB.walkins,...DB.events].forEach(o=>{
+    if(!o.name||!o.phone) return;
+    const clean=o.phone.replace(/\D/g,'');
+    if(!clean) return;
+    const exists=DB.customers.find(c=>c.phone&&c.phone.replace(/\D/g,'')===clean);
+    if(!exists){DB.customers.push({name:o.name,phone:o.phone,whatsapp:'',email:'',address:'',reviewDone:false});added++;}
+  });
+  if(added>0){save();render();}
+  return added;
+}
+
+/* ─── AUTO-CREATE / UPDATE CUSTOMER ─── */
+function autoCreateCustomer(name,phone){
+  if(!name) return;
+  const clean=phone?phone.replace(/\D/g,''):'';
+  if(!clean) return;
+  const idx=DB.customers.findIndex(c=>c.phone&&c.phone.replace(/\D/g,'')===clean);
+  if(idx===-1){
+    DB.customers.push({name,phone,whatsapp:'',email:'',address:'',reviewDone:false});
+  } else {
+    if(!DB.customers[idx].name) DB.customers[idx].name=name;
+  }
+}
+
+/* ─── PHONE LOOKUP (auto-fill name + show chip) ─── */
+function lookupCustomer(phone,nameFieldId){
+  const clean=phone.replace(/\D/g,'');
+  const chipId='cust-found-chip';
+  const chip=document.getElementById(chipId);
+  if(clean.length<8){if(chip)chip.style.display='none';return;}
+  const found=DB.customers.find(c=>c.phone&&c.phone.replace(/\D/g,'')===clean);
+  const nameEl=document.getElementById(nameFieldId);
+  if(found){
+    if(nameEl) nameEl.value=found.name;
+    if(chip){
+      chip.style.display='flex';
+      chip.innerHTML=`<span style="color:var(--grn);font-weight:500">✓ Known Customer: ${found.name}</span>`+(found.address?`<span style="color:var(--txm);margin-left:8px;font-size:10px">${found.address}</span>`:'')+(found.email?`<span style="color:var(--txm);margin-left:8px;font-size:10px">${found.email}</span>`:'');
+    }
+  } else {
+    if(chip){chip.style.display='flex';chip.innerHTML='<span style="color:var(--txm);font-size:11px">⊕ New customer — profile will be created on save</span>';}
+  }
+}
+
+/* ─── NAME AUTOCOMPLETE ─── */
+function acName(input,phoneFieldId){
+  const v=input.value.toLowerCase();
+  const drop=document.getElementById('ac-name-drop');
+  if(!drop)return;
+  if(!v||v.length<2){drop.style.display='none';return;}
+  const matches=DB.customers.filter(c=>(c.name||'').toLowerCase().includes(v)).slice(0,5);
+  if(!matches.length){drop.style.display='none';return;}
+  drop.innerHTML=matches.map(c=>`<div class="ac-item" onclick="selectAcCustomer('${c.name.replace(/'/g,"\\'")}','${c.phone||''}','${phoneFieldId}')">${c.name}<span style="color:var(--txm);font-size:10px;margin-left:6px">${c.phone||''}</span></div>`).join('');
+  drop.style.display='block';
+}
+function selectAcCustomer(name,phone,phoneFieldId){
+  const nameEl=document.querySelector('#shade #f-name');
+  if(nameEl) nameEl.value=name;
+  const phoneEl=document.getElementById(phoneFieldId);
+  if(phoneEl&&phone) phoneEl.value=phone;
+  const drop=document.getElementById('ac-name-drop');
+  if(drop) drop.style.display='none';
+  const found=DB.customers.find(c=>c.name===name);
+  const chip=document.getElementById('cust-found-chip');
+  if(chip&&found){
+    chip.style.display='flex';
+    chip.innerHTML=`<span style="color:var(--grn);font-weight:500">✓ Known Customer: ${found.name}</span>`+(found.address?`<span style="color:var(--txm);margin-left:8px;font-size:10px">${found.address}</span>`:'')+(found.email?`<span style="color:var(--txm);margin-left:8px;font-size:10px">${found.email}</span>`:'');
+  }
+}
+
+/* ─── LINKED DATE-VENUE ROW ─── */
+function addDateVenueRow(){
+  const c=document.getElementById('extra-date-venues');if(!c)return;
+  const d=document.createElement('div');
+  d.className='dv-pair extra-dv-pair';
+  d.innerHTML=`<div class="dv-pair-grid">
+    <div class="ff"><label>Additional Date</label><input type="date" class="extra-date" style="background:var(--s2);border:1px solid var(--br);border-radius:6px;color:var(--tx);font-family:'Outfit',sans-serif;font-size:12px;padding:7px 9px;width:100%;outline:none"></div>
+    <div class="ff"><label>Venue for this Date</label><input type="text" class="extra-venue" placeholder="Venue / City" style="background:var(--s2);border:1px solid var(--br);border-radius:6px;color:var(--tx);font-family:'Outfit',sans-serif;font-size:12px;padding:7px 9px;width:100%;outline:none"></div>
+  </div>
+  <button type="button" onclick="this.closest('.dv-pair').remove()" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:11px;margin-top:4px;font-family:'Outfit',sans-serif">✕ Remove</button>`;
+  c.appendChild(d);
+}
+
+/* ─── TOGGLE URGENT ─── */
+function toggleUrgent(i){
+  if(!DB.walkins[i])return;
+  DB.walkins[i].urgent=!DB.walkins[i].urgent;
+  save();render();
+}
+
+/* ─── WA DELIVERY NOTIFICATION ─── */
+function waDelivery(phone,name,type,date){
+  const msg='Hello '+name+'! 🎉\n\nGreat news! Your *'+type+'* from *Tathastu Weddings* is ready'+(date?' for '+date:'')+' 📸\n\nPlease contact us to confirm pickup/delivery. Thank you for choosing us! 🙏\n\n— Tathastu Weddings';
+  window.open('https://wa.me/91'+phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg));
+}
+
+/* ─── WHATSAPP MESSAGE TEMPLATES ─── */
+function showMsgTemplates(phone,name,context,extra1,extra2){
+  const cleanPhone=phone.replace(/\D/g,'');
+  const shade=document.createElement('div');
+  shade.id='msg-shade';
+  shade.style='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
+  const templates=getMsgTemplates(name,context,extra1,extra2,phone);
+  shade.innerHTML=`<div class="modal" style="max-width:520px;max-height:80vh;overflow-y:auto">
+    <div class="mtitle">WhatsApp Messages <button class="mclose" onclick="document.getElementById('msg-shade').remove()">✕</button></div>
+    <div style="font-size:11px;color:var(--txm);margin-bottom:12px">Choose a message template to send to <b style="color:var(--tx)">${name}</b> · ${phone}</div>
+    ${templates.map(t=>`<div class="msg-tmpl" onclick="window.open('https://wa.me/91${cleanPhone}?text='+encodeURIComponent(${JSON.stringify(t.body)}));document.getElementById('msg-shade').remove()">
+      <div class="msg-tmpl-title">${t.title}</div>
+      <div class="msg-tmpl-body">${t.body.replace(/\n/g,'<br>').replace(/\*(.*?)\*/g,'<b>$1</b>')}</div>
+    </div>`).join('')}
+    <div style="text-align:center;margin-top:8px">
+      <button class="btn btn-o btn-sm" onclick="document.getElementById('msg-shade').remove()">Close</button>
+    </div>
+  </div>`;
+  document.body.appendChild(shade);
+}
+function getMsgTemplates(name,context,service,date,phone){
+  const studio='Tathastu Weddings';
+  const bal=context==='walkin'?DB.walkins.find(o=>o.phone===phone&&o.name===name):DB.events.find(o=>o.phone===phone&&o.name===name);
+  const balAmt=bal?fmtINR(parseFloat(bal.balance)||0):'';
+  const templates=[];
+  if(context==='walkin'||context==='event'){
+    templates.push({title:'✅ Order/Work Ready',body:`Hello ${name}! 🎉\n\nYour *${service||'order'}* at *${studio}* is ready${date?' for '+date:''}.\nPlease confirm your pickup time. 📞\n\nThank you for choosing us! 🙏`});
+    templates.push({title:'🚀 Work Started',body:`Hello ${name}!\n\nWe've started working on your *${service||'order'}*. We'll notify you as soon as it's ready! 📸\n\n— ${studio}`});
+    templates.push({title:'💰 Payment Reminder',body:`Hello ${name}! 🙏\n\nThis is a gentle reminder from *${studio}*.\n\nYour pending balance is *${balAmt||'the agreed amount'}*.\nPlease make the payment at your earliest convenience.\n\nThank you! 😊`});
+    templates.push({title:'📸 Delivery Confirmation',body:`Hello ${name}! 🎊\n\nYour *${service||'work'}* from *${studio}* is ready for delivery${date?' on '+date:''}.\n\nWe're excited for you to see your photos/videos! 🌟\n\nPlease contact us to confirm. Thank you!`});
+  }
+  if(context==='event'){
+    templates.push({title:'📅 Event Reminder',body:`Hello ${name}! 📅\n\nJust a reminder that your *${service||'event'}* is scheduled for *${date||'your booked date'}*.\n\nOur team from *${studio}* will be there on time. Looking forward to capturing your beautiful moments! 📸\n\nFor any changes, please contact us in advance.`});
+    templates.push({title:'🤝 Post-Event Follow-up',body:`Hello ${name}! 🌸\n\nIt was an absolute pleasure being part of your *${service||'event'}*! 📸\n\nWe are processing your photos/videos and will deliver them as promised.\n\nWould love it if you could share your experience with a Google review! 🌟\n\n— ${studio}`});
+    templates.push({title:'⭐ Google Review Request',body:`Hello ${name}! 🙏\n\nThank you for choosing *${studio}* for your *${service||'event'}*! We hope you loved the results.\n\nWould you mind leaving us a Google review? It helps us grow and serve more families like yours. 🌟\n\nThank you so much! — Team Tathastu`});
+  }
+  if(context==='customer'){
+    templates.push({title:'👋 Greeting / Re-engage',body:`Hello ${name}! 🌸\n\nHope you're doing wonderful! This is *${studio}*.\n\nWe'd love to serve you again — whether it's a portrait session, prints, or your next big event! 📸\n\nFeel free to reach out anytime. Take care! 🙏`});
+    templates.push({title:'🎁 Special Offer',body:`Hello ${name}! 🎉\n\nExciting news from *${studio}*! We're running a special offer this season.\n\nBook any photography session and get 10% off! Valid for a limited time only. 📸✨\n\nCall us to know more. Thank you for your continued trust! 🙏`});
+    templates.push({title:'💰 Payment Reminder',body:`Hello ${name}! 🙏\n\nThis is a gentle reminder from *${studio}* about your pending balance.\n\nPlease make the payment at your earliest convenience so we can proceed with your order.\n\nThank you! 😊`});
+  }
+  return templates;
+}
+
+/* ─── EVENT RECEIPT PRINTING ─── */
+function printEventReceipt(idx){
+  const o=DB.events[idx];if(!o)return;
+  const rNo='TW-EV-'+String(idx+1).padStart(4,'0');
+  const bal=Math.round(parseFloat(o.balance)||0);
+  const crewStr=crewSum(o);
+  const allDates=[o.eventDate,...(o.extraDates||[])].filter(Boolean);
+  const allVenues=[o.venue,...(o.extraVenues||[])].filter(Boolean);
+  const win=window.open('','_blank','width=480,height=720');
+  win.document.write('<!DOCTYPE html><html><head><title>Event Receipt '+rNo+'</title><style>'+
+    '*{box-sizing:border-box;margin:0;padding:0}'+
+    'body{font-family:Arial,sans-serif;max-width:400px;margin:16px auto;padding:20px 24px;font-size:12px;color:#111}'+
+    '.hdr{text-align:center;border-bottom:2px solid #111;padding-bottom:12px;margin-bottom:12px}'+
+    '.hdr h1{font-size:20px;font-family:Georgia,serif;letter-spacing:1px;margin-bottom:3px}'+
+    '.hdr p{font-size:10px;color:#555;margin:1px 0}'+
+    '.title{text-align:center;font-size:13px;font-weight:700;letter-spacing:3px;margin-bottom:8px}'+
+    '.rno{text-align:right;font-size:10px;color:#777;margin-bottom:10px}'+
+    '.section{font-size:10px;font-weight:700;letter-spacing:2px;color:#888;margin:10px 0 4px;text-transform:uppercase}'+
+    'table{width:100%;border-collapse:collapse}'+
+    'td{padding:5px 0;vertical-align:top;font-size:12px}'+
+    'td:first-child{color:#555;width:120px}'+
+    'td:last-child{font-weight:600;text-align:right}'+
+    '.dash{border-top:1px dashed #aaa;margin:8px 0}'+
+    '.total td{font-size:14px;font-weight:700;padding-top:8px}'+
+    '.rp{color:#c00}.rg{color:#080}'+
+    '.crew-box{border:1px solid #ddd;border-radius:4px;padding:6px 10px;margin:8px 0;font-size:11px;color:#555}'+
+    '.footer{text-align:center;margin-top:12px;font-size:10px;color:#555;border-top:1px solid #111;padding-top:10px;line-height:1.6}'+
+    '.np{text-align:center;margin-top:18px}'+
+    '@media print{.np{display:none}body{margin:0}}'+
+  '</style></head><body>'+
+  '<div class="hdr"><img src="logo.png" alt="" style="width:60px;height:60px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px" onerror="this.style.display=\'none\'"><h1>Tathastu Weddings</h1><p>Photography &amp; Videography Studio</p></div>'+
+  '<div class="title">EVENT RECEIPT</div>'+
+  '<div class="rno">No: '+rNo+' &nbsp;|&nbsp; Booked: '+(o.date||today())+'</div>'+
+  '<div class="section">Customer</div>'+
+  '<table>'+
+    '<tr><td>Customer</td><td>'+o.name+'</td></tr>'+
+    (o.phone?'<tr><td>Phone</td><td>'+o.phone+'</td></tr>':'')+
+  '</table>'+
+  '<div class="section">Event Details</div>'+
+  '<table>'+
+    '<tr><td>Event Type</td><td>'+(o.eventType||'—')+'</td></tr>'+
+    '<tr><td>Event Date(s)</td><td>'+allDates.join(', ')+'</td></tr>'+
+    '<tr><td>Venue(s)</td><td>'+allVenues.join(', ')+'</td></tr>'+
+    (o.guests?'<tr><td>Guests (approx)</td><td>'+o.guests+'</td></tr>':'')+
+  '</table>'+
+  (crewStr!=='—'?'<div class="crew-box"><b>Crew:</b> '+crewStr+'</div>':'')+
+  (o.terms?'<div style="font-size:10px;color:#888;margin:6px 0">Terms: '+o.terms+'</div>':'')+
+  '<div class="dash"></div>'+
+  '<div class="section">Payment</div>'+
+  '<table>'+
+    (o.payMode?'<tr><td>Pay Mode</td><td>'+o.payMode+'</td></tr>':'')+
+    '<tr class="total"><td>Package Amount</td><td>&#8377;'+Math.round(parseFloat(o.amount)||0).toLocaleString('en-IN')+'</td></tr>'+
+    '<tr><td>Advance Paid</td><td>&#8377;'+Math.round(parseFloat(o.advance)||0).toLocaleString('en-IN')+'</td></tr>'+
+    '<tr><td class="'+(bal>0?'rp':'rg')+'">Balance Due</td><td class="'+(bal>0?'rp':'rg')+'">&#8377;'+bal.toLocaleString('en-IN')+'</td></tr>'+
+  '</table>'+
+  (o.notes?'<div style="margin-top:8px;font-size:10px;color:#888;border:1px dashed #ddd;padding:6px;border-radius:4px">Notes: '+o.notes+'</div>':'')+
+  '<div style="text-align:center;margin:14px 0;font-size:10px;color:#777;border:1px dashed #ccc;padding:8px;border-radius:4px">This is a computer generated receipt. No signature required.</div>'+
+  '<div class="footer"><b>Thank you for choosing Tathastu Weddings!</b><br>We look forward to capturing your beautiful moments.</div>'+
+  '<div class="np"><button onclick="window.print()" style="background:#111;color:#fff;border:none;padding:9px 24px;border-radius:5px;cursor:pointer;font-size:12px;margin-top:4px">🖶 Print Receipt</button></div>'+
+  '</body></html>');
+  win.document.close();
+}
+
 /* ── Startup ── */
 (function init(){
+  applyTheme();
   document.getElementById('hdr-date').textContent=
     new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   if(!workerAvailable()){
