@@ -13,6 +13,8 @@
 <script>
 const WORKER_URL = 'https://tathastu.vicky-bhardwaj.workers.dev';
 </script>
+<script src="wedding-functions.js"></script>
+<script src="studio-business.js"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap');
@@ -320,6 +322,33 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
 .inst-row:last-child{border-bottom:none}
 /* CONFLICT WARNING */
 .conflict-warn{background:var(--red-bg);border:1px solid var(--red-br);border-radius:var(--r);padding:10px 14px;margin:8px 0;font-size:11px;color:var(--red)}
+.wf-modal{max-width:980px;margin:0 auto}
+.wf-heading{font-family:'Cormorant Garamond',serif;color:var(--gold-lt);font-size:20px;margin:18px 0 6px}
+.wf-help{color:var(--txm);font-size:12px;margin:5px 0 12px}
+.wf-timeline-item,.wf-editor{border:1px solid var(--br);border-radius:8px;background:var(--s2);margin:7px 0;padding:10px 12px}
+.wf-timeline-item summary,.wf-editor summary{cursor:pointer;font-size:13px}
+.wf-timeline-item summary .bdg,.wf-editor summary .bdg{margin-left:7px}
+.wf-timeline-body{font-size:12px;line-height:1.8;color:var(--txm);margin-top:8px}
+.wf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.wf-row-actions,.wf-sequence-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--txm)}
+.wf-sequence-row{border-bottom:1px solid var(--br);padding:6px 0;margin:0}
+.wf-sequence-row span{flex:1;min-width:150px}
+.wf-sequence-row button:disabled{opacity:.35;cursor:default}
+.business-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.business-card{background:var(--s2);border:1px solid var(--br);border-radius:8px;padding:12px}
+.business-card h3{color:var(--gold-lt);margin-bottom:8px;font-size:15px}
+.business-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.pos-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);gap:14px}
+.pos-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:480px;overflow:auto}
+.pos-item{text-align:left;padding:10px;border:1px solid var(--br);border-radius:8px;background:var(--s2);color:var(--tx);cursor:pointer}
+.pos-item:hover{border-color:var(--gold)}
+.pos-item small{display:block;color:var(--txm)}
+.pos-cart-row{display:flex;gap:6px;align-items:center;border-bottom:1px solid var(--br);padding:7px 0}
+.pos-cart-row span{flex:1}
+.pos-cart-row input{width:64px!important}
+@media(max-width:750px){.pos-layout,.business-grid{grid-template-columns:1fr}}
+@media(max-width:680px){.wf-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wf-modal{padding:14px}}
+@media(max-width:430px){.wf-grid{grid-template-columns:1fr}}
 </style>
 
 <!-- LOGIN OVERLAY -->
@@ -373,8 +402,10 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
     <div class="date-chip">Today <b id="hdr-date"></b></div>
     <div id="sync-status"><span class="sync-dot ok" id="sync-dot"></span><span id="sync-txt">Synced</span></div>
     <button class="btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
+    <button class="btn btn-o btn-sm" onclick="downloadBackup()">⬇ Backup JSON</button>
     <button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button>
     <button class="btn btn-g btn-sm" onclick="showAdd('walkin')">+ Walk-in</button>
+    <button class="btn btn-g btn-sm" onclick="go('fastbilling',document.getElementById('tab-fastbilling'))">⚡ Fast Billing</button>
     <button class="btn btn-g btn-sm" onclick="showAdd('event')">+ Event</button>
     <button class="btn btn-o btn-sm" onclick="doLogout()">Sign Out</button>
   </div>
@@ -383,8 +414,12 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
 <div class="nav">
   <button class="ntab on" onclick="go('dash',this)">Dashboard</button>
   <button class="ntab" onclick="go('walkins',this)">Walk-ins</button>
+  <button class="ntab" id="tab-fastbilling" onclick="go('fastbilling',this)">⚡ Fast Billing</button>
+  <button class="ntab" onclick="go('catalogue',this)">Catalogue</button>
   <button class="ntab" id="tab-events" onclick="go('events',this)">Events</button>
   <button class="ntab" onclick="go('tasks',this)">Tasks</button>
+  <button class="ntab" onclick="go('jobs',this)">Studio Jobs</button>
+  <button class="ntab" onclick="go('quotes',this)">Quotations</button>
   <button class="ntab" onclick="go('pricing',this)">Pricing</button>
   <button class="ntab" onclick="go('customers',this)">Customers</button>
   <button class="ntab" onclick="go('pending',this)">Pending</button>
@@ -474,9 +509,34 @@ let DB={
   blockedDates:[],
   equipment: [],
   commissions:[],
+  catalogue:[],
+  jobs:[],
+  quotes:[],
+  messages:[],
   gstConfig: {gstin:'',businessName:'Tathastu Weddings',address:'',hsnCode:'998382',taxRate:18},
   googleReviewLink:'',
 };
+const DEFAULT_DB=structuredClone(DB);
+
+// Keep fields introduced by newer releases when an older client reads a record.
+// In particular, never replace the Worker document with a fixed subset of keys.
+function hydrateDB(data){
+  if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Invalid studio data');
+  DB={...structuredClone(DEFAULT_DB),...data};
+  for(const key of ['walkins','events','tasks','pricing','customers','staff','expenses','blockedDates','equipment','commissions','catalogue','jobs','quotes','messages']){
+    if(data[key]!==undefined&&!Array.isArray(data[key]))throw new Error('Invalid '+key+' data');
+    if(!Array.isArray(DB[key]))DB[key]=key==='pricing'?getDefaultPricing():[];
+  }
+}
+
+function downloadBackup(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='tathastu-backup-'+today()+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
 
 /* ── Auth helpers ── */
 function getCredentials(){
@@ -503,22 +563,44 @@ function setSyncStatus(state){
 
 /* ── Save ── */
 let _saveTimer=null;
+let _workerLoaded=false;
+let _saveQueue=Promise.resolve();
+let _saveRevision=0;
+let _workerETag=null;
 function save(){
   localStorage.setItem('tw_db',JSON.stringify(DB));
+  const revision=++_saveRevision;
+  if(workerAvailable())localStorage.setItem('tw_offline_dirty','1');
   clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(async()=>{
+  _saveTimer=setTimeout(()=>{
     if(!workerAvailable()) return;
     const creds=getCredentials();
-    if(!creds) return;
+    if(!creds||!_workerLoaded){
+      localStorage.setItem('tw_offline_dirty','1');
+      setSyncStatus('err');
+      return;
+    }
+    const body=JSON.stringify(DB);
     setSyncStatus('saving');
-    try{
-      const res=await fetch(workerBase()+'/data',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':creds},
-        body:JSON.stringify(DB),
-      });
-      setSyncStatus(res.ok?'ok':'err');
-    }catch{ setSyncStatus('err'); }
+    _saveQueue=_saveQueue.then(async()=>{
+      if(!_workerLoaded)return;
+      try{
+        const etag=_workerETag;
+        const res=await fetch(workerBase()+'/data',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':creds,...(etag?{'If-Match':etag}:{})},body,
+        });
+        if(!res.ok)throw new Error('Save failed');
+        _workerETag=res.headers.get('ETag')||_workerETag;
+        if(revision===_saveRevision)localStorage.removeItem('tw_offline_dirty');
+        setSyncStatus('ok');
+      }catch{
+        _workerLoaded=false;
+        localStorage.setItem('tw_offline_dirty','1');
+        setSyncStatus('err');
+        alert('Cloud save failed. Your changes remain in this browser. Download Backup JSON before reloading.');
+      }
+    });
   },300);
 }
 
@@ -555,50 +637,40 @@ function doLogout(){
 
 /* ── Load DB ── */
 async function loadFromWorker(){
+  _workerLoaded=false;
+  _workerETag=null;
   if(!workerAvailable()) return loadFromCache();
   const creds=getCredentials();
   if(!creds) return loadFromCache();
   try{
     const res=await fetch(workerBase()+'/data',{headers:{'Authorization':creds}});
+    if(res.status===401){
+      sessionStorage.removeItem('tw_u');sessionStorage.removeItem('tw_p');
+      document.getElementById('login-overlay').classList.remove('hidden');
+      setSyncStatus('err');return;
+    }
     if(!res.ok) return loadFromCache();
     const data=await res.json();
-    DB.walkins     = data.walkins     || [];
-    DB.events      = data.events      || [];
-    DB.tasks       = data.tasks       || [];
-    DB.pricing     = data.pricing     || getDefaultPricing();
-    DB.customers   = data.customers   || [];
-    DB.priceConfig = data.priceConfig || {mrpMultiplier:2.5,customerMultiplier:2.0};
-    DB.staff       = data.staff       || [];
-    DB.expenses    = data.expenses    || [];
-    DB.blockedDates= data.blockedDates|| [];
-    DB.equipment   = data.equipment   || [];
-    DB.commissions = data.commissions || [];
-    DB.gstConfig   = data.gstConfig   || {gstin:'',businessName:'Tathastu Weddings',address:'',hsnCode:'998382',taxRate:18};
-    DB.googleReviewLink = data.googleReviewLink || '';
+    if(localStorage.getItem('tw_offline_dirty')==='1'){
+      loadFromCache();
+      alert('Unsynced changes are saved in this browser. Cloud data was not overwritten. Download Backup JSON before reloading or changing devices.');
+      return;
+    }
+    hydrateDB(data);
+    _workerETag=res.headers.get('ETag');
     backfillCustomers();
     localStorage.setItem('tw_db',JSON.stringify(DB));
+    _workerLoaded=true;
     setSyncStatus('ok');
     render();
   }catch{ loadFromCache(); }
 }
 function loadFromCache(){
+  _workerLoaded=false;
   const cached=localStorage.getItem('tw_db');
   if(cached){
     try{
-      const d=JSON.parse(cached);
-      DB.walkins     = d.walkins     || [];
-      DB.events      = d.events      || [];
-      DB.tasks       = d.tasks       || [];
-      DB.pricing     = d.pricing     || getDefaultPricing();
-      DB.customers   = d.customers   || [];
-      DB.priceConfig = d.priceConfig || {mrpMultiplier:2.5,customerMultiplier:2.0};
-      DB.staff       = d.staff       || [];
-      DB.expenses    = d.expenses    || [];
-      DB.blockedDates= d.blockedDates|| [];
-      DB.equipment   = d.equipment   || [];
-      DB.commissions = d.commissions || [];
-      DB.gstConfig   = d.gstConfig   || {gstin:'',businessName:'Tathastu Weddings',address:'',hsnCode:'998382',taxRate:18};
-      DB.googleReviewLink = d.googleReviewLink || '';
+      hydrateDB(JSON.parse(cached));
     }catch{}
   }
   backfillCustomers();
@@ -606,7 +678,8 @@ function loadFromCache(){
   render();
 }
 
-function today(){return new Date().toISOString().split('T')[0];}
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function phoneKey(phone){const digits=String(phone||'').replace(/\D/g,'');return digits.length===12&&digits.startsWith('91')?digits.slice(2):digits.length===11&&digits.startsWith('0')?digits.slice(1):digits;}
 function fmtINR(n){return '₹'+(Math.round(parseFloat(n)||0)).toLocaleString('en-IN');}
 function daysFrom(d){if(!d)return null;return Math.ceil((new Date(d)-new Date(today()))/86400000);}
 
@@ -637,9 +710,13 @@ function go(id,btn){
 function render(){
   const pg=document.getElementById('pg');
   if(curTab==='dash')       pg.innerHTML=renderDash();
+  else if(curTab==='fastbilling') pg.innerHTML=StudioBusiness.renderPOS();
+  else if(curTab==='catalogue') pg.innerHTML=StudioBusiness.renderCatalogue();
   else if(curTab==='walkins')   pg.innerHTML=renderWalkins();
   else if(curTab==='events')    pg.innerHTML=renderEvents();
   else if(curTab==='tasks')     pg.innerHTML=renderTasks();
+  else if(curTab==='jobs')      pg.innerHTML=StudioBusiness.renderJobs();
+  else if(curTab==='quotes')    pg.innerHTML=StudioBusiness.renderQuotes();
   else if(curTab==='pricing')   pg.innerHTML=renderPricing();
   else if(curTab==='customers') pg.innerHTML=renderCustomers();
   else if(curTab==='pending')   pg.innerHTML=renderPending();
@@ -665,9 +742,18 @@ function render(){
 function renderDash(){
   const all=[...DB.walkins,...DB.events];
   const urgent=DB.tasks.filter(t=>t.priority==='Urgent'&&t.status!=='Done').length;
+  const todayWalkins=DB.walkins.filter(o=>o.date===today());
+  const todaysSales=todayWalkins.reduce((sum,o)=>sum+(Number(o.amount)||0),0);
+  const pendingPayments=all.reduce((sum,o)=>sum+(Number(o.balance)||0),0);
+  const pendingJobs=DB.jobs.filter(j=>!['Completed','Delivered'].includes(j.status)).length;
+  const readyDelivery=DB.walkins.filter(o=>o.status==='Ready').length+DB.jobs.filter(j=>j.status==='Completed').length;
+  const monthPrefix=today().slice(0,7);
+  const monthRevenue=all.filter(o=>(o.date||'').startsWith(monthPrefix)).reduce((sum,o)=>sum+(Number(o.amount)||0),0);
+  const monthExpenses=DB.expenses.filter(e=>(e.date||'').startsWith(monthPrefix)).reduce((sum,e)=>sum+(Number(e.amount)||0),0);
   const todayDel=all.filter(o=>{const d=o.deliveryDate||o.eventDate;return d===today();}).length;
   const recentWi=DB.walkins.slice(-5).reverse();
   const upcoming=DB.events.filter(e=>e.eventDate&&new Date(e.eventDate)>=new Date()).sort((a,b)=>new Date(a.eventDate)-new Date(b.eventDate)).slice(0,5);
+  const upcomingFunctions=DB.events.flatMap(WeddingFunctions.calendarEntries).filter(f=>f.date>=today()&&f.status!=='Completed'&&f.status!=='Cancelled').sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
   const urgTasks=DB.tasks.filter(t=>t.priority==='Urgent'&&t.status!=='Done').slice(0,4);
   const soonEvents=DB.events.filter(e=>{const d=daysFrom(e.eventDate);return d!==null&&d>=0&&d<=3;});
   // Birthday/anniversary reminders (within 7 days)
@@ -690,7 +776,19 @@ function renderDash(){
     <div class="sc"><div class="sc-lbl">Total Orders</div><div class="sc-val g">${DB.walkins.length+DB.events.length}</div></div>
     <div class="sc"><div class="sc-lbl">Urgent Tasks</div><div class="sc-val ${urgent>0?'r':'gr'}">${urgent}</div></div>
     <div class="sc"><div class="sc-lbl">Due Today</div><div class="sc-val ${todayDel>0?'r':'gr'}">${todayDel}</div></div>
+    <div class="sc"><div class="sc-lbl">Today's Walk-ins</div><div class="sc-val">${todayWalkins.length}</div></div>
+    <div class="sc"><div class="sc-lbl">Today's Sales</div><div class="sc-val g">${fmtINR(todaysSales)}</div></div>
+    <div class="sc"><div class="sc-lbl">Pending Payments</div><div class="sc-val r">${fmtINR(pendingPayments)}</div></div>
+    <div class="sc"><div class="sc-lbl">Pending Studio Jobs</div><div class="sc-val">${pendingJobs}</div></div>
+    <div class="sc"><div class="sc-lbl">Ready for Delivery</div><div class="sc-val">${readyDelivery}</div></div>
+    <div class="sc"><div class="sc-lbl">Event Bookings</div><div class="sc-val">${DB.events.length}</div></div>
+    <div class="sc"><div class="sc-lbl">Monthly Revenue</div><div class="sc-val g">${fmtINR(monthRevenue)}</div></div>
+    <div class="sc"><div class="sc-lbl">Monthly Expenses</div><div class="sc-val r">${fmtINR(monthExpenses)}</div></div>
   </div>
+  <div class="shdr"><div><div class="stitle">Upcoming Functions</div><div class="ssub">In date order across all bookings</div></div></div>
+  <div class="tw"><table style="table-layout:auto"><thead><tr><th>Date</th><th>Customer</th><th>Function</th><th>Status</th></tr></thead><tbody>
+  ${upcomingFunctions.length?upcomingFunctions.map(f=>`<tr><td>${f.date}</td><td>${f.name}</td><td>${f.functionName}</td><td>${statusBadge(f.status)}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">No upcoming functions</td></tr>'}
+  </tbody></table></div>
   ${soonEvents.length?`<div class="shdr"><div><div class="stitle">🔔 Events Within 3 Days</div></div></div>
   <div class="tw"><table style="table-layout:auto">
     <thead><tr><th>Event Date</th><th>Customer</th><th>Type</th><th>Venue</th></tr></thead>
@@ -800,6 +898,7 @@ function evRows(list){
       <td>${statusBadge(o.status)}</td>
       <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap">
         <button class="btn btn-o btn-sm" onclick="editEv(${ri})">Edit</button>
+        <button class="btn btn-g btn-sm" onclick="WeddingFunctions.open(${ri})">Functions</button>
         <button class="btn-print btn-sm" onclick="printEventReceipt(${ri})">Receipt</button>
         <button class="btn-print btn-sm" onclick="showQuotation('event',${ri})">Invoice</button>
         <button class="btn-print btn-sm" onclick="showInstallments(${ri})" style="color:var(--amb);border-color:var(--amb-br)">Payments</button>
@@ -940,9 +1039,9 @@ function renderCustomers(){
   const q=(window._cq||'').toLowerCase();
   let list=[...DB.customers];
   if(q) list=list.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.email||'').toLowerCase().includes(q));
-  const ordersWithNoProfile=[...DB.walkins,...DB.events].filter(o=>o.name&&o.phone&&!DB.customers.find(c=>c.phone&&c.phone.replace(/\D/g,'')===o.phone.replace(/\D/g,''))).length;
+  const ordersWithNoProfile=[...DB.walkins,...DB.events].filter(o=>o.name&&o.phone&&!DB.customers.find(c=>c.phone&&phoneKey(c.phone)===phoneKey(o.phone))).length;
   return `
-  <div class="shdr"><div><div class="stitle">Customer Profiles</div><div class="ssub">${DB.customers.length} profiles${ordersWithNoProfile>0?` · <span style="color:var(--amb)">${ordersWithNoProfile} orders without a profile</span>`:''}</div></div><div style="display:flex;gap:6px">${ordersWithNoProfile>0?`<button class="btn btn-o btn-sm" onclick="backfillCustomers()" style="border-color:var(--amb-br);color:var(--amb)">⟳ Sync ${ordersWithNoProfile} from Orders</button>`:''}<button class="btn btn-g btn-sm" onclick="showAdd('customer')">+ Add Customer</button></div></div>
+  <div class="shdr"><div><div class="stitle">Customer Profiles</div><div class="ssub">${DB.customers.length} profiles${ordersWithNoProfile>0?` · <span style="color:var(--amb)">${ordersWithNoProfile} orders without a profile</span>`:''}</div></div><div style="display:flex;gap:6px">${ordersWithNoProfile>0?`<button class="btn btn-o btn-sm" onclick="if(backfillCustomers()){save();render()}" style="border-color:var(--amb-br);color:var(--amb)">⟳ Sync ${ordersWithNoProfile} from Orders</button>`:''}<button class="btn btn-g btn-sm" onclick="showAdd('customer')">+ Add Customer</button></div></div>
   <div class="srow"><input class="sinp" id="cust-search" placeholder="Search by name, phone or email…" value="${window._cq||''}" oninput="window._cq=this.value;renderCustOnly()"></div>
   <div id="cust-table-wrap">
   <div class="tw"><table>
@@ -959,7 +1058,7 @@ function custLoyaltyTier(spent){
 }
 function custTableRows(list){
   return list.length?list.map(c=>{
-    const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone&&c.phone&&o.phone.replace(/\D/g,'')===c.phone.replace(/\D/g,''));
+    const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone&&c.phone&&phoneKey(o.phone)===phoneKey(c.phone));
     const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
     const pending=cOrders.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
     const ri=DB.customers.indexOf(c);
@@ -1047,7 +1146,7 @@ function renderReports(){
   const totalAdv=allOrd.reduce((a,o)=>a+(parseFloat(o.advance)||0),0);
   const totalBal=allOrd.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
   const delivered=allOrd.filter(o=>o.status==='Delivered').length;
-  const svcCount={};DB.walkins.forEach(o=>{svcCount[o.service]=(svcCount[o.service]||0)+1;});
+  const svcCount={};DB.walkins.forEach(o=>{if(o.items?.length)o.items.forEach(item=>{svcCount[item.name]=(svcCount[item.name]||0)+(Number(item.quantity)||1);});else svcCount[o.service]=(svcCount[o.service]||0)+1;});
   const topSvc=Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const evCount={};DB.events.forEach(o=>{evCount[o.eventType]=(evCount[o.eventType]||0)+1;});
   const topEv=Object.entries(evCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -1072,6 +1171,7 @@ function renderReports(){
   const netProfit=totalSales-totalExpenses;
   return `
   <div class="shdr"><div><div class="stitle">Reports &amp; Analytics</div></div><button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button></div>
+  ${StudioBusiness.renderPeriodReport()}
   <div class="rep-grid">
     <div class="rep-card">
       <div class="rep-title">Financial Summary</div>
@@ -1506,6 +1606,7 @@ function saveWi(){
   if(!name){alert('Customer name required');return;}
   const amt=parseFloat(document.getElementById('f-amt').value)||0;
   const adv=parseFloat(document.getElementById('f-adv').value)||0;
+  if(amt<0||adv<0||adv>amt){alert('Check amount and advance: both must be positive and advance cannot exceed amount.');return;}
   const phone=document.getElementById('f-phone').value;
   DB.walkins.push({
     date:document.getElementById('f-date').value,name,phone,
@@ -1530,12 +1631,14 @@ function saveEv(){
   if(!name){alert('Customer name required');return;}
   const amt=parseFloat(document.getElementById('f-amt').value)||0;
   const adv=parseFloat(document.getElementById('f-adv').value)||0;
+  if(amt<0||adv<0||adv>amt){alert('Check amount and advance: both must be positive and advance cannot exceed amount.');return;}
   const crew={pt:+document.getElementById('f-pt').value,pc:+document.getElementById('f-pc').value,vt:+document.getElementById('f-vt').value,vc:+document.getElementById('f-vc').value,ph:+document.getElementById('f-ph').value,vh:+document.getElementById('f-vh').value,vv:+document.getElementById('f-vv').value,v3:+document.getElementById('f-v3').value,dr:+document.getElementById('f-dr').value,ac:+document.getElementById('f-ac').value};
   const extraPairs=[...document.querySelectorAll('.extra-dv-pair')].map(el=>({date:el.querySelector('.extra-date')?.value||'',venue:el.querySelector('.extra-venue')?.value||''})).filter(p=>p.date||p.venue);
   const extraDates=extraPairs.map(p=>p.date);
   const extraVenues=extraPairs.map(p=>p.venue);
   const eType=document.getElementById('f-etype').value;
   const eDate=document.getElementById('f-edate').value;
+  if(!eDate){alert('Main event date required.');return;}
   const phone=document.getElementById('f-phone').value;
   // Conflict detection
   const conflictEvs=DB.events.filter(e=>e.eventDate===eDate&&e.name!==name);
@@ -1551,9 +1654,13 @@ function saveEv(){
   if(refBy&&commAmt>0){
     DB.commissions.push({date:document.getElementById('f-date').value,eventName:name,refBy,amount:commAmt,paid:false,notes:''});
   }
+  const eventFunctions=[{...WeddingFunctions.newFunction(eType||'Wedding',eDate,eDate,document.getElementById('f-venue').value),isMain:true,sequence:1},
+    ...extraPairs.filter(p=>p.date).map((p,i)=>({...WeddingFunctions.newFunction('Additional function '+(i+1),p.date,eDate,p.venue),sequence:i+2}))];
   DB.events.push({
     date:document.getElementById('f-date').value,name,phone,
     eventType:eType,eventDate:eDate,extraDates,
+    weddingDate:eDate,
+    functions:eventFunctions,
     venue:document.getElementById('f-venue').value,extraVenues,
     guests:parseInt(document.getElementById('f-guests').value)||0,
     ...crew,
@@ -1593,7 +1700,10 @@ function savePrice(){
 function saveCust(){
   const name=document.getElementById('f-cname').value.trim();
   if(!name){alert('Name required');return;}
-  DB.customers.push({name,phone:document.getElementById('f-cmob').value,whatsapp:document.getElementById('f-cwa').value,email:document.getElementById('f-cemail')?.value||'',address:document.getElementById('f-cadr').value,reviewDone:document.getElementById('f-crev').value==='1',birthday:document.getElementById('f-cbday')?.value||'',anniversary:document.getElementById('f-canniv')?.value||'',notes:document.getElementById('f-cnotes')?.value||'',timeline:[]});
+  const phone=document.getElementById('f-cmob').value;
+  const clean=phoneKey(phone);
+  if(clean&&DB.customers.some(c=>phoneKey(c.phone)===clean)){alert('A customer with this phone number already exists. Open that customer profile instead.');return;}
+  DB.customers.push({name,phone,whatsapp:document.getElementById('f-cwa').value,email:document.getElementById('f-cemail')?.value||'',address:document.getElementById('f-cadr').value,reviewDone:document.getElementById('f-crev').value==='1',birthday:document.getElementById('f-cbday')?.value||'',anniversary:document.getElementById('f-canniv')?.value||'',notes:document.getElementById('f-cnotes')?.value||'',timeline:[]});
   save();closeShade();render();
 }
 function saveQL(){
@@ -1667,12 +1777,10 @@ function updateTaskStatus(i,v){DB.tasks[i].status=v;save();}
 
 /* ─── WHATSAPP ─── */
 function wa(phone,name,svc,del){
-  const msg='Hello '+name+'! Your '+svc+' order at Tathastu Weddings is ready for pickup'+(del?' on '+del:'')+'.\nPlease contact us to confirm. Thank you! 🙏';
-  window.open('https://wa.me/91'+phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg));
+  showMsgTemplates(phone,name,'walkin',svc,del);
 }
 function waRemind(phone,name,bal){
-  const msg='Hello '+name+'! This is a gentle reminder from Tathastu Weddings.\nYour pending balance is '+bal+'.\nPlease make the payment at your earliest convenience. Thank you! 🙏';
-  window.open('https://wa.me/91'+phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg));
+  showMsgTemplates(phone,name,'customer');
 }
 
 /* ─── UTILS ─── */
@@ -1815,7 +1923,7 @@ function renderCalendar(){
   const daysInPrev=new Date(y,m,0).getDate();
   const monthName=new Date(y,m,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
   const todayStr=today();
-  const allEvents=DB.events.filter(e=>e.eventDate);
+  const allEvents=DB.events.flatMap(WeddingFunctions.calendarEntries);
   const allDeliveries=DB.walkins.filter(o=>o.deliveryDate);
   const blocked=DB.blockedDates.map(b=>b.date);
   const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -1830,11 +1938,11 @@ function renderCalendar(){
     const dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const isToday=dateStr===todayStr;
     const isBlocked=blocked.includes(dateStr);
-    const dayEvs=allEvents.filter(e=>e.eventDate===dateStr||e.extraDates?.includes(dateStr));
+    const dayEvs=allEvents.filter(e=>e.date===dateStr);
     const dayDels=allDeliveries.filter(o=>o.deliveryDate===dateStr);
     cells+=`<div class="cal-day${isToday?' today':''}${isBlocked?' blocked':''}${(dayEvs.length||dayDels.length)?' has-event':''}">
       <div class="cal-dn${isToday?' today-n':''}">${d}</div>
-      ${dayEvs.map(e=>`<div class="cal-ev" title="${e.name} - ${e.eventType}">${e.name.split(' ')[0]} ${e.eventType}</div>`).join('')}
+      ${dayEvs.map(e=>`<div class="cal-ev" title="${e.name} - ${e.functionName}">${e.name.split(' ')[0]} ${e.functionName}</div>`).join('')}
       ${dayDels.map(o=>`<div class="cal-ev wi" title="${o.name} - Delivery">${o.name.split(' ')[0]} 📦</div>`).join('')}
       ${isBlocked?`<div class="cal-ev blk">${DB.blockedDates.find(b=>b.date===dateStr)?.reason||'Blocked'}</div>`:''}
     </div>`;
@@ -2091,6 +2199,7 @@ function editWi(i){
       if(!name){alert('Customer name required');return;}
       const amt=parseFloat(document.getElementById('f-amt').value)||0;
       const adv=parseFloat(document.getElementById('f-adv').value)||0;
+      if(amt<0||adv<0||adv>amt){alert('Check amount and advance.');return;}
       DB.walkins[i]={...DB.walkins[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,service:document.getElementById('f-svc').value,status:document.getElementById('f-status').value,amount:amt,advance:adv,balance:Math.max(0,amt-adv),payMode:document.getElementById('f-pay').value,urgent:document.getElementById('f-urg').value==='Yes',deliveryDate:document.getElementById('f-del').value,deliveryTime:document.getElementById('f-deltime').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||'',watermarkSent:document.getElementById('f-watermark')?.value==='1',finalDelivered:document.getElementById('f-finaldel')?.value==='1'};
       save();closeShade();render();
     };
@@ -2122,11 +2231,9 @@ function editEv(i){
     if(o.extraDates&&o.extraDates.length){
       o.extraDates.forEach((d,j)=>{
         addDateVenueRow();
-        setTimeout(()=>{
-          const pairs=document.querySelectorAll('.extra-dv-pair');
-          const lastPair=pairs[pairs.length-1];
-          if(lastPair){lastPair.querySelector('.extra-date').value=d||'';lastPair.querySelector('.extra-venue').value=(o.extraVenues&&o.extraVenues[j])||'';}
-        },50);
+        const pairs=document.querySelectorAll('.extra-dv-pair');
+        const pair=pairs[pairs.length-1];
+        if(pair){pair.querySelector('.extra-date').value=d||'';pair.querySelector('.extra-venue').value=(o.extraVenues&&o.extraVenues[j])||'';}
       });
     }
     const title=document.querySelector('#shade .mtitle');
@@ -2137,9 +2244,19 @@ function editEv(i){
       if(!name){alert('Customer name required');return;}
       const amt=parseFloat(document.getElementById('f-amt').value)||0;
       const adv=parseFloat(document.getElementById('f-adv').value)||0;
+      if(amt<0||adv<0||adv>amt){alert('Check amount and advance.');return;}
+      const recorded=(o.installments||[]).reduce((sum,p)=>sum+(parseFloat(p.amount)||0),0);
+      if(o.installments?.length&&Math.abs(adv-recorded)>0.01){alert('Recorded payments total '+fmtINR(recorded)+'. Add payments in the Payments view instead of changing Advance here.');return;}
       const crew={pt:+document.getElementById('f-pt').value,pc:+document.getElementById('f-pc').value,vt:+document.getElementById('f-vt').value,vc:+document.getElementById('f-vc').value,ph:+document.getElementById('f-ph').value,vh:+document.getElementById('f-vh').value,vv:+document.getElementById('f-vv').value,v3:+document.getElementById('f-v3').value,dr:+document.getElementById('f-dr').value,ac:+document.getElementById('f-ac').value};
       const extraPairs=[...document.querySelectorAll('.extra-dv-pair')].map(el=>({date:el.querySelector('.extra-date')?.value||'',venue:el.querySelector('.extra-venue')?.value||''})).filter(p=>p.date||p.venue);
-      DB.events[i]={...DB.events[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,eventType:document.getElementById('f-etype').value,eventDate:document.getElementById('f-edate').value,extraDates:extraPairs.map(p=>p.date),venue:document.getElementById('f-venue').value,extraVenues:extraPairs.map(p=>p.venue),guests:parseInt(document.getElementById('f-guests').value)||0,...crew,amount:amt,advance:adv,balance:Math.max(0,amt-adv),status:document.getElementById('f-status').value,payMode:document.getElementById('f-pay').value,terms:document.getElementById('f-terms').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||''};
+      const newDate=document.getElementById('f-edate').value;
+      if((o.weddingDate||o.eventDate)!==newDate&&Array.isArray(o.functions)&&o.functions.length){
+        alert('Change the main date in Functions so you can review all linked date changes first.');return;
+      }
+      if(o.functions?.length&&JSON.stringify(extraPairs)!==JSON.stringify((o.extraDates||[]).map((date,j)=>({date,venue:(o.extraVenues||[])[j]||''})))){alert('Change function dates and venues in Functions so the timeline stays in sync.');return;}
+      const venue=document.getElementById('f-venue').value;
+      const functions=o.functions?.map(f=>f.isMain&&f.venue===o.venue?{...f,venue}:f);
+      DB.events[i]={...DB.events[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,eventType:document.getElementById('f-etype').value,eventDate:newDate,weddingDate:o.weddingDate||newDate,extraDates:extraPairs.map(p=>p.date),venue,extraVenues:extraPairs.map(p=>p.venue),functions,guests:parseInt(document.getElementById('f-guests').value)||0,...crew,amount:amt,advance:adv,balance:Math.max(0,amt-(o.installments?.length?recorded:adv)),status:document.getElementById('f-status').value,payMode:document.getElementById('f-pay').value,terms:document.getElementById('f-terms').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||''};
       save();closeShade();render();
     };
   },150);
@@ -2182,7 +2299,8 @@ function renderInstList(insts){
 function addInstallment(evIdx){
   const o=DB.events[evIdx];if(!o)return;
   const amt=parseFloat(document.getElementById('inst-amt').value)||0;
-  if(!amt){alert('Amount required');return;}
+  if(!Number.isFinite(amt)||amt<=0){alert('Enter a payment greater than zero.');return;}
+  if(amt>(parseFloat(o.balance)||0)){alert('Payment exceeds the remaining balance.');return;}
   if(!o.installments)o.installments=[];
   o.installments.push({date:document.getElementById('inst-date').value,amount:amt,mode:document.getElementById('inst-mode').value,note:document.getElementById('inst-note').value});
   const totalPaid=o.installments.reduce((a,p)=>a+(parseFloat(p.amount)||0),0);
@@ -2263,7 +2381,7 @@ function showQuotation(type,idx){
 /* ─── CUSTOMER NOTES / TIMELINE ─── */
 function showCustDetail(i){
   const c=DB.customers[i];if(!c)return;
-  const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone&&c.phone&&o.phone.replace(/\D/g,'')===c.phone.replace(/\D/g,''));
+  const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone&&c.phone&&phoneKey(o.phone)===phoneKey(c.phone));
   const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
   const shade=document.createElement('div');shade.className='shade';shade.id='shade';
   shade.style='position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;overflow-y:auto;padding:20px';
@@ -2322,21 +2440,21 @@ function backfillCustomers(){
   let added=0;
   [...DB.walkins,...DB.events].forEach(o=>{
     if(!o.name||!o.phone) return;
-    const clean=o.phone.replace(/\D/g,'');
+    const clean=phoneKey(o.phone);
     if(!clean) return;
-    const exists=DB.customers.find(c=>c.phone&&c.phone.replace(/\D/g,'')===clean);
+    const exists=DB.customers.find(c=>c.phone&&phoneKey(c.phone)===clean);
     if(!exists){DB.customers.push({name:o.name,phone:o.phone,whatsapp:'',email:'',address:'',reviewDone:false});added++;}
   });
-  if(added>0){save();render();}
+  // Backfill is in memory only. Loading data must never write to R2.
   return added;
 }
 
 /* ─── AUTO-CREATE / UPDATE CUSTOMER ─── */
 function autoCreateCustomer(name,phone){
   if(!name) return;
-  const clean=phone?phone.replace(/\D/g,''):'';
+  const clean=phoneKey(phone);
   if(!clean) return;
-  const idx=DB.customers.findIndex(c=>c.phone&&c.phone.replace(/\D/g,'')===clean);
+  const idx=DB.customers.findIndex(c=>c.phone&&phoneKey(c.phone)===clean);
   if(idx===-1){
     DB.customers.push({name,phone,whatsapp:'',email:'',address:'',reviewDone:false});
   } else {
@@ -2346,11 +2464,11 @@ function autoCreateCustomer(name,phone){
 
 /* ─── PHONE LOOKUP (auto-fill name + show chip) ─── */
 function lookupCustomer(phone,nameFieldId){
-  const clean=phone.replace(/\D/g,'');
+  const clean=phoneKey(phone);
   const chipId='cust-found-chip';
   const chip=document.getElementById(chipId);
   if(clean.length<8){if(chip)chip.style.display='none';return;}
-  const found=DB.customers.find(c=>c.phone&&c.phone.replace(/\D/g,'')===clean);
+  const found=DB.customers.find(c=>c.phone&&phoneKey(c.phone)===clean);
   const nameEl=document.getElementById(nameFieldId);
   if(found){
     if(nameEl) nameEl.value=found.name;
@@ -2411,29 +2529,12 @@ function toggleUrgent(i){
 
 /* ─── WA DELIVERY NOTIFICATION ─── */
 function waDelivery(phone,name,type,date){
-  const msg='Hello '+name+'! 🎉\n\nGreat news! Your *'+type+'* from *Tathastu Weddings* is ready'+(date?' for '+date:'')+' 📸\n\nPlease contact us to confirm pickup/delivery. Thank you for choosing us! 🙏\n\n— Tathastu Weddings';
-  window.open('https://wa.me/91'+phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg));
+  showMsgTemplates(phone,name,'walkin',type,date);
 }
 
 /* ─── WHATSAPP MESSAGE TEMPLATES ─── */
 function showMsgTemplates(phone,name,context,extra1,extra2){
-  const cleanPhone=phone.replace(/\D/g,'');
-  const shade=document.createElement('div');
-  shade.id='msg-shade';
-  shade.style='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
-  const templates=getMsgTemplates(name,context,extra1,extra2,phone);
-  shade.innerHTML=`<div class="modal" style="max-width:520px;max-height:80vh;overflow-y:auto">
-    <div class="mtitle">WhatsApp Messages <button class="mclose" onclick="document.getElementById('msg-shade').remove()">✕</button></div>
-    <div style="font-size:11px;color:var(--txm);margin-bottom:12px">Choose a message template to send to <b style="color:var(--tx)">${name}</b> · ${phone}</div>
-    ${templates.map(t=>`<div class="msg-tmpl" onclick="window.open('https://wa.me/91${cleanPhone}?text='+encodeURIComponent(${JSON.stringify(t.body)}));document.getElementById('msg-shade').remove()">
-      <div class="msg-tmpl-title">${t.title}</div>
-      <div class="msg-tmpl-body">${t.body.replace(/\n/g,'<br>').replace(/\*(.*?)\*/g,'<b>$1</b>')}</div>
-    </div>`).join('')}
-    <div style="text-align:center;margin-top:8px">
-      <button class="btn btn-o btn-sm" onclick="document.getElementById('msg-shade').remove()">Close</button>
-    </div>
-  </div>`;
-  document.body.appendChild(shade);
+  return StudioBusiness.openMessages(phone,name,context,extra1,extra2);
 }
 function getMsgTemplates(name,context,service,date,phone){
   const studio='Tathastu Weddings';

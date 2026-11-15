@@ -10,7 +10,8 @@ const DATA_KEY = 'studio-db.json';
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-Match',
+  'Access-Control-Expose-Headers': 'ETag',
 };
 
 function text(body, status = 200) {
@@ -40,6 +41,7 @@ function checkAuth(request, env) {
   if (!creds) return false;
   const eu = (env.AUTH_USERNAME || '').trim();
   const ep = (env.AUTH_PASSWORD || '').trim();
+  if (!eu || !ep) return false;
   const uOk = creds.user.length === eu.length && [...creds.user].every((c,i)=>c===eu[i]);
   const pOk = creds.pass.length === ep.length && [...creds.pass].every((c,i)=>c===ep[i]);
   return uOk && pOk;
@@ -56,15 +58,36 @@ export default {
       if (!checkAuth(request, env)) return text('Unauthorized', 401);
       const obj = await env.TATHASTU_BUCKET.get(DATA_KEY);
       if (!obj) return json({ walkins:[], events:[], tasks:[], pricing:[], customers:[] });
-      return new Response(obj.body, { headers: { ...CORS, 'Content-Type': 'application/json' } });
+      return new Response(obj.body, { headers: { ...CORS, 'Content-Type': 'application/json', ETag: obj.httpEtag } });
     }
     if (method === 'POST' && url.pathname === '/data') {
       if (!checkAuth(request, env)) return text('Unauthorized', 401);
       const body = await request.text();
       if (body.length > 10*1024*1024) return text('Payload too large', 413);
-      try { JSON.parse(body); } catch { return text('Invalid JSON', 400); }
-      await env.TATHASTU_BUCKET.put(DATA_KEY, body, { httpMetadata: { contentType: 'application/json' } });
-      return text('OK');
+      let data;
+      try { data = JSON.parse(body); } catch { return text('Invalid JSON', 400); }
+      if (!data || typeof data !== 'object' || Array.isArray(data) ||
+          !['walkins', 'events', 'tasks', 'pricing', 'customers'].every(key => Array.isArray(data[key]))) {
+        return text('Invalid studio data', 400);
+      }
+      // Keep a complete prior copy before any replacement. If backup fails, leave
+      // the current document untouched so a failed write cannot erase records.
+      const current = await env.TATHASTU_BUCKET.get(DATA_KEY);
+      const expected = request.headers.get('If-Match');
+      if (current && !expected) return text('Refresh required before saving', 428);
+      if (current && expected !== current.httpEtag) return text('Data changed on another device', 409);
+      if (current) {
+        const backupKey = `studio-backups/${new Date().toISOString()}-${crypto.randomUUID()}.json`;
+        await env.TATHASTU_BUCKET.put(backupKey, await current.text(), {
+          httpMetadata: { contentType: 'application/json' },
+        });
+      }
+      const written = await env.TATHASTU_BUCKET.put(DATA_KEY, body, {
+        onlyIf: current ? { etagMatches: current.etag } : undefined,
+        httpMetadata: { contentType: 'application/json' },
+      });
+      if (!written) return text('Data changed on another device', 409);
+      return new Response('OK', { headers: { ...CORS, ETag: written.httpEtag } });
     }
     return text('Not Found', 404);
   },
