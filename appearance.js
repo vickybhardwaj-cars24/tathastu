@@ -73,6 +73,7 @@ const Appearance=(()=>{
     document.body.style.setProperty('--cal-important',hex(c.importantColor)||'#d46a45');
     document.body.style.zoom=String((Number(settings.textSize)||13.5)/13.5);
     document.getElementById('theme-btn')?.setAttribute('title','Appearance settings');
+    window.AdvancedAppearance?.apply(activeTheme());
   }
   function setTheme(key){if(!names()[key])return;settings.theme=key;settings.manualOverride=true;persist();window.render();}
   function setMode(mode){if(!['light','dark'].includes(mode))return;settings.mode=mode;persist();window.render();}
@@ -123,5 +124,5 @@ const Appearance=(()=>{
   apply();setInterval(()=>{if(settings.automatic&&!settings.manualOverride)apply();},60000);
   return {render,apply,toggleMode,setTheme,setMode,setTextSize,setAuto,resumeAuto,saveCustom,saveCalendarStyle,editRule,saveRule,deleteRule,
     renderCalendar,setCalendarDate,setCalendarView,shiftCalendar,openEntry,editNote,saveNote,deleteNote,editBlocked,saveBlocked,deleteBlocked,
-    activeTheme,activeRule,settings};
+    activeTheme,activeRule,palette,settings};
 })();
