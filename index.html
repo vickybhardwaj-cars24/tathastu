@@ -778,9 +778,10 @@ function render(){
 
 /* ─── DASHBOARD ─── */
 function renderDash(){
-  const all=[...DB.walkins,...DB.events];
+  const activeWalkins=DB.walkins.filter(o=>o.status!=='Enquiry');
+  const all=[...activeWalkins,...DB.events];
   const urgent=DB.tasks.filter(t=>t.priority==='Urgent'&&t.status!=='Done').length;
-  const todayWalkins=DB.walkins.filter(o=>o.date===today());
+  const todayWalkins=activeWalkins.filter(o=>o.date===today());
   const todaysSales=todayWalkins.reduce((sum,o)=>sum+(Number(o.amount)||0),0);
   const pendingPayments=all.reduce((sum,o)=>sum+(Number(o.balance)||0),0);
   const pendingJobs=DB.jobs.filter(j=>!['Completed','Delivered'].includes(j.status)).length;
@@ -811,7 +812,7 @@ function renderDash(){
 
   return `
   <div class="stats">
-    <div class="sc"><div class="sc-lbl">Total Orders</div><div class="sc-val g">${DB.walkins.length+DB.events.length}</div></div>
+    <div class="sc"><div class="sc-lbl">Total Orders</div><div class="sc-val g">${all.length}</div></div>
     <div class="sc"><div class="sc-lbl">Urgent Tasks</div><div class="sc-val ${urgent>0?'r':'gr'}">${urgent}</div></div>
     <div class="sc"><div class="sc-lbl">Due Today</div><div class="sc-val ${todayDel>0?'r':'gr'}">${todayDel}</div></div>
     <div class="sc"><div class="sc-lbl">Today's Walk-ins</div><div class="sc-val">${todayWalkins.length}</div></div>
@@ -1077,7 +1078,7 @@ function renderCustomers(){
   const q=(window._cq||'').toLowerCase();
   let list=[...DB.customers];
   if(q) list=list.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.email||'').toLowerCase().includes(q));
-  const ordersWithNoProfile=[...DB.walkins,...DB.events].filter(o=>o.name&&o.phone&&!DB.customers.find(c=>c.phone&&phoneKey(c.phone)===phoneKey(o.phone))).length;
+  const ordersWithNoProfile=[...DB.walkins.filter(o=>o.status!=='Enquiry'),...DB.events].filter(o=>o.name&&o.phone&&!DB.customers.find(c=>c.phone&&phoneKey(c.phone)===phoneKey(o.phone))).length;
   return `
   <div class="shdr"><div><div class="stitle">Customer Profiles</div><div class="ssub">${DB.customers.length} profiles${ordersWithNoProfile>0?` · <span style="color:var(--amb)">${ordersWithNoProfile} orders without a profile</span>`:''}</div></div><div style="display:flex;gap:6px">${ordersWithNoProfile>0?`<button class="btn btn-o btn-sm" onclick="if(backfillCustomers()){save();render()}" style="border-color:var(--amb-br);color:var(--amb)">⟳ Sync ${ordersWithNoProfile} from Orders</button>`:''}<button class="btn btn-g btn-sm" onclick="showAdd('customer')">+ Add Customer</button></div></div>
   <div class="srow"><input class="sinp" id="cust-search" placeholder="Search by name, phone or email…" value="${window._cq||''}" oninput="window._cq=this.value;renderCustOnly()"></div>
@@ -1096,7 +1097,7 @@ function custLoyaltyTier(spent){
 }
 function custTableRows(list){
   return list.length?list.map(c=>{
-    const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone&&c.phone&&phoneKey(o.phone)===phoneKey(c.phone));
+    const cOrders=[...DB.walkins.filter(o=>o.status!=='Enquiry'),...DB.events].filter(o=>o.phone&&c.phone&&phoneKey(o.phone)===phoneKey(c.phone));
     const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
     const pending=cOrders.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
     const ri=DB.customers.indexOf(c);
@@ -1129,7 +1130,7 @@ function renderCustOnly(){
 
 /* ─── PENDING ─── */
 function renderPending(){
-  const all=[...DB.walkins.map(o=>({...o,_t:'Walk-in'})),...DB.events.map(o=>({...o,_t:o.eventType||'Event'}))].filter(o=>parseFloat(o.balance)>0).sort((a,b)=>(parseFloat(b.balance)||0)-(parseFloat(a.balance)||0));
+  const all=[...DB.walkins.filter(o=>o.status!=='Enquiry').map(o=>({...o,_t:'Walk-in'})),...DB.events.map(o=>({...o,_t:o.eventType||'Event'}))].filter(o=>parseFloat(o.balance)>0).sort((a,b)=>(parseFloat(b.balance)||0)-(parseFloat(a.balance)||0));
   return `
   <div class="shdr"><div><div class="stitle">Pending Balances</div><div class="ssub">${all.length} orders with outstanding payment · Total: ${fmtINR(all.reduce((a,o)=>a+(parseFloat(o.balance)||0),0))}</div></div></div>
   <div class="tw"><table>
@@ -1179,12 +1180,12 @@ function renderDelivery(){
 
 /* ─── REPORTS ─── */
 function renderReports(){
-  const allOrd=[...DB.walkins,...DB.events];
+  const allOrd=[...DB.walkins.filter(o=>o.status!=='Enquiry'),...DB.events];
   const totalSales=allOrd.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
   const totalAdv=allOrd.reduce((a,o)=>a+(parseFloat(o.advance)||0),0);
   const totalBal=allOrd.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
   const delivered=allOrd.filter(o=>o.status==='Delivered').length;
-  const svcCount={};DB.walkins.forEach(o=>{if(o.items?.length)o.items.forEach(item=>{svcCount[item.name]=(svcCount[item.name]||0)+(Number(item.quantity)||1);});else svcCount[o.service]=(svcCount[o.service]||0)+1;});
+  const svcCount={};DB.walkins.filter(o=>o.status!=='Enquiry').forEach(o=>{if(o.items?.length)o.items.forEach(item=>{svcCount[item.name]=(svcCount[item.name]||0)+(Number(item.quantity)||1);});else svcCount[o.service]=(svcCount[o.service]||0)+1;});
   const topSvc=Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const evCount={};DB.events.forEach(o=>{evCount[o.eventType]=(evCount[o.eventType]||0)+1;});
   const topEv=Object.entries(evCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -2107,7 +2108,7 @@ function renderFinance(){
   // Last 6 months P&L
   const months6=[];
   for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months6.push({year:d.getFullYear(),month:d.getMonth()+1,lbl:d.toLocaleString('en-IN',{month:'short'})});}
-  const allOrd=[...DB.walkins,...DB.events];
+  const allOrd=[...DB.walkins.filter(o=>o.status!=='Enquiry'),...DB.events];
   const maxBar=Math.max(1,...months6.map(m=>{
     const inc=allOrd.filter(o=>{const d=new Date(o.eventDate||o.date);return d.getFullYear()===m.year&&d.getMonth()+1===m.month;}).reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
     const exp=DB.expenses.filter(e=>{if(!e.date)return false;const d=new Date(e.date);return d.getFullYear()===m.year&&d.getMonth()+1===m.month;}).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
@@ -2429,7 +2430,7 @@ function showQuotation(type,idx){
 function showCustDetail(i){
   const c=DB.customers[i];if(!c)return;
   const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone&&c.phone&&phoneKey(o.phone)===phoneKey(c.phone));
-  const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
+  const spent=cOrders.filter(o=>o.status!=='Enquiry').reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
   const shade=document.createElement('div');shade.className='shade';shade.id='shade';
   shade.style='position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;overflow-y:auto;padding:20px';
   shade.innerHTML=`<div class="modal" style="max-width:560px">
@@ -2444,7 +2445,7 @@ function showCustDetail(i){
     ${c.notes?`<div style="background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px">${c.notes}</div>`:''}
     ${DB.googleReviewLink?`<div style="margin-bottom:10px"><a href="${DB.googleReviewLink}" target="_blank" class="btn btn-o btn-sm" style="text-decoration:none;display:inline-block">⭐ Open Google Review Page</a> ${c.reviewDone?'<span class="bdg bdg-grn">✓ Review Done</span>':'<button class="btn btn-o btn-sm" onclick="DB.customers[${i}].reviewDone=true;save();closeShade();render()">Mark Review Done</button>'}</div>`:''}
     <div class="shdr" style="margin-top:0"><div><div class="stitle" style="font-size:14px">Order History</div></div></div>
-    <div style="font-size:12px">${cOrders.length?cOrders.map(o=>`<div style="padding:5px 0;border-bottom:1px solid var(--br)"><b>${o.eventDate||o.deliveryDate||o.date||'—'}</b> · ${o.service||o.eventType||'—'} · ${fmtINR(o.amount)} ${parseFloat(o.balance)>0?'<span class="bal-r">(bal: '+fmtINR(o.balance)+')</span>':'<span class="bal-g">✓ Paid</span>'}</div>`).join(''):'<div class="empty">No orders yet</div>'}</div>
+    <div style="font-size:12px">${cOrders.length?cOrders.map(o=>`<div style="padding:5px 0;border-bottom:1px solid var(--br)"><b>${o.eventDate||o.deliveryDate||o.date||'—'}</b> · ${o.service||o.eventType||'—'} · ${fmtINR(o.amount)} ${o.status==='Enquiry'?'<span class="bdg bdg-muted">Estimate only</span>':parseFloat(o.balance)>0?'<span class="bal-r">(bal: '+fmtINR(o.balance)+')</span>':'<span class="bal-g">✓ Paid</span>'}</div>`).join(''):'<div class="empty">No orders yet</div>'}</div>
     <div class="csub">Add Timeline Note</div>
     <div class="fg fg-2">
       <div class="ff"><label>Date</label><input type="date" id="tl-date" value="${today()}"></div>

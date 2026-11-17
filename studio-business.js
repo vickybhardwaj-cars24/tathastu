@@ -189,7 +189,7 @@ const StudioBusiness=(()=>{
     const weekStart=new Date(selectedDate);weekStart.setUTCDate(weekStart.getUTCDate()-weekStart.getUTCDay());
     const weekEnd=new Date(weekStart);weekEnd.setUTCDate(weekEnd.getUTCDate()+7);
     const inPeriod=d=>{if(!d)return false;if(period==='day')return d===selected;if(period==='month')return d.slice(0,7)===selected.slice(0,7);const date=new Date(d+'T00:00:00Z');return date>=weekStart&&date<weekEnd;};
-    const orders=[...DB.walkins,...DB.events].filter(o=>inPeriod(o.date));
+    const orders=[...DB.walkins.filter(o=>o.status!=='Enquiry'),...DB.events].filter(o=>inPeriod(o.date));
     const expenses=DB.expenses.filter(e=>inPeriod(e.date));
     const sales=money(orders.reduce((n,o)=>n+(Number(o.amount)||0),0));
     const received=money(orders.reduce((n,o)=>n+(Number(o.advance)||0),0));
