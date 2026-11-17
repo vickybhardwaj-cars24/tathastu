@@ -14,7 +14,10 @@
 const WORKER_URL = 'https://tathastu.vicky-bhardwaj.workers.dev';
 </script>
 <script src="wedding-functions.js"></script>
+<script src="print-layout.js"></script>
 <script src="studio-business.js"></script>
+<script src="quotation-upgrades.js"></script>
+<script src="appearance.js"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap');
@@ -89,6 +92,7 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
 /* BUTTONS */
 .btn{padding:7px 16px;border-radius:var(--r);border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;transition:all .15s}
 .btn-g{background:var(--gold);color:#180F00}
+.btn-g{color:var(--on-primary,#180F00)}
 .btn-g:hover{background:var(--gold-lt)}
 .btn-o{background:transparent;border:1px solid var(--br);color:var(--txm)}
 .btn-o:hover{border-color:var(--gold);color:var(--gold)}
@@ -106,6 +110,8 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
 .tw td{padding:9px 10px;border-bottom:1px solid var(--br);color:var(--tx);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tw tr:last-child td{border-bottom:none}
 .tw tr:hover td{background:var(--s2)}
+.quotes-wrap{overflow-x:auto}
+.quotes-wrap table{min-width:1000px;table-layout:auto}
 
 /* BADGES */
 .bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;letter-spacing:.04em;white-space:nowrap}
@@ -279,6 +285,20 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
 .cal-dn{font-size:10px;font-weight:600;color:var(--txm);margin-bottom:2px}
 .cal-dn.today-n{color:var(--gold)}
 .cal-ev{font-size:8.5px;background:var(--gold-dk);color:var(--gold-lt);border-radius:2px;padding:1px 3px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-day{background:var(--cal-bg,var(--s2))}
+.cal-dn{font-size:var(--cal-number-size,11px);border:0;background:none;color:var(--txm);cursor:pointer}
+.cal-ev{display:block;width:100%;text-align:left;border:0;cursor:pointer;font-size:var(--cal-event-size,10px);background:var(--entry-color,var(--cal-event,var(--gold)));color:var(--ink);white-space:normal;overflow-wrap:anywhere}
+.cal-ev.delivery{background:var(--cal-delivery,var(--blu))}
+.cal-ev.blocked,.cal-ev.important{outline:2px solid var(--cal-important,var(--red))}
+.cal-ev.note{background:var(--entry-color,var(--gold-dk));color:var(--tx)}
+.cal-detail{display:block;font-size:var(--cal-detail-size,10px);font-weight:400;opacity:.85}
+.cal-one{grid-template-columns:1fr}
+.cal-one .cal-day{min-height:180px}
+.cal-legend{font-size:var(--cal-detail-size,10px);padding:3px 8px;border-left:4px solid var(--cal-event,var(--gold))}
+.cal-legend.delivery{border-color:var(--cal-delivery,var(--blu))}
+.cal-legend.blocked{border-color:var(--cal-important,var(--red))}
+.appearance-color{display:flex;gap:6px}
+.appearance-color input[type=color]{width:44px;min-width:44px;padding:1px}
 .cal-ev.wi{background:var(--blu-bg);color:var(--blu);border:1px solid var(--blu-br)}
 .cal-ev.blk{background:var(--red-bg);color:var(--red);border:1px solid var(--red-br)}
 .cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:10px}
@@ -401,7 +421,7 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
   <div class="hdr-right">
     <div class="date-chip">Today <b id="hdr-date"></b></div>
     <div id="sync-status"><span class="sync-dot ok" id="sync-dot"></span><span id="sync-txt">Synced</span></div>
-    <button class="btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
+    <button class="btn-theme" id="theme-btn" onclick="go('appearance',document.getElementById('tab-appearance'))" title="Appearance settings">🎨</button>
     <button class="btn btn-o btn-sm" onclick="downloadBackup()">⬇ Backup JSON</button>
     <button class="btn btn-o btn-sm" onclick="exportAll()">⬇ Export CSV</button>
     <button class="btn btn-g btn-sm" onclick="showAdd('walkin')">+ Walk-in</button>
@@ -426,6 +446,7 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
   <button class="ntab" onclick="go('delivery',this)">Delivery</button>
   <button class="ntab" onclick="go('reports',this)">Reports</button>
   <button class="ntab" onclick="go('calendar',this)">Calendar</button>
+  <button class="ntab" id="tab-appearance" onclick="go('appearance',this)">🎨 Appearance</button>
   <button class="ntab" onclick="go('staff',this)">Staff</button>
   <button class="ntab" onclick="go('finance',this)">Finance</button>
   <button class="ntab" onclick="go('equipment',this)">Equipment</button>
@@ -454,7 +475,7 @@ const BIG_SVC=[
   'Portfolio','Family Shoot','Documentary','Movie','Janeu',
   'Product Photography','School Photos'
 ];
-const ORDER_STATUS=['New Order','In Progress','Urgent','Ready','Delivered','Payment Pending','Cancelled'];
+const ORDER_STATUS=['New Order','In Progress','Urgent','Ready','Delivered','Payment Pending','Cancelled','Enquiry'];
 const TASK_PRI=['Urgent','High','Normal','Low'];
 const PAY_MODES=['Cash','UPI','Card','Bank Transfer'];
 const PRICE_DATA=[
@@ -513,6 +534,7 @@ let DB={
   jobs:[],
   quotes:[],
   messages:[],
+  calendarNotes:[],
   gstConfig: {gstin:'',businessName:'Tathastu Weddings',address:'',hsnCode:'998382',taxRate:18},
   googleReviewLink:'',
 };
@@ -523,7 +545,7 @@ const DEFAULT_DB=structuredClone(DB);
 function hydrateDB(data){
   if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Invalid studio data');
   DB={...structuredClone(DEFAULT_DB),...data};
-  for(const key of ['walkins','events','tasks','pricing','customers','staff','expenses','blockedDates','equipment','commissions','catalogue','jobs','quotes','messages']){
+  for(const key of ['walkins','events','tasks','pricing','customers','staff','expenses','blockedDates','equipment','commissions','catalogue','jobs','quotes','messages','calendarNotes']){
     if(data[key]!==undefined&&!Array.isArray(data[key]))throw new Error('Invalid '+key+' data');
     if(!Array.isArray(DB[key]))DB[key]=key==='pricing'?getDefaultPricing():[];
   }
@@ -722,7 +744,8 @@ function render(){
   else if(curTab==='pending')   pg.innerHTML=renderPending();
   else if(curTab==='delivery')  pg.innerHTML=renderDelivery();
   else if(curTab==='reports')   pg.innerHTML=renderReports();
-  else if(curTab==='calendar')  pg.innerHTML=renderCalendar();
+  else if(curTab==='calendar')  pg.innerHTML=Appearance.renderCalendar();
+  else if(curTab==='appearance') pg.innerHTML=Appearance.render();
   else if(curTab==='staff')     pg.innerHTML=renderStaff();
   else if(curTab==='finance')   pg.innerHTML=renderFinance();
   else if(curTab==='equipment') pg.innerHTML=renderEquipment();
@@ -1325,7 +1348,7 @@ function buildForm(type){
     <div class="fg fg-3 mt8">
       <div class="ff"><label>Event Type</label><select id="f-etype">${BIG_SVC.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="ff"><label>Guest Count (approx)</label><input type="number" id="f-guests" placeholder="e.g. 150" min="0" oninput="updateCrewFeedback()"></div>
-      <div class="ff"><label>Status</label><select id="f-status">${ORDER_STATUS.map(s=>`<option>${s}</option>`).join('')}</select></div>
+      <div class="ff"><label>Status</label><select id="f-status">${ORDER_STATUS.filter(s=>s!=='Enquiry').map(s=>`<option>${s}</option>`).join('')}</select></div>
     </div>
     <div class="divider"></div>
     <div class="csub">Event Dates &amp; Venues (linked)</div>
@@ -1537,6 +1560,7 @@ function showBookingConfirm(name,eType,date){
 /* ─── Receipt printing ─── */
 function printReceipt(idx){
   const o=DB.walkins[idx];if(!o)return;
+  const enquiry=o.status==='Enquiry';
   const rNo='TW-'+String(idx+1).padStart(4,'0');
   const bal=Math.round(parseFloat(o.balance)||0);
   const win=window.open('','_blank','width=420,height=660');
@@ -1561,7 +1585,7 @@ function printReceipt(idx){
     '@media print{.np{display:none}body{margin:0}}'+
   '</style></head><body>'+
   '<div class="hdr"><img src="logo.png" alt="" style="width:60px;height:60px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px" onerror="this.style.display=\'none\'"><h1>Tathastu Weddings</h1><p>Photography &amp; Videography Studio</p></div>'+
-  '<div class="title">RECEIPT</div>'+
+  '<div class="title">'+(enquiry?'ESTIMATE':'RECEIPT')+'</div>'+
   '<div class="rno">No: '+rNo+' &nbsp;|&nbsp; Date: '+(o.date||today())+'</div>'+
   '<table>'+
     '<tr><td>Customer</td><td>'+o.name+'</td></tr>'+
@@ -1570,13 +1594,13 @@ function printReceipt(idx){
     '<tr><td>Service</td><td>'+(o.service||'—')+'</td></tr>'+
     (o.notes?'<tr><td>Details</td><td style="font-size:10px;font-weight:400">'+o.notes+'</td></tr>':'')+
     (o.deliveryDate?'<tr><td>Delivery</td><td>'+o.deliveryDate+(o.deliveryTime?' at '+o.deliveryTime:'')+'</td></tr>':'')+
-    (o.payMode?'<tr><td>Pay Mode</td><td>'+o.payMode+'</td></tr>':'')+
+    (!enquiry&&o.payMode?'<tr><td>Pay Mode</td><td>'+o.payMode+'</td></tr>':'')+
     '<tr><td colspan="2"><div class="dash"></div></td></tr>'+
-    '<tr class="total"><td>Total Amount</td><td>&#8377;'+Math.round(parseFloat(o.amount)||0).toLocaleString('en-IN')+'</td></tr>'+
-    '<tr><td>Advance Paid</td><td>&#8377;'+Math.round(parseFloat(o.advance)||0).toLocaleString('en-IN')+'</td></tr>'+
-    '<tr><td class="'+(bal>0?'rp':'rg')+'">Balance Due</td><td class="'+(bal>0?'rp':'rg')+'">&#8377;'+bal.toLocaleString('en-IN')+'</td></tr>'+
+    '<tr class="total"><td>'+(enquiry?'Estimated Amount':'Total Amount')+'</td><td>&#8377;'+Math.round(parseFloat(o.amount)||0).toLocaleString('en-IN')+'</td></tr>'+
+    (enquiry?'':'<tr><td>Advance Paid</td><td>&#8377;'+Math.round(parseFloat(o.advance)||0).toLocaleString('en-IN')+'</td></tr>'+
+    '<tr><td class="'+(bal>0?'rp':'rg')+'">Balance Due</td><td class="'+(bal>0?'rp':'rg')+'">&#8377;'+bal.toLocaleString('en-IN')+'</td></tr>')+
   '</table>'+
-  '<div style="text-align:center;margin:14px 0;font-size:10px;color:#777;border:1px dashed #ccc;padding:8px;border-radius:4px">This is a computer generated receipt. No signature required.</div>'+
+  '<div style="text-align:center;margin:14px 0;font-size:10px;color:#777;border:1px dashed #ccc;padding:8px;border-radius:4px">'+(enquiry?'Estimate only. No booking or payment is confirmed.':'This is a computer generated receipt. No signature required.')+'</div>'+
   '<div class="footer"><b>Thank you for choosing Tathastu Weddings!</b><br>Please keep this receipt for your records.</div>'+
   '<div class="np"><button onclick="window.print()" style="background:#111;color:#fff;border:none;padding:9px 24px;border-radius:5px;cursor:pointer;font-size:12px;margin-top:4px">🖶 Print Receipt</button></div>'+
   '</body></html>');
@@ -1607,6 +1631,7 @@ function saveWi(){
   const amt=parseFloat(document.getElementById('f-amt').value)||0;
   const adv=parseFloat(document.getElementById('f-adv').value)||0;
   if(amt<0||adv<0||adv>amt){alert('Check amount and advance: both must be positive and advance cannot exceed amount.');return;}
+  if(document.getElementById('f-status').value==='Enquiry'&&adv>0){alert('An enquiry cannot show an advance. Choose a confirmed order status after receiving payment.');return;}
   const phone=document.getElementById('f-phone').value;
   DB.walkins.push({
     date:document.getElementById('f-date').value,name,phone,
@@ -1909,8 +1934,10 @@ function updateCost(i,field,val){
   save();
 }
 function saveGSTConfig(){
+  const reviewValue=document.getElementById('cfg-glink').value.trim();
+  if(reviewValue){try{if(new URL(reviewValue).protocol!=='https:')throw new Error('HTTPS required');}catch{alert('Enter a complete https:// Google review link.');return;}}
   DB.gstConfig={gstin:document.getElementById('cfg-gstin').value.trim(),businessName:document.getElementById('cfg-bname').value.trim(),address:document.getElementById('cfg-badr').value.trim(),hsnCode:document.getElementById('cfg-hsn').value.trim()||'998382',taxRate:parseFloat(document.getElementById('cfg-gstrate').value)||18};
-  DB.googleReviewLink=document.getElementById('cfg-glink').value.trim();
+  DB.googleReviewLink=reviewValue;
   save();alert('GST & Review config saved!');render();
 }
 
@@ -2200,6 +2227,7 @@ function editWi(i){
       const amt=parseFloat(document.getElementById('f-amt').value)||0;
       const adv=parseFloat(document.getElementById('f-adv').value)||0;
       if(amt<0||adv<0||adv>amt){alert('Check amount and advance.');return;}
+      if(document.getElementById('f-status').value==='Enquiry'&&adv>0){alert('An enquiry cannot show an advance. Change its status after receiving payment.');return;}
       DB.walkins[i]={...DB.walkins[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,service:document.getElementById('f-svc').value,status:document.getElementById('f-status').value,amount:amt,advance:adv,balance:Math.max(0,amt-adv),payMode:document.getElementById('f-pay').value,urgent:document.getElementById('f-urg').value==='Yes',deliveryDate:document.getElementById('f-del').value,deliveryTime:document.getElementById('f-deltime').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||'',watermarkSent:document.getElementById('f-watermark')?.value==='1',finalDelivered:document.getElementById('f-finaldel')?.value==='1'};
       save();closeShade();render();
     };
@@ -2426,13 +2454,11 @@ function attachEvents(){}
 
 /* ─── THEME ─── */
 function toggleTheme(){
-  const isLight=document.body.classList.toggle('light');
-  localStorage.setItem('tw_theme',isLight?'light':'dark');
-  document.getElementById('theme-btn').textContent=isLight?'☀️':'🌙';
+  Appearance.toggleMode();
 }
 function applyTheme(){
-  const saved=localStorage.getItem('tw_theme');
-  if(saved==='light'){document.body.classList.add('light');const b=document.getElementById('theme-btn');if(b)b.textContent='☀️';}
+  if(!localStorage.getItem('tw_appearance_v2')&&localStorage.getItem('tw_theme')==='light')Appearance.settings.mode='light';
+  Appearance.apply();
 }
 
 /* ─── BACKFILL CUSTOMER PROFILES FROM ALL ORDERS ─── */
@@ -2538,6 +2564,7 @@ function showMsgTemplates(phone,name,context,extra1,extra2){
 }
 function getMsgTemplates(name,context,service,date,phone){
   const studio='Tathastu Weddings';
+  const reviewUrl=/^https:\/\//i.test(DB.googleReviewLink||'')?DB.googleReviewLink.trim():'';
   const bal=context==='walkin'?DB.walkins.find(o=>o.phone===phone&&o.name===name):DB.events.find(o=>o.phone===phone&&o.name===name);
   const balAmt=bal?fmtINR(parseFloat(bal.balance)||0):'';
   const templates=[];
@@ -2549,13 +2576,25 @@ function getMsgTemplates(name,context,service,date,phone){
   }
   if(context==='event'){
     templates.push({title:'📅 Event Reminder',body:`Hello ${name}! 📅\n\nJust a reminder that your *${service||'event'}* is scheduled for *${date||'your booked date'}*.\n\nOur team from *${studio}* will be there on time. Looking forward to capturing your beautiful moments! 📸\n\nFor any changes, please contact us in advance.`});
-    templates.push({title:'🤝 Post-Event Follow-up',body:`Hello ${name}! 🌸\n\nIt was an absolute pleasure being part of your *${service||'event'}*! 📸\n\nWe are processing your photos/videos and will deliver them as promised.\n\nWould love it if you could share your experience with a Google review! 🌟\n\n— ${studio}`});
-    templates.push({title:'⭐ Google Review Request',body:`Hello ${name}! 🙏\n\nThank you for choosing *${studio}* for your *${service||'event'}*! We hope you loved the results.\n\nWould you mind leaving us a Google review? It helps us grow and serve more families like yours. 🌟\n\nThank you so much! — Team Tathastu`});
+    templates.push({title:'🤝 Post-Event Follow-up',body:`Hello ${name}! 🌸\n\nIt was a pleasure being part of your *${service||'event'}*. We are processing your photos/videos and will deliver them as promised.${reviewUrl?'\n\nIf you enjoyed working with us, we would appreciate a Google review: '+reviewUrl:''}\n\n— ${studio}`});
   }
   if(context==='customer'){
     templates.push({title:'👋 Greeting / Re-engage',body:`Hello ${name}! 🌸\n\nHope you're doing wonderful! This is *${studio}*.\n\nWe'd love to serve you again — whether it's a portrait session, prints, or your next big event! 📸\n\nFeel free to reach out anytime. Take care! 🙏`});
-    templates.push({title:'🎁 Special Offer',body:`Hello ${name}! 🎉\n\nExciting news from *${studio}*! We're running a special offer this season.\n\nBook any photography session and get 10% off! Valid for a limited time only. 📸✨\n\nCall us to know more. Thank you for your continued trust! 🙏`});
+    templates.push({title:'🎁 Offer enquiry',body:`Hello ${name}! 🎉\n\nThank you for staying in touch with *${studio}*. If you're planning a photography session, we would love to share our current packages and any offers available for your date. 📸✨\n\nPlease reply with what you have in mind. Thank you! 🙏`});
     templates.push({title:'💰 Payment Reminder',body:`Hello ${name}! 🙏\n\nThis is a gentle reminder from *${studio}* about your pending balance.\n\nPlease make the payment at your earliest convenience so we can proceed with your order.\n\nThank you! 😊`});
+  }
+  if((context==='walkin'||context==='event'||context==='customer')&&reviewUrl){
+    templates.push({title:'⭐ Google Review & Thank You',body:`Hello ${name}! 🙏\n\nThank you for choosing *${studio}*${service?' for your '+service:''}. We hope you loved the experience.\n\nIf you have a moment, please rate and review us on Google: ${reviewUrl}\n\nYour feedback means a lot to our team. Thank you again! 🌟`});
+  }
+  if(context==='quote'){
+    const q=DB.quotes.find(x=>x.id===service);
+    if(q){
+      const summary=`Quotation *${q.id}* for *${q.packageType||'Wedding Photography'}* on *${q.weddingDate||'your wedding date'}*. Quoted total: *${fmtINR(q.total)}*.${q.validUntil?' Valid until '+q.validUntil+'.':''}`;
+      templates.push({title:'📄 Share quotation',body:`Hello ${name}! 🙏\n\nThank you for considering *${studio}*. ${summary}\n\nWe would love to capture your special day. Please reply if you would like to discuss or confirm your booking.\n\n— Team Tathastu`});
+      templates.push({title:'🤝 Gentle follow-up',body:`Hello ${name}! 🌸\n\nJust checking in about your wedding photography quotation *${q.id}*. Please let us know if you have any questions or would like to adjust the package.\n\nWe would be delighted to work with you! — ${studio}`});
+      templates.push({title:'🎁 Actual offer / discount',body:`Hello ${name}! 🎁\n\nFollowing up on quotation *${q.id}*. ${q.offerNote|| (Number(q.discount)>0?'Your quotation includes a discount of '+fmtINR(q.discount)+'.':'Please ask us about current offers for your preferred date.')}\n\nLet us know if you would like to proceed. — ${studio}`});
+      templates.push({title:'📅 Availability reminder',body:`Hello ${name}! 📅\n\nWe are following up on your quotation *${q.id}* for *${q.weddingDate||'your date'}*. If you would like to reserve the date, please contact us to confirm availability and booking details.\n\n— ${studio}`});
+    }
   }
   return templates;
 }
