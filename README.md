@@ -8,7 +8,7 @@ A static browser application hosted on Vercel. Its data lives in a Cloudflare R2
 2. Run `npx.cmd serve .` or any static HTTP server.
 3. Open the local address shown by the server and sign in with the existing studio account.
 
-The app has no npm build step. `index.html`, `wedding-functions.js`, `studio-business.js`, `quotation-upgrades.js`, `print-layout.js`, `appearance.js`, and `logo.png` must be deployed together. Keep `.env.local` and `.vercel` out of Git.
+The app has no npm build step. `index.html`, `wedding-functions.js`, `studio-business.js`, `quotation-upgrades.js`, `print-layout.js`, `appearance.js`, `vivah-muhurat.js`, and `logo.png` must be deployed together. Keep `.env.local` and `.vercel` out of Git.
 
 ## Existing data
 
@@ -28,7 +28,11 @@ The revised Worker creates a versioned R2 copy of the previous `studio-db.json` 
 - **Quotations:** edit, archive and restore quotes; print a clean estimate without payment rows until booked; open an editable WhatsApp summary or follow-up message. Confirming a booking asks for the advance actually received.
 - **Appearance:** choose from dark, light, premium gold, wedding and festival themes, or save custom color palettes. Each palette can use a dark or light tone. Optional automatic switching uses editable calendar date ranges; changing festival dates must be entered for each year. Appearance settings are local to each browser and do not affect billing data.
 - **Calendar:** month, week and day views; shared editable notes; booking, delivery and blocked-date controls; local font size and color settings. Edit a booking's function dates through the function manager.
+- **Enquiries:** unconfirmed walk-in estimates stay visible in the records and customer history, while order, sales, pending-payment and profit totals exclude them until their status becomes a confirmed order.
+- **Vivah Muhurat:** the calendar requests the selected year's New Delhi wedding-date JSON automatically from [MyKundli](https://mykundli.app/data), under CC BY 4.0. It shows each published Shubh date, exact IST window, Nakshatra, Tithi, and a distinct-date count per month. Date selection in quotations and wedding bookings shows these details and a *potential* high-demand alert; the alert is a planning heuristic, not a market forecast. Studio booking counts come from existing app records. The app caches a successful feed for seven days and identifies stale or unavailable data. [Drik Panchang](https://www.drikpanchang.com/shubh-dates/shubh-marriage-dates-with-muhurat.html) is linked as an independent New Delhi reference.
 
 ## Current limits
 
 The existing single shared account still controls all data. Staff roles and scoped permissions require a server-side account model; hiding buttons in the browser would not protect customer or payment records. PDFs use the browser's Print / Save as PDF control. WhatsApp opens an editable text draft; attaching a saved quotation PDF and pressing Send remain manual. The Google review URL must be saved under Pricing → GST & Invoice Configuration before review templates appear. Festival dates that change each year must be scheduled by the user.
+
+The open New Delhi wedding feed covers all listed 2027 dates but only November–December of 2026. It does not publish reasons for inauspicious dates. The app marks these as unknown instead of inventing a reason, and links to Drik Panchang for manual verification. It tries the appropriate year URL automatically when a new year is selected; data appears only after the provider publishes that year's file. A fully automatic complete-year feed with inauspicious reasons requires a provider that licenses those fields and supplies an API or data file. Panchang Shuddhi is general guidance; a priest should confirm the final personalized muhurat.
