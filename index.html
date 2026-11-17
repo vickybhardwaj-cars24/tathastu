@@ -19,6 +19,7 @@ const WORKER_URL = 'https://tathastu.vicky-bhardwaj.workers.dev';
 <script src="quotation-upgrades.js"></script>
 <script src="appearance.js"></script>
 <script src="vivah-muhurat.js"></script>
+<script src="e-invitation.js"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap');
@@ -70,6 +71,18 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
 .ntab:hover{color:var(--tx)}
 .ntab.on{color:var(--gold);border-bottom-color:var(--gold)}
 .tab-badge{background:var(--red);color:#fff;border-radius:9px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:4px;vertical-align:middle;animation:pulse 1.5s infinite}
+.ei-category-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:15px 0}
+.ei-category{min-height:100px;text-align:left;border:1px solid var(--br);border-radius:12px;background:var(--s1);color:var(--tx);padding:14px;cursor:pointer;font-family:'Outfit',sans-serif}
+.ei-category:hover,.ei-category.selected{border-color:var(--gold);background:var(--s2)}
+.ei-category span{display:block;font-size:24px;margin-bottom:7px}.ei-category b{display:block;font-size:12px}.ei-category small{display:block;color:var(--txm);font-size:10px;margin-top:3px}
+.ei-layout{display:grid;grid-template-columns:minmax(350px,1fr) minmax(330px,.9fr);gap:18px;align-items:start}.ei-editor{display:grid;gap:12px}.ei-editor .business-card{margin:0}.ei-editor h3{margin-bottom:10px}.ei-editor .business-grid{margin-top:10px}
+.ei-templates{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}.ei-template{border:2px solid transparent;border-radius:9px;background:var(--tile-bg);color:var(--tile-accent);height:68px;cursor:pointer;font-family:'Outfit',sans-serif}.ei-template.selected{border-color:var(--gold);box-shadow:0 0 0 1px var(--ink)}.ei-template span{display:block;font-size:23px;line-height:1.2}.ei-template b{display:block;font-size:10px}.ei-editor details{color:var(--txm);cursor:pointer}
+.ei-function{border:1px solid var(--br);border-radius:8px;padding:10px;margin:8px 0}.ei-function>.btn{margin-top:8px}.ei-preview-wrap{position:sticky;top:12px}.ei-preview-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;color:var(--txm);margin-bottom:8px}.ei-preview-head b{color:var(--tx)}
+.ei-card{background:var(--ei-bg);color:var(--ei-ink);font-family:var(--ei-font);min-height:570px;padding:34px 32px;text-align:center;border:1px solid var(--ei-accent);outline:5px solid var(--ei-bg);box-shadow:0 12px 40px rgba(0,0,0,.2);display:flex;flex-direction:column;align-items:center;overflow-wrap:anywhere}.ei-card-top{font:10px Arial,sans-serif;letter-spacing:.22em;color:var(--ei-accent)}.ei-card-top span{margin:0 7px}.ei-ornament{font-size:28px;color:var(--ei-accent);letter-spacing:.3em;margin:32px 0 16px}.ei-overline{font-size:12px;color:var(--ei-muted);letter-spacing:.08em}.ei-card h2{font-size:32px;line-height:1.12;font-weight:normal;color:var(--ei-accent);margin:12px 0}.ei-divider{width:72px;height:1px;background:var(--ei-accent);margin:12px auto 20px}.ei-card h3{font-size:27px;line-height:1.2;font-weight:normal;margin:0}.ei-family{font-size:13px;color:var(--ei-muted);margin-top:6px}.ei-message{font-size:14px;line-height:1.6;max-width:390px;white-space:pre-wrap;margin:24px 0}.ei-details{display:grid;gap:7px;max-width:400px;font-size:14px}.ei-details b{font-size:16px;color:var(--ei-accent)}.ei-schedule{border-top:1px solid var(--ei-accent);border-bottom:1px solid var(--ei-accent);width:100%;max-width:410px;text-align:left;margin:24px 0;padding:12px 2px}.ei-schedule strong{display:block;text-align:center;color:var(--ei-accent);font:10px Arial,sans-serif;letter-spacing:.18em;margin-bottom:9px}.ei-schedule div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:12px}.ei-schedule span{color:var(--ei-muted);text-align:right}.ei-card-bottom{font:11px Arial,sans-serif;color:var(--ei-muted);margin-top:auto;padding-top:24px}
+.ei-projects{display:grid;gap:9px;margin-top:12px}.ei-project{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--br);border-radius:9px;padding:10px 12px}.ei-project>div:first-child{min-width:0}.ei-project-icon{font-size:20px;margin-right:8px}.ei-project b{font-size:13px}.ei-project small{display:block;margin-left:29px;color:var(--txm)}
+@media(max-width:850px){.ei-layout{grid-template-columns:1fr}.ei-preview-wrap{position:static}.ei-card{min-height:500px}.ei-templates{grid-template-columns:repeat(2,minmax(0,1fr))}.ei-project{align-items:flex-start;flex-direction:column}}
+@page{size:A4;margin:12mm}
+@media print{body:has(.ei-preview-wrap)>.hdr,body:has(.ei-preview-wrap)>.nav,body:has(.ei-preview-wrap)>#login-overlay,#pg:has(.ei-preview-wrap)>.shdr,.ei-editor,.ei-preview-head,.ei-preview-wrap>.wf-help{display:none!important}body:has(.ei-preview-wrap){background:#fff!important;color:#111!important}#pg:has(.ei-preview-wrap){padding:0;min-height:0}.ei-layout{display:block}.ei-preview-wrap{position:static}.ei-card{box-shadow:none;outline:none;min-height:265mm;break-inside:avoid;width:100%}}
 
 /* MAIN */
 .pg{padding:18px 20px;min-height:400px}
@@ -455,6 +468,7 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
   <button class="ntab" onclick="go('tasks',this)">Tasks</button>
   <button class="ntab" onclick="go('jobs',this)">Studio Jobs</button>
   <button class="ntab" onclick="go('quotes',this)">Quotations</button>
+  <button class="ntab" id="tab-invitations" onclick="go('invitations',this)">✉ E-Invitations</button>
   <button class="ntab" onclick="go('pricing',this)">Pricing</button>
   <button class="ntab" onclick="go('customers',this)">Customers</button>
   <button class="ntab" onclick="go('pending',this)">Pending</button>
@@ -548,6 +562,7 @@ let DB={
   catalogue:[],
   jobs:[],
   quotes:[],
+  invitations:[],
   messages:[],
   calendarNotes:[],
   gstConfig: {gstin:'',businessName:'Tathastu Weddings',address:'',hsnCode:'998382',taxRate:18},
@@ -560,7 +575,7 @@ const DEFAULT_DB=structuredClone(DB);
 function hydrateDB(data){
   if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Invalid studio data');
   DB={...structuredClone(DEFAULT_DB),...data};
-  for(const key of ['walkins','events','tasks','pricing','customers','staff','expenses','blockedDates','equipment','commissions','catalogue','jobs','quotes','messages','calendarNotes']){
+  for(const key of ['walkins','events','tasks','pricing','customers','staff','expenses','blockedDates','equipment','commissions','catalogue','jobs','quotes','invitations','messages','calendarNotes']){
     if(data[key]!==undefined&&!Array.isArray(data[key]))throw new Error('Invalid '+key+' data');
     if(!Array.isArray(DB[key]))DB[key]=key==='pricing'?getDefaultPricing():[];
   }
@@ -754,6 +769,7 @@ function render(){
   else if(curTab==='tasks')     pg.innerHTML=renderTasks();
   else if(curTab==='jobs')      pg.innerHTML=StudioBusiness.renderJobs();
   else if(curTab==='quotes')    pg.innerHTML=StudioBusiness.renderQuotes();
+  else if(curTab==='invitations') pg.innerHTML=EInvitationStudio.render();
   else if(curTab==='pricing')   pg.innerHTML=renderPricing();
   else if(curTab==='customers') pg.innerHTML=renderCustomers();
   else if(curTab==='pending')   pg.innerHTML=renderPending();
@@ -766,6 +782,7 @@ function render(){
   else if(curTab==='equipment') pg.innerHTML=renderEquipment();
   else if(curTab==='admin')     pg.innerHTML=renderAdmin();
   else if(curTab==='quicklog')  pg.innerHTML=renderQuickLog();
+  if(curTab==='invitations') EInvitationStudio.attachActions();
   /* update events reminder badge */
   const cnt=eventReminderCount();
   const tab=document.getElementById('tab-events');
@@ -938,6 +955,7 @@ function evRows(list){
       <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap">
         <button class="btn btn-o btn-sm" onclick="editEv(${ri})">Edit</button>
         <button class="btn btn-g btn-sm" onclick="WeddingFunctions.open(${ri})">Functions</button>
+        <button class="btn btn-o btn-sm" onclick="EInvitationStudio.openFromSource('event:${ri}')">Invite</button>
         <button class="btn-print btn-sm" onclick="printEventReceipt(${ri})">Receipt</button>
         <button class="btn-print btn-sm" onclick="showQuotation('event',${ri})">Invoice</button>
         <button class="btn-print btn-sm" onclick="showInstallments(${ri})" style="color:var(--amb);border-color:var(--amb-br)">Payments</button>
@@ -2445,6 +2463,7 @@ function showCustDetail(i){
     ${c.notes?`<div style="background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px">${c.notes}</div>`:''}
     ${DB.googleReviewLink?`<div style="margin-bottom:10px"><a href="${DB.googleReviewLink}" target="_blank" class="btn btn-o btn-sm" style="text-decoration:none;display:inline-block">⭐ Open Google Review Page</a> ${c.reviewDone?'<span class="bdg bdg-grn">✓ Review Done</span>':'<button class="btn btn-o btn-sm" onclick="DB.customers[${i}].reviewDone=true;save();closeShade();render()">Mark Review Done</button>'}</div>`:''}
     <div class="shdr" style="margin-top:0"><div><div class="stitle" style="font-size:14px">Order History</div></div></div>
+    <div class="btn-row"><button class="btn btn-o btn-sm" onclick="EInvitationStudio.openFromSource('customer:${i}')">+ Create Invitation</button><span class="wf-help">${(DB.invitations||[]).filter(inv=>!inv.archivedAt&&c.phone&&phoneKey(inv.phone)===phoneKey(c.phone)).length} saved invitation(s) for this contact</span></div>
     <div style="font-size:12px">${cOrders.length?cOrders.map(o=>`<div style="padding:5px 0;border-bottom:1px solid var(--br)"><b>${o.eventDate||o.deliveryDate||o.date||'—'}</b> · ${o.service||o.eventType||'—'} · ${fmtINR(o.amount)} ${o.status==='Enquiry'?'<span class="bdg bdg-muted">Estimate only</span>':parseFloat(o.balance)>0?'<span class="bal-r">(bal: '+fmtINR(o.balance)+')</span>':'<span class="bal-g">✓ Paid</span>'}</div>`).join(''):'<div class="empty">No orders yet</div>'}</div>
     <div class="csub">Add Timeline Note</div>
     <div class="fg fg-2">
