@@ -60,7 +60,7 @@ const StudioBusiness=(()=>{
     save();window.render();
   }
 
-  const pos={category:'All',query:'',cart:[],discountType:'fixed',discountValue:0,payment:'Cash',paid:0,customerMode:'guest',customerIndex:'',guestName:'',guestPhone:''};
+  const pos={category:'All',query:'',cart:[],discountType:'fixed',discountValue:0,payment:'Cash',paid:0,customerMode:'guest',customerIndex:'',guestName:'',guestPhone:'',lastBill:null};
   function posItems(){return catalogue().filter(p=>p.active!==false&&p.sellingPrice!=null&&Number(p.sellingPrice)>0&&!p.quotationOnly&&
       (pos.category==='All'||p.category===pos.category)&&(!pos.query||(p.name+' '+p.code).toLowerCase().includes(pos.query.toLowerCase())));}
   function calculateBill(items,discountType,discountValue,paidInput){
@@ -75,7 +75,8 @@ const StudioBusiness=(()=>{
   function totals(){return calculateBill(pos.cart,pos.discountType,pos.discountValue,pos.paid);}
   function renderPOS(){
     const t=totals();
-    return `<div class="shdr"><div><div class="stitle">⚡ Fast Billing</div><div class="ssub">Quick guest bill or registered customer bill</div></div><button class="btn btn-o btn-sm" onclick="go('catalogue',document.querySelector('.ntab[onclick*=catalogue]'))">Manage Prices</button></div>
+    return `<div class="shdr"><div><div class="stitle">⚡ Fast Billing</div><div class="ssub">Quick guest bill or registered customer bill</div></div><div class="business-actions"><button class="btn btn-g btn-sm" onclick="StudioBusiness.openCustomService()">+ Custom service</button><button class="btn btn-o btn-sm" onclick="go('catalogue',document.querySelector('.ntab[onclick*=catalogue]'))">Manage Prices</button></div></div>
+      ${pos.lastBill?`<div class="business-card" style="margin-bottom:12px"><b>Bill saved:</b> ${esc(pos.lastBill.billNo)} · ${fmtINR(pos.lastBill.amount)} <button class="btn btn-o btn-sm" onclick="StudioBusiness.printBillAgain()">Print again</button> ${pos.lastBill.phone&&/^https:\/\//i.test(DB.googleReviewLink||'')?`<button class="btn-wa" onclick="StudioBusiness.openBillReview()">WhatsApp review request</button>`:''}</div>`:''}
       <div class="pos-layout"><div><div class="business-actions">${['All',...Object.keys(categories),'Custom'].map(v=>`<button class="btn ${pos.category===v?'btn-g':'btn-o'} btn-sm" onclick="StudioBusiness.setCategory('${esc(v)}')">${esc(v)}</button>`).join('')}</div>
       <input class="sinp" placeholder="Search product or service" value="${esc(pos.query)}" oninput="StudioBusiness.setSearch(this.value)">
       <div class="pos-list mt8" id="pos-list">${renderPOSItems()}</div></div>
@@ -100,6 +101,17 @@ const StudioBusiness=(()=>{
     const existing=pos.cart.find(x=>x.code===ref&&x.unitPrice===Number(p.sellingPrice));
     if(existing)existing.quantity++;else pos.cart.push({code:ref,name:p.name,unit:p.unit,quantity:1,unitPrice:Number(p.sellingPrice),taxRate:Number(p.taxRate)||0});
     window.render();}
+  function openCustomService(){
+    const shade=document.createElement('div');shade.className='shade';shade.id='shade';shade.style='position:fixed;inset:0;z-index:300;overflow:auto;padding:20px';
+    shade.innerHTML=`<div class="modal"><div class="mtitle">Add custom service <button class="mclose" onclick="closeShade()">✕</button></div><div class="business-grid"><div class="ff"><label>Service name</label><input id="custom-name" placeholder="Special retouching"></div><div class="ff"><label>Unit price (₹)</label><input id="custom-price" type="number" min="0.01" step="0.01"></div><div class="ff"><label>Quantity</label><input id="custom-quantity" type="number" min="1" step="1" value="1"></div><div class="ff"><label>Tax % (optional)</label><input id="custom-tax" type="number" min="0" max="100" step="0.01" value="0"></div></div><p class="wf-help">This service is added to this bill only. Add another custom service the same way.</p><div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="StudioBusiness.saveCustomService()">Add to bill</button></div></div>`;
+    document.body.appendChild(shade);
+  }
+  function saveCustomService(){
+    const name=document.getElementById('custom-name').value.trim(),price=Number(document.getElementById('custom-price').value),quantity=Number(document.getElementById('custom-quantity').value),tax=Number(document.getElementById('custom-tax').value);
+    if(!name||name.length>120||!Number.isFinite(price)||price<=0||!Number.isInteger(quantity)||quantity<1||quantity>10000||!Number.isFinite(tax)||tax<0||tax>100){alert('Enter a name, positive price, whole-number quantity and valid tax.');return;}
+    pos.cart.push({code:id('custom'),name,unit:'each',quantity,unitPrice:money(price),taxRate:tax,custom:true});
+    closeShade();window.render();
+  }
   function quantity(i,delta){const x=pos.cart[i];if(!x)return;x.quantity=Math.max(1,x.quantity+delta);window.render();}
   function removeItem(i){pos.cart.splice(i,1);window.render();}
   async function overridePrice(i){
@@ -137,14 +149,16 @@ const StudioBusiness=(()=>{
     }
     const bill={id:id('bill'),billNo:'TW-'+Date.now(),date:today(),createdAt:new Date().toISOString(),name:customer?.name||pos.guestName.trim()||'Guest',phone:customer?.phone||pos.guestPhone.trim(),service:pos.cart.map(x=>x.name).join(', '),items:pos.cart.map(x=>({...x})),subtotal:t.subtotal,discountType:pos.discountType,discountValue:pos.discountValue,discountAmount:t.discount,taxAmount:t.tax,amount:t.total,advance:t.paid,balance:t.balance,payMode:pos.payment,paymentStatus:t.balance===0?'Paid':t.paid>0?'Partially Paid':'Unpaid',status:'New Order',deliveryDate:'',notes:'Fast Billing'};
     DB.walkins.push(bill);save();
-    pos.cart=[];pos.discountValue=0;pos.paid=0;pos.customerIndex='';pos.guestName='';pos.guestPhone='';
+    pos.lastBill=bill;pos.cart=[];pos.discountValue=0;pos.paid=0;pos.customerIndex='';pos.guestName='';pos.guestPhone='';
     window.render();printBill(bill);
   }
   function printBill(bill){
-    const win=window.open('','_blank');if(!win){alert('Allow pop-ups to print the bill. The bill is saved.');return;}
-    win.document.write(`<html><head><title>${esc(bill.billNo)}</title><style>body{font:14px Arial;max-width:760px;margin:30px auto;padding:15px}h1{font-size:24px}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:8px;text-align:left}.total{font-weight:bold;font-size:18px}@media print{button{display:none}}</style></head><body><h1>Tathastu Weddings</h1><p>Studio Bill ${esc(bill.billNo)} · ${esc(bill.date)}</p><p>Customer: ${esc(bill.name)} ${esc(bill.phone)}</p><table><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Amount</th></tr>${bill.items.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.quantity}</td><td>${fmtINR(x.unitPrice)}</td><td>${fmtINR(x.quantity*x.unitPrice)}</td></tr>`).join('')}</table><p>Subtotal ${fmtINR(bill.subtotal)} · Discount ${fmtINR(bill.discountAmount)} · Tax ${fmtINR(bill.taxAmount)}</p><p class="total">Total ${fmtINR(bill.amount)}</p><p>Paid ${fmtINR(bill.advance)} · Balance ${fmtINR(bill.balance)} · ${esc(bill.payMode)}</p><p>Thank you for choosing Tathastu Weddings.</p><button onclick="window.print()">Print / Save as PDF</button></body></html>`);
-    win.document.close();
+    return TathastuPrint.open({kind:'Bill / Receipt',number:bill.billNo||bill.id,date:bill.date,customer:bill.name,phone:bill.phone,
+      details:[['Payment method',bill.payMode||'—']],items:bill.items||[],subtotal:bill.subtotal,discount:bill.discountAmount,
+      tax:bill.taxAmount,total:bill.amount,paid:bill.advance,balance:bill.balance});
   }
+  function printBillAgain(){if(pos.lastBill)printBill(pos.lastBill);}
+  function openBillReview(){const bill=pos.lastBill;if(!bill||!bill.phone||!/^https:\/\//i.test(DB.googleReviewLink||''))return;openMessages(bill.phone,bill.name,'walkin',bill.service,bill.date);const select=document.getElementById('msg-template');const option=[...select.options].find(o=>o.textContent.includes('Google Review'));if(option){select.value=option.value;chooseTemplate();}}
 
   function renderJobs(){return `<div class="shdr"><div><div class="stitle">Studio Jobs</div><div class="ssub">Editing, printing, albums and deliveries</div></div><button class="btn btn-g btn-sm" onclick="StudioBusiness.openJob()">+ New Job</button></div><div class="tw"><table><thead><tr><th>ID</th><th>Customer</th><th>Service</th><th>Received</th><th>Deadline</th><th>Assigned</th><th>Status</th><th>Payment</th><th>Delivery</th></tr></thead><tbody>${DB.jobs.length?DB.jobs.map((j,i)=>`<tr><td>${esc(j.id)}</td><td>${esc(j.customerName)}<div class="phone">${esc(j.phone||'')}</div></td><td>${esc(j.service)}</td><td>${esc(j.receivedDate)}</td><td>${esc(j.deadline)}</td><td>${esc(j.assigned||'—')}</td><td><select onchange="StudioBusiness.updateJob(${i},'status',this.value)">${['New Order','Pending','In Progress','Editing','Ready for Preview','Awaiting Approval','Completed','Delivered'].map(x=>`<option ${j.status===x?'selected':''}>${x}</option>`).join('')}</select></td><td><select onchange="StudioBusiness.updateJob(${i},'paymentStatus',this.value)">${['Unpaid','Partially Paid','Paid'].map(x=>`<option ${j.paymentStatus===x?'selected':''}>${x}</option>`).join('')}</select></td><td>${esc(j.deliveryMethod||'—')}</td></tr>`).join(''):'<tr><td colspan="9" class="empty">No studio jobs yet</td></tr>'}</tbody></table></div>`;}
   function openJob(){const shade=document.createElement('div');shade.className='shade';shade.id='shade';shade.style='position:fixed;inset:0;z-index:200;overflow:auto;padding:20px';shade.innerHTML=`<div class="modal"><div class="mtitle">New Studio Job <button class="mclose" onclick="closeShade()">✕</button></div><div class="business-grid">${[['name','Customer name','text'],['phone','Phone','tel'],['service','Service type','text'],['received','Received date','date'],['deadline','Deadline','date'],['assigned','Assigned editor / employee','text'],['delivery','Delivery method','text'],['notes','Notes','text']].map(([key,label,type])=>`<div class="ff"><label>${label}</label><input id="job-${key}" type="${type}" ${key==='received'?'value="'+today()+'"':''}></div>`).join('')}</div><div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="StudioBusiness.saveJob()">Save Job</button></div></div>`;document.body.appendChild(shade);}
@@ -185,6 +199,6 @@ const StudioBusiness=(()=>{
     const top=[...count].sort((a,b)=>b[1]-a[1]).slice(0,5);
     return `<div class="business-card" style="margin-bottom:14px"><h3>Date-wise / Weekly / Monthly</h3><div class="business-actions"><select class="fsel" onchange="window._reportPeriod=this.value;window.render()"><option value="day" ${period==='day'?'selected':''}>Day</option><option value="week" ${period==='week'?'selected':''}>Week</option><option value="month" ${period==='month'?'selected':''}>Month</option></select><input class="sinp" type="date" value="${esc(selected)}" onchange="window._reportDate=this.value;window.render()"></div><div class="stats"><div class="sc"><div class="sc-lbl">Orders</div><div class="sc-val">${orders.length}</div></div><div class="sc"><div class="sc-lbl">Sales</div><div class="sc-val g">${fmtINR(sales)}</div></div><div class="sc"><div class="sc-lbl">Received</div><div class="sc-val">${fmtINR(received)}</div></div><div class="sc"><div class="sc-lbl">Expenses</div><div class="sc-val r">${fmtINR(cost)}</div></div><div class="sc"><div class="sc-lbl">Sales less expenses</div><div class="sc-val">${fmtINR(sales-cost)}</div></div></div><div class="wf-help">Top services: ${top.length?top.map(([name,n])=>esc(name)+' ('+n+')').join(', '):'No sales in this period'}</div></div>`;
   }
-  return {renderCatalogue,editProduct,saveProduct,toggleProduct,renderPOS,setCategory,setSearch,addItem,quantity,removeItem,overridePrice,updatePOS,setCustomer,saveBill,printBill,renderJobs,openJob,saveJob,updateJob,renderQuotes,openQuote,saveQuote,convertQuote,printQuote,openMessages,chooseTemplate,openWhatsApp,markMessageSent,posGuest,totals,calculateBill,renderPeriodReport};
+  return {renderCatalogue,editProduct,saveProduct,toggleProduct,renderPOS,setCategory,setSearch,addItem,openCustomService,saveCustomService,quantity,removeItem,overridePrice,updatePOS,setCustomer,saveBill,printBill,printBillAgain,openBillReview,renderJobs,openJob,saveJob,updateJob,renderQuotes,openQuote,saveQuote,convertQuote,printQuote,openMessages,chooseTemplate,openWhatsApp,markMessageSent,posGuest,totals,calculateBill,renderPeriodReport};
 })();
 function posGuest(key,value){StudioBusiness.posGuest(key,value);}
