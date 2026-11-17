@@ -6,15 +6,16 @@ const path=require('node:path');
 
 function boot(){
   const values=new Map([['customer-records','KEEP-EXISTING-DATA']]);
+  const styles=[];
   const localStorage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)};
   const styleProps=new Map();
   const document={body:{classList:{toggle(){}},style:{setProperty:(k,v)=>styleProps.set(k,v),removeProperty:k=>styleProps.delete(k),zoom:''}},
-    head:{appendChild(el){el.isConnected=true}},getElementById(){return null},querySelector(){return null},createElement(){return {id:'',textContent:'',isConnected:false}}};
+    head:{appendChild(el){el.isConnected=true;styles.push(el)}},getElementById(id){return styles.find(s=>s.id===id)||null},querySelector(){return null},createElement(){return {id:'',textContent:'',isConnected:false}}};
   const ctx={document,localStorage,structuredClone,Date,console,setInterval(){},requestAnimationFrame(){},confirm(){return true},alert(m){throw Error(m)}};
   ctx.window=ctx;ctx.render=()=>{};
   vm.createContext(ctx);
   for(const file of ['appearance.js','advanced-theme.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),ctx,{filename:file});
-  return {ctx,values,appearance:vm.runInContext('Appearance',ctx),advanced:ctx.AdvancedAppearance};
+  return {ctx,values,styles,appearance:vm.runInContext('Appearance',ctx),advanced:ctx.AdvancedAppearance};
 }
 
 test('custom themes can be saved, deleted and restored without touching other data',()=>{
@@ -34,4 +35,13 @@ test('custom themes can be saved, deleted and restored without touching other da
   advanced.restore(key);
   assert.equal(appearance.settings.customPresets[0].name,'My Studio');
   assert.equal(values.get('customer-records'),'KEEP-EXISTING-DATA');
+});
+
+test('whole-app photo leaves body-level booking overlays positioned by their own CSS',()=>{
+  const {styles,advanced}=boot();
+  advanced.change('image','data','data:image/png;base64,AA==');
+  advanced.save(true);
+  const css=styles.find(s=>s.id==='advanced-theme-runtime').textContent;
+  assert.match(css,/body\.adv-theme-on>\.hdr/);
+  assert.doesNotMatch(css,/body\.adv-theme-on>\*/);
 });
