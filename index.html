@@ -18,6 +18,7 @@ const WORKER_URL = 'https://tathastu.vicky-bhardwaj.workers.dev';
 <script src="studio-business.js"></script>
 <script src="quotation-upgrades.js"></script>
 <script src="appearance.js"></script>
+<script src="vivah-muhurat.js"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap');
@@ -112,6 +113,20 @@ body.light #cust-found-chip{background:rgba(42,148,72,.08)}
 .tw tr:hover td{background:var(--s2)}
 .quotes-wrap{overflow-x:auto}
 .quotes-wrap table{min-width:1000px;table-layout:auto}
+.muhurat-panel{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin:12px 0;padding:12px 14px;border:1px solid var(--br);border-radius:10px;background:var(--s2);font-size:12px}
+.muhurat-panel small{width:100%;color:var(--txm);line-height:1.5}
+.muhurat-panel label{display:flex;align-items:center;gap:8px;width:100%;color:var(--txm)}
+.muhurat-panel input{padding:6px 8px;border:1px solid var(--br);border-radius:5px;background:var(--s1);color:var(--tx)}
+.muhurat-panel .muhurat-alert{width:100%;margin:0}
+.muhurat-panel a,.muhurat-alert a{color:var(--gold)}
+.muhurat-count{font-weight:700;color:var(--gold)}
+.muhurat-stale{color:var(--amb)}
+.muhurat-day{display:block;width:100%;margin-top:4px;padding:3px 5px;border:1px solid var(--gold);border-radius:5px;background:transparent;color:var(--gold);font-size:10px;text-align:left;cursor:pointer}
+.muhurat-alert{margin:10px 0;padding:12px;border:1px solid var(--br);border-radius:9px;background:var(--s2);color:var(--tx);font-size:12px;line-height:1.5}
+.muhurat-alert.shubh{border-color:var(--gold)}
+.muhurat-alert small{display:block;margin-top:7px;color:var(--txm)}
+.muhurat-window{margin:8px 0;padding:8px;border-left:3px solid var(--gold);background:rgba(201,168,76,.08)}
+.muhurat-window span{display:block;margin-top:3px;color:var(--txm)}
 
 /* BADGES */
 .bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;letter-spacing:.04em;white-space:nowrap}
@@ -1300,7 +1315,7 @@ function showAdd(type){
   shade.innerHTML='<div class="modal">'+buildForm(type)+'</div>';
   document.body.appendChild(shade);
   if(type==='walkin') setupWiCalc();
-  if(type==='event')  {setupEvCalc();setTimeout(()=>{const ed=document.getElementById('f-edate');if(ed)ed.addEventListener('change',checkConflict);},200);}
+  if(type==='event')  {setupEvCalc();setTimeout(()=>{const ed=document.getElementById('f-edate'),et=document.getElementById('f-etype');if(ed)ed.addEventListener('change',checkConflict);if(et)et.addEventListener('change',checkConflict);},200);}
   if(type==='price')  setupPriceCalc();
 }
 function closeShade(){const s=document.getElementById('shade');if(s)s.remove();}
@@ -1358,6 +1373,7 @@ function buildForm(type){
         <div class="ff"><label>Primary Venue</label><input type="text" id="f-venue" placeholder="Venue / City"></div>
       </div>
     </div>
+    <div id="event-muhurat-alert"></div>
     <div id="extra-date-venues"></div>
     <button type="button" class="btn btn-o btn-sm mt4" onclick="addDateVenueRow()">+ Add Another Date &amp; Venue</button>
     <div class="divider"></div>
@@ -2012,7 +2028,9 @@ function showBlockDate(){
 }
 function checkConflict(){
   const eDate=document.getElementById('f-edate')?.value;
-  const el=document.getElementById('conflict-alert');if(!el||!eDate)return;
+  const el=document.getElementById('conflict-alert');if(!el)return;
+  VivahMuhurat.showDateAlert('f-edate','event-muhurat-alert','f-etype');
+  if(!eDate){el.innerHTML='';return;}
   const blocked=DB.blockedDates.find(b=>b.date===eDate);
   const conflicts=DB.events.filter(e=>e.eventDate===eDate);
   let html='';
@@ -2246,6 +2264,7 @@ function editEv(i){
     document.getElementById('f-guests').value=o.guests||0;
     document.getElementById('f-status').value=o.status||'New Order';
     document.getElementById('f-edate').value=o.eventDate||'';
+    checkConflict();
     document.getElementById('f-venue').value=o.venue||'';
     document.getElementById('f-amt').value=o.amount||0;
     document.getElementById('f-adv').value=o.advance||0;
