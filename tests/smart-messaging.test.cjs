@@ -44,6 +44,22 @@ test('review eligibility starts only after completed service or final event deli
   assert.match(messaging.prepare('event',0).template.body,/g\.page\/r\//);
 });
 
+test('customer WhatsApp preview includes the review link only after service completion',()=>{
+  const {DB,messaging}=boot();
+  const customer={name:'Asha',whatsapp:'9876543210',reviewDone:false};
+  const walkin={name:'Asha',phone:'9876543210',status:'In Progress',service:'Passport photos'};
+  DB.customers.push(customer);DB.walkins.push(walkin);
+  assert.doesNotMatch(messaging.prepare('customer',0).template.body,/g\.page\/r\//);
+  walkin.status='Delivered';
+  const ready=messaging.prepare('customer',0);
+  assert.equal(ready.reviewAllowed,true);
+  assert.match(ready.template.body,/g\.page\/r\//);
+  assert.equal(messaging.reviewStatusForCustomer(customer),'Eligible');
+  customer.reviewDone=true;
+  assert.equal(messaging.prepare('customer',0).reviewAllowed,false);
+  assert.equal(messaging.reviewStatusForCustomer(customer),'Review done');
+});
+
 test('review requests are queued once and a sent request blocks another',()=>{
   const {DB,messaging}=boot();
   DB.messageConfig={autoPrepare:true};
