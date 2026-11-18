@@ -1124,9 +1124,7 @@ function custTableRows(list){
     const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
     const pending=cOrders.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
     const ri=DB.customers.indexOf(c);
-    const waBtn=c.phone?`<button class="btn-wa btn-sm" onclick="SmartMessaging.open('customer',${ri})" title="WhatsApp">${WA_SVG14}</button> `:'';
-    const eligibleReviewLink=SmartMessaging.reviewLinkForCustomer(c);
-    const reviewLink=eligibleReviewLink?`<a href="${eligibleReviewLink}" target="_blank" rel="noopener noreferrer" class="btn-print btn-sm" style="text-decoration:none;display:inline-block;padding:3px 8px">⭐ Review</a>`:'';
+    const waBtn=(c.phone||c.whatsapp)?`<button class="btn-wa btn-sm" onclick="SmartMessaging.open('customer',${ri})" title="Preview WhatsApp message">${WA_SVG14}</button> `:'';
     return`<tr>
       <td><b style="font-size:12px">${c.name}</b><div style="font-size:9px;margin-top:2px">${custLoyaltyTier(spent)}</div>${c.birthday?`<div style="font-size:9px;color:var(--txm)">🎂 ${c.birthday.substring(5)}</div>`:''}</td>
       <td>${waLink(c.phone||c.whatsapp)}</td>
@@ -1136,7 +1134,7 @@ function custTableRows(list){
       <td class="amt">${fmtINR(spent)}</td>
       <td class="${pending>0?'bal-r':'bal-g'}">${fmtINR(pending)}</td>
       <td><span class="bdg ${c.reviewDone?'bdg-grn':'bdg-amb'}">${SmartMessaging.reviewStatusForCustomer(c)}</span></td>
-      <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap">${waBtn}${reviewLink}<button class="btn btn-o btn-sm" onclick="showCustDetail(${ri})">Notes</button><button class="btn btn-d btn-sm" onclick="delCust(${ri})">✕</button></td>
+      <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap">${waBtn}<button class="btn btn-o btn-sm" onclick="showCustDetail(${ri})">Notes</button><button class="btn btn-d btn-sm" onclick="delCust(${ri})">✕</button></td>
     </tr>`;
   }).join(''):'<tr><td colspan="9" class="empty">No customers found</td></tr>';
 }
@@ -2466,6 +2464,7 @@ function showQuotation(type,idx){
 /* ─── CUSTOMER NOTES / TIMELINE ─── */
 function showCustDetail(i){
   const c=DB.customers[i];if(!c)return;
+  const reviewStatus=SmartMessaging.reviewStatusForCustomer(c);
   const cOrders=[...DB.walkins,...DB.events].filter(o=>o.phone&&c.phone&&phoneKey(o.phone)===phoneKey(c.phone));
   const spent=cOrders.filter(o=>o.status!=='Enquiry').reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
   const shade=document.createElement('div');shade.className='shade';shade.id='shade';
@@ -2480,7 +2479,7 @@ function showCustDetail(i){
       ${c.email?`<span>✉ ${c.email}</span>`:''}
     </div>
     ${c.notes?`<div style="background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px">${c.notes}</div>`:''}
-    ${SmartMessaging.reviewLinkForCustomer(c)?`<div style="margin-bottom:10px"><a href="${SmartMessaging.reviewLinkForCustomer(c)}" target="_blank" rel="noopener noreferrer" class="btn btn-o btn-sm" style="text-decoration:none;display:inline-block">⭐ Open Google Review Page</a> ${c.reviewDone?'<span class="bdg bdg-grn">✓ Review Done</span>':'<button class="btn btn-o btn-sm" onclick="DB.customers[${i}].reviewDone=true;save();closeShade();render()">Mark Review Done</button>'}</div>`:''}
+    ${reviewStatus!=='Not due'?`<div style="margin-bottom:10px"><span class="bdg ${c.reviewDone?'bdg-grn':'bdg-amb'}">Review: ${reviewStatus}</span> ${!c.reviewDone?`<button class="btn btn-o btn-sm" onclick="markCustomerReviewReceived(${i})" title="Use after confirming the customer posted a review">Mark customer review received</button>`:''}</div>`:''}
     <div class="shdr" style="margin-top:0"><div><div class="stitle" style="font-size:14px">Order History</div></div></div>
     <div class="btn-row"><button class="btn btn-o btn-sm" onclick="EInvitationStudio.openFromSource('customer:${i}')">+ Create Invitation</button><span class="wf-help">${(DB.invitations||[]).filter(inv=>!inv.archivedAt&&c.phone&&phoneKey(inv.phone)===phoneKey(c.phone)).length} saved invitation(s) for this contact</span></div>
     <div style="font-size:12px">${cOrders.length?cOrders.map(o=>`<div style="padding:5px 0;border-bottom:1px solid var(--br)"><b>${o.eventDate||o.deliveryDate||o.date||'—'}</b> · ${o.service||o.eventType||'—'} · ${fmtINR(o.amount)} ${o.status==='Enquiry'?'<span class="bdg bdg-muted">Estimate only</span>':parseFloat(o.balance)>0?'<span class="bal-r">(bal: '+fmtINR(o.balance)+')</span>':'<span class="bal-g">✓ Paid</span>'}</div>`).join(''):'<div class="empty">No orders yet</div>'}</div>
@@ -2494,6 +2493,13 @@ function showCustDetail(i){
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Close</button></div>
   </div>`;
   document.body.appendChild(shade);
+}
+function markCustomerReviewReceived(i){
+  const c=DB.customers[i];if(!c)return;
+  c.reviewDone=true;
+  const phone=SmartMessaging.cleanPhone(c.phone||c.whatsapp);
+  if(phone)(DB.messages||[]).filter(m=>m.status==='Pending'&&SmartMessaging.cleanPhone(m.phone)===phone&&(m.reviewRequest||SmartMessaging.reviewBody(m.body))).forEach(m=>m.status='Superseded');
+  save();closeShade();render();
 }
 function renderCustTimeline(tl){
   if(!tl||!tl.length)return'<div style="font-size:11px;color:var(--txm)">No notes yet</div>';
