@@ -30,6 +30,6 @@ const TathastuPrint=(()=>{
       ${note?`<div class="note">${esc(note)}</div>`:''}<div class="footer"><b>Thank you for choosing Tathastu Weddings!</b><br>${quotation?'We look forward to capturing your special moments.':'Please keep this document for your records.'}</div>
       <div class="actions"><button onclick="window.print()">Print / Save as PDF</button></div></body></html>`;
   }
-  function open(data){const win=window.open('','_blank');if(!win){alert('Allow pop-ups to print or save a PDF.');return false;}win.document.write(documentHTML(data));win.document.close();return true;}
+  function open(data){const win=window.open('','_blank');if(!win){alert('Allow pop-ups to print or save a PDF.');return false;}win.document.write(documentHTML(data));win.document.close();DocumentShare.attach(win,{kind:data.share?.kind,index:data.share?.index,type:data.share?.type||(data.kind==='Quotation'?'quotation':'receipt'),label:data.kind,number:data.number,name:data.customer,phone:data.phone,paper:'a4',payment:data.share?.payment,balance:data.share?.balance});return true;}
   return {documentHTML,open};
 })();

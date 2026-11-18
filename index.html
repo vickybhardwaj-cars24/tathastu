@@ -15,6 +15,7 @@
 const WORKER_URL = 'https://tathastu.vicky-bhardwaj.workers.dev';
 </script>
 <script src="wedding-functions.js"></script>
+<script src="document-share.js"></script>
 <script src="print-layout.js"></script>
 <script src="studio-business.js"></script>
 <script src="quotation-upgrades.js"></script>
@@ -1646,6 +1647,7 @@ function printReceipt(idx){
   '<div class="np"><button onclick="window.print()" style="background:#111;color:#fff;border:none;padding:9px 24px;border-radius:5px;cursor:pointer;font-size:12px;margin-top:4px">🖶 Print Receipt</button></div>'+
   '</body></html>');
   win.document.close();
+  DocumentShare.attach(win,{kind:'walkin',index:idx,type:enquiry?'estimate':'receipt',label:enquiry?'Estimate':'Walk-in Receipt',number:rNo,paper:'a5'});
 }
 
 /* ─── FORM HELPERS ─── */
@@ -2347,7 +2349,7 @@ function showInstallments(evIdx){
       <span>Paid: <b style="color:var(--grn)">${fmtINR(totalPaid)}</b></span>
       <span>Remaining: <b class="${remaining>0?'bal-r':'bal-g'}">${fmtINR(Math.max(0,remaining))}</b></span>
     </div>
-    <div id="inst-list">${renderInstList(o.installments||[])}</div>
+    <div id="inst-list">${renderInstList(o.installments||[],evIdx)}</div>
     <hr class="divider">
     <div class="csub">Add Payment</div>
     <div class="fg fg-3">
@@ -2363,9 +2365,20 @@ function showInstallments(evIdx){
   </div>`;
   document.body.appendChild(shade);
 }
-function renderInstList(insts){
+function renderInstList(insts,evIdx){
   if(!insts.length)return'<div class="empty" style="padding:10px">No payments recorded</div>';
-  return insts.map((p,i)=>`<div class="inst-row"><span style="flex:1"><b>${p.date||'—'}</b> · ${p.note||'Payment'}</span><span class="bdg bdg-muted">${p.mode||'—'}</span><span class="amt" style="margin-left:8px">${fmtINR(p.amount)}</span></div>`).join('');
+  return insts.map((p,i)=>`<div class="inst-row"><span style="flex:1"><b>${p.date||'—'}</b> · ${p.note||'Payment'}</span><span class="bdg bdg-muted">${p.mode||'—'}</span><span class="amt" style="margin-left:8px">${fmtINR(p.amount)}</span>${Number(p.amount)>0?`<button class="btn btn-o btn-sm" onclick="printPaymentReceipt(${evIdx},${i})">Receipt</button>`:''}</div>`).join('');
+}
+function printPaymentReceipt(evIdx,paymentIdx){
+  const o=DB.events[evIdx],p=o?.installments?.[paymentIdx];if(!p||Number(p.amount)<=0)return;
+  const paid=o.installments.slice(0,paymentIdx+1).reduce((sum,x)=>sum+(Number(x.amount)||0),0);
+  const balance=Math.max(0,(Number(o.amount)||0)-paid);
+  const firstPayment=!o.installments.slice(0,paymentIdx).some(x=>Number(x.amount)>0);
+  const kind=firstPayment?'Advance Receipt':balance===0?'Final Receipt':'Payment Receipt';
+  TathastuPrint.open({kind,number:`TW-PAY-${String(evIdx+1).padStart(4,'0')}-${paymentIdx+1}`,date:p.date||o.date||today(),customer:o.name,phone:o.phone,subtitle:o.eventType,
+    details:[['Event date',o.eventDate||'—'],['Venue',o.venue||'—'],['This payment',fmtINR(p.amount)],['Payment method',p.mode||'—'],['Payment note',p.note||'—']],
+    items:[{name:(o.eventType||'Event')+' package',quantity:1,unitPrice:Number(o.amount)||0}],subtotal:Number(o.amount)||0,total:Number(o.amount)||0,paid,balance,
+    share:{kind:'event',index:evIdx,type:firstPayment?'advance':'payment',payment:Number(p.amount)||0,balance}});
 }
 function addInstallment(evIdx){
   const o=DB.events[evIdx];if(!o)return;
@@ -2378,7 +2391,7 @@ function addInstallment(evIdx){
   o.advance=Math.min(totalPaid,parseFloat(o.amount)||0);
   o.balance=Math.max(0,(parseFloat(o.amount)||0)-totalPaid);
   save();
-  document.getElementById('inst-list').innerHTML=renderInstList(o.installments);
+  document.getElementById('inst-list').innerHTML=renderInstList(o.installments,evIdx);
   const totalPd=(o.installments).reduce((a,p)=>a+(parseFloat(p.amount)||0),0);
   document.querySelector('#shade .modal>div:first-of-type+div').innerHTML=`<span>Total: <b class="amt">${fmtINR(o.amount)}</b></span>&nbsp;&nbsp;<span>Paid: <b style="color:var(--grn)">${fmtINR(totalPd)}</b></span>&nbsp;&nbsp;<span>Remaining: <b class="${(parseFloat(o.amount)-totalPd)>0?'bal-r':'bal-g'}">${fmtINR(Math.max(0,parseFloat(o.amount)-totalPd))}</b></span>`;
   document.getElementById('inst-amt').value='';
@@ -2447,6 +2460,7 @@ function showQuotation(type,idx){
   '<div class="np"><button onclick="window.print()" style="background:#C9A84C;color:#180F00;border:none;padding:9px 24px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700;margin-top:4px">🖶 Print / Save as PDF</button></div>'+
   '</body></html>');
   win.document.close();
+  DocumentShare.attach(win,{kind:type,index:idx,type:'invoice',label:'Invoice',number:rNo,paper:'a4'});
 }
 
 /* ─── CUSTOMER NOTES / TIMELINE ─── */
@@ -2672,6 +2686,7 @@ function printEventReceipt(idx){
   '<div class="np"><button onclick="window.print()" style="background:#111;color:#fff;border:none;padding:9px 24px;border-radius:5px;cursor:pointer;font-size:12px;margin-top:4px">🖶 Print Receipt</button></div>'+
   '</body></html>');
   win.document.close();
+  DocumentShare.attach(win,{kind:'event',index:idx,type:'receipt',label:'Event Receipt',number:rNo,paper:'a5'});
 }
 
 /* ── Startup ── */
