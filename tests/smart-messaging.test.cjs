@@ -72,6 +72,22 @@ test('changing a booking stage supersedes an unsent draft',()=>{
   assert.equal(DB.messages[1].stage,'progress');
 });
 
+test('legacy order gets a stable message source after edits and array shifts',()=>{
+  const {DB,messaging}=boot();
+  DB.messageConfig={autoPrepare:true};
+  DB.walkins.push({name:'Earlier',phone:'9876543200',status:'New Order'});
+  DB.walkins.push({name:'Asha',phone:'9876543210',date:'2026-11-18',status:'New Order'});
+  messaging.queueFor('walkin',1);
+  const record=DB.walkins[1],sourceId=DB.messages[0].sourceId;
+  assert.equal(record.id,sourceId);
+  record.name='Asha Sharma';record.date='2026-11-19';record.status='Ready';
+  DB.walkins.shift();
+  messaging.queueFor('walkin',0);
+  assert.equal(DB.messages[0].status,'Superseded');
+  assert.equal(DB.messages[1].sourceId,sourceId);
+  assert.equal(messaging.prepare('walkin',0).sourceId,sourceId);
+});
+
 test('custom Hindi template uses central links without changing business records',()=>{
   const {DB,messaging}=boot();
   const quote={id:'Q2',customerName:'Riya',phone:'9876543211',status:'Draft',weddingDate:'2027-02-14'};
