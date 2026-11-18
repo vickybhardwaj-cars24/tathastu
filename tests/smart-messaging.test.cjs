@@ -88,6 +88,24 @@ test('legacy order gets a stable message source after edits and array shifts',()
   assert.equal(messaging.prepare('walkin',0).sourceId,sourceId);
 });
 
+test('pending draft follows edited contact and keeps review history by record',()=>{
+  const {DB,messaging}=boot();
+  DB.messageConfig={autoPrepare:true};
+  const order={name:'Asha',phone:'9876543210',status:'Delivered',service:'Prints'};
+  DB.walkins.push(order);
+  messaging.queueFor('walkin',0);
+  const ref=DB.messages[0].sourceId;
+  order.name='Asha Sharma';order.phone='9876543222';
+  messaging.queueFor('walkin',0);
+  assert.equal(DB.messages.length,1);
+  assert.equal(DB.messages[0].customerName,'Asha Sharma');
+  assert.equal(DB.messages[0].phone,'9876543222');
+  DB.messages[0].status='Marked sent';
+  order.phone='9876543333';
+  assert.equal(order.id,ref);
+  assert.equal(messaging.prepare('walkin',0).stage,'walkinThanks');
+});
+
 test('custom Hindi template uses central links without changing business records',()=>{
   const {DB,messaging}=boot();
   const quote={id:'Q2',customerName:'Riya',phone:'9876543211',status:'Draft',weddingDate:'2027-02-14'};
