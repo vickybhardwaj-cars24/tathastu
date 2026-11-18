@@ -20,6 +20,7 @@ const WORKER_URL = 'https://tathastu.vicky-bhardwaj.workers.dev';
 <script src="quotation-upgrades.js"></script>
 <script src="appearance.js"></script>
 <script src="advanced-theme.js"></script>
+<script src="smart-messaging.js"></script>
 <script src="vivah-muhurat.js"></script>
 <script src="e-invitation.js"></script>
 
@@ -569,6 +570,7 @@ let DB={
   calendarNotes:[],
   gstConfig: {gstin:'',businessName:'Tathastu Weddings',address:'',hsnCode:'998382',taxRate:18},
   googleReviewLink:'',
+  messageConfig:null,
 };
 const DEFAULT_DB=structuredClone(DB);
 
@@ -903,7 +905,7 @@ function wiRows(list){
       <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
       <td>${statusBadge(o.status)}</td>
       <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
-      <td>${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${nm}','walkin','${o.service||''}','${o.deliveryDate||''}')" title="WhatsApp">${WA_SVG14}</button>`:'—'}</td>
+      <td>${o.phone?`<button class="btn-wa" onclick="SmartMessaging.open('walkin',${ri})" title="WhatsApp">${WA_SVG14}</button>`:'—'}</td>
       <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap"><button class="btn btn-o btn-sm" onclick="editWi(${ri})">Edit</button><button class="btn-print btn-sm" onclick="printReceipt(${ri})">Receipt</button><button class="btn-print btn-sm" onclick="showQuotation('walkin',${ri})">Invoice</button><button class="btn-urg btn-sm ${o.urgent?'':'off'}" onclick="toggleUrgent(${ri})">${o.urgent?'🔴':'⚪'}</button><button class="btn btn-d btn-sm" onclick="delWi(${ri})">✕</button></td>
     </tr>`;
   }).join(''):'<tr><td colspan="10" class="empty">No orders found</td></tr>';
@@ -961,7 +963,7 @@ function evRows(list){
         <button class="btn-print btn-sm" onclick="printEventReceipt(${ri})">Receipt</button>
         <button class="btn-print btn-sm" onclick="showQuotation('event',${ri})">Invoice</button>
         <button class="btn-print btn-sm" onclick="showInstallments(${ri})" style="color:var(--amb);border-color:var(--amb-br)">Payments</button>
-        ${o.phone?`<button class="btn-wa" onclick="showMsgTemplates('${o.phone}','${nm}','event','${o.eventType||''}','${o.eventDate||''}')" title="WhatsApp">${WA_SVG14}</button>`:''}
+        ${o.phone?`<button class="btn-wa" onclick="SmartMessaging.open('event',${ri})" title="WhatsApp">${WA_SVG14}</button>`:''}
         <button class="btn btn-d btn-sm" onclick="delEv(${ri})">✕</button>
       </td>
     </tr>`;
@@ -1121,8 +1123,9 @@ function custTableRows(list){
     const spent=cOrders.reduce((a,o)=>a+(parseFloat(o.amount)||0),0);
     const pending=cOrders.reduce((a,o)=>a+(parseFloat(o.balance)||0),0);
     const ri=DB.customers.indexOf(c);
-    const waBtn=c.phone?`<button class="btn-wa btn-sm" onclick="showMsgTemplates('${c.phone}','${c.name.replace(/'/g,"\\'")}','customer')" title="WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button> `:'';
-    const reviewLink=DB.googleReviewLink?`<a href="${DB.googleReviewLink}" target="_blank" class="btn-print btn-sm" style="text-decoration:none;display:inline-block;padding:3px 8px">⭐ Review</a>`:'';
+    const waBtn=c.phone?`<button class="btn-wa btn-sm" onclick="SmartMessaging.open('customer',${ri})" title="WhatsApp">${WA_SVG14}</button> `:'';
+    const eligibleReviewLink=SmartMessaging.reviewLinkForCustomer(c);
+    const reviewLink=eligibleReviewLink?`<a href="${eligibleReviewLink}" target="_blank" rel="noopener noreferrer" class="btn-print btn-sm" style="text-decoration:none;display:inline-block;padding:3px 8px">⭐ Review</a>`:'';
     return`<tr>
       <td><b style="font-size:12px">${c.name}</b><div style="font-size:9px;margin-top:2px">${custLoyaltyTier(spent)}</div>${c.birthday?`<div style="font-size:9px;color:var(--txm)">🎂 ${c.birthday.substring(5)}</div>`:''}</td>
       <td>${waLink(c.phone||c.whatsapp)}</td>
@@ -1131,7 +1134,7 @@ function custTableRows(list){
       <td style="text-align:center">${cOrders.length}</td>
       <td class="amt">${fmtINR(spent)}</td>
       <td class="${pending>0?'bal-r':'bal-g'}">${fmtINR(pending)}</td>
-      <td>${c.reviewDone?'<span class="bdg bdg-grn">✓ Done</span>':'<span class="bdg bdg-amb">Pending</span>'}</td>
+      <td><span class="bdg ${c.reviewDone?'bdg-grn':'bdg-amb'}">${SmartMessaging.reviewStatusForCustomer(c)}</span></td>
       <td style="white-space:normal;display:flex;gap:3px;flex-wrap:wrap">${waBtn}${reviewLink}<button class="btn btn-o btn-sm" onclick="showCustDetail(${ri})">Notes</button><button class="btn btn-d btn-sm" onclick="delCust(${ri})">✕</button></td>
     </tr>`;
   }).join(''):'<tr><td colspan="9" class="empty">No customers found</td></tr>';
@@ -1262,7 +1265,7 @@ function renderReports(){
       <div class="rep-row"><span class="rep-lbl">Frame Sizes Listed</span><span class="rep-val">${DB.pricing.length}</span></div>
       <div class="rep-row"><span class="rep-lbl">Best Value Frame</span><span class="rep-val bal-g">${bestFrame?bestFrame.size+(bestFrame.group?' ('+bestFrame.group+')':''):'—'}</span></div>
       <div class="rep-row"><span class="rep-lbl">Customers Tracked</span><span class="rep-val">${DB.customers.length}</span></div>
-      <div class="rep-row"><span class="rep-lbl">Reviews Pending</span><span class="rep-val bal-r">${DB.customers.filter(c=>!c.reviewDone).length}</span></div>
+      <div class="rep-row"><span class="rep-lbl">Reviews Due / Pending</span><span class="rep-val bal-r">${DB.customers.filter(c=>['Eligible','Request pending','Request opened'].includes(SmartMessaging.reviewStatusForCustomer(c))).length}</span></div>
       <div class="rep-row"><span class="rep-lbl">Open Tasks</span><span class="rep-val">${DB.tasks.filter(t=>t.status!=='Done').length}</span></div>
     </div>
     <div class="rep-card">
@@ -1419,6 +1422,7 @@ function buildForm(type){
       <div class="ff"><label>Referred By (for commission)</label><input type="text" id="f-refby" placeholder="Agent or vendor name"></div>
       <div class="ff"><label>Commission Amount (₹)</label><input type="number" id="f-commission" placeholder="0"></div>
     </div>
+    <div class="ff mt8"><label>Final event files delivered?</label><select id="f-finaldel"><option value="0">No</option><option value="1">Yes, delivered to customer</option></select></div>
     <div id="conflict-alert"></div>
     <div class="btn-row"><button class="btn btn-o" onclick="closeShade()">Cancel</button><button class="btn btn-g" onclick="saveEv()">Book Event</button></div>`;
 
@@ -1686,6 +1690,7 @@ function saveWi(){
     installments:[],
   });
   autoCreateCustomer(name,phone);
+  SmartMessaging.queueFor('walkin',DB.walkins.length-1);
   save();closeShade();render();
 }
 function saveEv(){
@@ -1732,10 +1737,11 @@ function saveEv(){
     terms:document.getElementById('f-terms').value,
     notes:document.getElementById('f-notes').value,
     galleryLink:document.getElementById('f-gallery')?.value||'',
-    watermarkSent:false,finalDelivered:false,
+    watermarkSent:false,finalDelivered:document.getElementById('f-finaldel')?.value==='1',
     installments:[{date:document.getElementById('f-date').value,amount:adv,mode:document.getElementById('f-pay').value,note:'Advance'}],
   });
   autoCreateCustomer(name,phone);
+  SmartMessaging.queueFor('event',DB.events.length-1);
   save();closeShade();render();
   showBookingConfirm(name,eType,eDate);
 }
@@ -1937,16 +1943,13 @@ function renderAdmin(){
       <div class="ff"><label>HSN/SAC Code</label><input type="text" id="cfg-hsn" value="${DB.gstConfig?.hsnCode||'998382'}" placeholder="998382"></div>
       <div class="ff"><label>GST Rate (%)</label><input type="number" id="cfg-gstrate" value="${DB.gstConfig?.taxRate||18}" min="0" max="28" step="0.5"></div>
     </div>
-    <div class="fg fg-2 mt8">
-      <div class="ff"><label>Google Review Page Link</label><input type="url" id="cfg-glink" value="${DB.googleReviewLink||''}" placeholder="https://g.page/r/..."></div>
-    </div>
-    <div class="btn-row"><button class="btn btn-g" onclick="saveGSTConfig()">Save GST &amp; Review Config</button></div>
+    <div class="btn-row"><button class="btn btn-g" onclick="saveGSTConfig()">Save GST Config</button></div>
   </div>
   <div class="fc" style="border-color:var(--red-br);margin-top:20px">
     <div class="ftitle" style="color:var(--red)">Danger Zone</div>
     <div style="font-size:11px;color:var(--txm);margin-bottom:10px">These actions cannot be undone.</div>
     <button class="btn btn-d btn-sm" onclick="if(confirm('Reset ALL pricing data to defaults? This cannot be undone.')){DB.pricing=getDefaultPricing();DB.priceConfig={mrpMultiplier:2.5,customerMultiplier:2.0};save();render();}">Reset Pricing to Factory Defaults</button>
-  </div>`;
+  </div>${SmartMessaging.renderAdmin()}`;
 }
 function updateCfgPreview(){
   const mrp=parseFloat(document.getElementById('cfg-mrp')?.value)||2.5;
@@ -1971,11 +1974,8 @@ function updateCost(i,field,val){
   save();
 }
 function saveGSTConfig(){
-  const reviewValue=document.getElementById('cfg-glink').value.trim();
-  if(reviewValue){try{if(new URL(reviewValue).protocol!=='https:')throw new Error('HTTPS required');}catch{alert('Enter a complete https:// Google review link.');return;}}
   DB.gstConfig={gstin:document.getElementById('cfg-gstin').value.trim(),businessName:document.getElementById('cfg-bname').value.trim(),address:document.getElementById('cfg-badr').value.trim(),hsnCode:document.getElementById('cfg-hsn').value.trim()||'998382',taxRate:parseFloat(document.getElementById('cfg-gstrate').value)||18};
-  DB.googleReviewLink=reviewValue;
-  save();alert('GST & Review config saved!');render();
+  save();alert('GST config saved!');render();
 }
 
 /* ─── CALENDAR VIEW ─── */
@@ -2268,6 +2268,7 @@ function editWi(i){
       if(amt<0||adv<0||adv>amt){alert('Check amount and advance.');return;}
       if(document.getElementById('f-status').value==='Enquiry'&&adv>0){alert('An enquiry cannot show an advance. Change its status after receiving payment.');return;}
       DB.walkins[i]={...DB.walkins[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,service:document.getElementById('f-svc').value,status:document.getElementById('f-status').value,amount:amt,advance:adv,balance:Math.max(0,amt-adv),payMode:document.getElementById('f-pay').value,urgent:document.getElementById('f-urg').value==='Yes',deliveryDate:document.getElementById('f-del').value,deliveryTime:document.getElementById('f-deltime').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||'',watermarkSent:document.getElementById('f-watermark')?.value==='1',finalDelivered:document.getElementById('f-finaldel')?.value==='1'};
+      SmartMessaging.queueFor('walkin',i);
       save();closeShade();render();
     };
   },150);
@@ -2294,6 +2295,7 @@ function editEv(i){
     document.getElementById('f-terms').value=o.terms||'';
     document.getElementById('f-notes').value=o.notes||'';
     if(document.getElementById('f-gallery'))document.getElementById('f-gallery').value=o.galleryLink||'';
+    if(document.getElementById('f-finaldel'))document.getElementById('f-finaldel').value=o.finalDelivered?'1':'0';
     [['pt','f-pt'],['pc','f-pc'],['vt','f-vt'],['vc','f-vc'],['ph','f-ph'],['vh','f-vh'],['vv','f-vv'],['v3','f-v3'],['dr','f-dr'],['ac','f-ac']].forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.value=o[k]||0;});
     // Extra date-venue pairs
     if(o.extraDates&&o.extraDates.length){
@@ -2324,7 +2326,8 @@ function editEv(i){
       if(o.functions?.length&&JSON.stringify(extraPairs)!==JSON.stringify((o.extraDates||[]).map((date,j)=>({date,venue:(o.extraVenues||[])[j]||''})))){alert('Change function dates and venues in Functions so the timeline stays in sync.');return;}
       const venue=document.getElementById('f-venue').value;
       const functions=o.functions?.map(f=>f.isMain&&f.venue===o.venue?{...f,venue}:f);
-      DB.events[i]={...DB.events[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,eventType:document.getElementById('f-etype').value,eventDate:newDate,weddingDate:o.weddingDate||newDate,extraDates:extraPairs.map(p=>p.date),venue,extraVenues:extraPairs.map(p=>p.venue),functions,guests:parseInt(document.getElementById('f-guests').value)||0,...crew,amount:amt,advance:adv,balance:Math.max(0,amt-(o.installments?.length?recorded:adv)),status:document.getElementById('f-status').value,payMode:document.getElementById('f-pay').value,terms:document.getElementById('f-terms').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||''};
+      DB.events[i]={...DB.events[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,eventType:document.getElementById('f-etype').value,eventDate:newDate,weddingDate:o.weddingDate||newDate,extraDates:extraPairs.map(p=>p.date),venue,extraVenues:extraPairs.map(p=>p.venue),functions,guests:parseInt(document.getElementById('f-guests').value)||0,...crew,amount:amt,advance:adv,balance:Math.max(0,amt-(o.installments?.length?recorded:adv)),status:document.getElementById('f-status').value,payMode:document.getElementById('f-pay').value,terms:document.getElementById('f-terms').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||'',finalDelivered:document.getElementById('f-finaldel')?.value==='1'};
+      SmartMessaging.queueFor('event',i);
       save();closeShade();render();
     };
   },150);
@@ -2463,7 +2466,7 @@ function showCustDetail(i){
       ${c.email?`<span>✉ ${c.email}</span>`:''}
     </div>
     ${c.notes?`<div style="background:var(--s2);border:1px solid var(--br);border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px">${c.notes}</div>`:''}
-    ${DB.googleReviewLink?`<div style="margin-bottom:10px"><a href="${DB.googleReviewLink}" target="_blank" class="btn btn-o btn-sm" style="text-decoration:none;display:inline-block">⭐ Open Google Review Page</a> ${c.reviewDone?'<span class="bdg bdg-grn">✓ Review Done</span>':'<button class="btn btn-o btn-sm" onclick="DB.customers[${i}].reviewDone=true;save();closeShade();render()">Mark Review Done</button>'}</div>`:''}
+    ${SmartMessaging.reviewLinkForCustomer(c)?`<div style="margin-bottom:10px"><a href="${SmartMessaging.reviewLinkForCustomer(c)}" target="_blank" rel="noopener noreferrer" class="btn btn-o btn-sm" style="text-decoration:none;display:inline-block">⭐ Open Google Review Page</a> ${c.reviewDone?'<span class="bdg bdg-grn">✓ Review Done</span>':'<button class="btn btn-o btn-sm" onclick="DB.customers[${i}].reviewDone=true;save();closeShade();render()">Mark Review Done</button>'}</div>`:''}
     <div class="shdr" style="margin-top:0"><div><div class="stitle" style="font-size:14px">Order History</div></div></div>
     <div class="btn-row"><button class="btn btn-o btn-sm" onclick="EInvitationStudio.openFromSource('customer:${i}')">+ Create Invitation</button><span class="wf-help">${(DB.invitations||[]).filter(inv=>!inv.archivedAt&&c.phone&&phoneKey(inv.phone)===phoneKey(c.phone)).length} saved invitation(s) for this contact</span></div>
     <div style="font-size:12px">${cOrders.length?cOrders.map(o=>`<div style="padding:5px 0;border-bottom:1px solid var(--br)"><b>${o.eventDate||o.deliveryDate||o.date||'—'}</b> · ${o.service||o.eventType||'—'} · ${fmtINR(o.amount)} ${o.status==='Enquiry'?'<span class="bdg bdg-muted">Estimate only</span>':parseFloat(o.balance)>0?'<span class="bal-r">(bal: '+fmtINR(o.balance)+')</span>':'<span class="bal-g">✓ Paid</span>'}</div>`).join(''):'<div class="empty">No orders yet</div>'}</div>
@@ -2604,40 +2607,8 @@ function showMsgTemplates(phone,name,context,extra1,extra2){
   return StudioBusiness.openMessages(phone,name,context,extra1,extra2);
 }
 function getMsgTemplates(name,context,service,date,phone){
-  const studio='Tathastu Weddings';
-  const reviewUrl=/^https:\/\//i.test(DB.googleReviewLink||'')?DB.googleReviewLink.trim():'';
-  const bal=context==='walkin'?DB.walkins.find(o=>o.phone===phone&&o.name===name):DB.events.find(o=>o.phone===phone&&o.name===name);
-  const balAmt=bal?fmtINR(parseFloat(bal.balance)||0):'';
-  const templates=[];
-  if(context==='walkin'||context==='event'){
-    templates.push({title:'✅ Order/Work Ready',body:`Hello ${name}! 🎉\n\nYour *${service||'order'}* at *${studio}* is ready${date?' for '+date:''}.\nPlease confirm your pickup time. 📞\n\nThank you for choosing us! 🙏`});
-    templates.push({title:'🚀 Work Started',body:`Hello ${name}!\n\nWe've started working on your *${service||'order'}*. We'll notify you as soon as it's ready! 📸\n\n— ${studio}`});
-    templates.push({title:'💰 Payment Reminder',body:`Hello ${name}! 🙏\n\nThis is a gentle reminder from *${studio}*.\n\nYour pending balance is *${balAmt||'the agreed amount'}*.\nPlease make the payment at your earliest convenience.\n\nThank you! 😊`});
-    templates.push({title:'📸 Delivery Confirmation',body:`Hello ${name}! 🎊\n\nYour *${service||'work'}* from *${studio}* is ready for delivery${date?' on '+date:''}.\n\nWe're excited for you to see your photos/videos! 🌟\n\nPlease contact us to confirm. Thank you!`});
-  }
-  if(context==='event'){
-    templates.push({title:'📅 Event Reminder',body:`Hello ${name}! 📅\n\nJust a reminder that your *${service||'event'}* is scheduled for *${date||'your booked date'}*.\n\nOur team from *${studio}* will be there on time. Looking forward to capturing your beautiful moments! 📸\n\nFor any changes, please contact us in advance.`});
-    templates.push({title:'🤝 Post-Event Follow-up',body:`Hello ${name}! 🌸\n\nIt was a pleasure being part of your *${service||'event'}*. We are processing your photos/videos and will deliver them as promised.${reviewUrl?'\n\nIf you enjoyed working with us, we would appreciate a Google review: '+reviewUrl:''}\n\n— ${studio}`});
-  }
-  if(context==='customer'){
-    templates.push({title:'👋 Greeting / Re-engage',body:`Hello ${name}! 🌸\n\nHope you're doing wonderful! This is *${studio}*.\n\nWe'd love to serve you again — whether it's a portrait session, prints, or your next big event! 📸\n\nFeel free to reach out anytime. Take care! 🙏`});
-    templates.push({title:'🎁 Offer enquiry',body:`Hello ${name}! 🎉\n\nThank you for staying in touch with *${studio}*. If you're planning a photography session, we would love to share our current packages and any offers available for your date. 📸✨\n\nPlease reply with what you have in mind. Thank you! 🙏`});
-    templates.push({title:'💰 Payment Reminder',body:`Hello ${name}! 🙏\n\nThis is a gentle reminder from *${studio}* about your pending balance.\n\nPlease make the payment at your earliest convenience so we can proceed with your order.\n\nThank you! 😊`});
-  }
-  if((context==='walkin'||context==='event'||context==='customer')&&reviewUrl){
-    templates.push({title:'⭐ Google Review & Thank You',body:`Hello ${name}! 🙏\n\nThank you for choosing *${studio}*${service?' for your '+service:''}. We hope you loved the experience.\n\nIf you have a moment, please rate and review us on Google: ${reviewUrl}\n\nYour feedback means a lot to our team. Thank you again! 🌟`});
-  }
-  if(context==='quote'){
-    const q=DB.quotes.find(x=>x.id===service);
-    if(q){
-      const summary=`Quotation *${q.id}* for *${q.packageType||'Wedding Photography'}* on *${q.weddingDate||'your wedding date'}*. Quoted total: *${fmtINR(q.total)}*.${q.validUntil?' Valid until '+q.validUntil+'.':''}`;
-      templates.push({title:'📄 Share quotation',body:`Hello ${name}! 🙏\n\nThank you for considering *${studio}*. ${summary}\n\nWe would love to capture your special day. Please reply if you would like to discuss or confirm your booking.\n\n— Team Tathastu`});
-      templates.push({title:'🤝 Gentle follow-up',body:`Hello ${name}! 🌸\n\nJust checking in about your wedding photography quotation *${q.id}*. Please let us know if you have any questions or would like to adjust the package.\n\nWe would be delighted to work with you! — ${studio}`});
-      templates.push({title:'🎁 Actual offer / discount',body:`Hello ${name}! 🎁\n\nFollowing up on quotation *${q.id}*. ${q.offerNote|| (Number(q.discount)>0?'Your quotation includes a discount of '+fmtINR(q.discount)+'.':'Please ask us about current offers for your preferred date.')}\n\nLet us know if you would like to proceed. — ${studio}`});
-      templates.push({title:'📅 Availability reminder',body:`Hello ${name}! 📅\n\nWe are following up on your quotation *${q.id}* for *${q.weddingDate||'your date'}*. If you would like to reserve the date, please contact us to confirm availability and booking details.\n\n— ${studio}`});
-    }
-  }
-  return templates;
+  const prepared=SmartMessaging.prepareLegacy(phone,name,context,service,date);
+  return prepared?[prepared.template]:[];
 }
 
 /* ─── EVENT RECEIPT PRINTING ─── */
