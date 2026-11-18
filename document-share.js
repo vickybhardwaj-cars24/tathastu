@@ -36,6 +36,7 @@ const DocumentShare=(()=>{
     if(!win||win.closed)return false;
     const doc=win.document,actions=doc.querySelector('.np,.actions');if(!actions)return false;
     actions.setAttribute('data-html2canvas-ignore','true');
+    const printStyle=doc.createElement('style');printStyle.textContent='@media print{.doc-share-panel{display:none!important}}';doc.head.appendChild(printStyle);
     const shareButton=doc.createElement('button');shareButton.type='button';shareButton.textContent='Send on WhatsApp';shareButton.style.cssText='background:#25d366;color:#082612;border:0;border-radius:5px;padding:9px 16px;margin:5px;cursor:pointer;font:600 12px Arial';
     actions.appendChild(shareButton);
     const panel=doc.createElement('div');panel.className='doc-share-panel';panel.setAttribute('data-html2canvas-ignore','true');panel.style.cssText='display:none;border:1px solid #ddd;border-radius:8px;padding:14px;margin:14px auto;max-width:480px;background:#fff;color:#171717;font:12px/1.5 Arial;text-align:left';
@@ -51,9 +52,10 @@ const DocumentShare=(()=>{
     function logAttempt(result,data){
       DB.messages=DB.messages||[];
       const p=message.prepared;
-      attempt={id:'msg-doc-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),phone:data.phone,customerName:message.name,context:meta.kind||'document',sourceId:p.sourceId||'',stage:p.stage||meta.type||'document',template:meta.label||'Document',body:data.body,reviewRequest:p.reviewAllowed&&SmartMessaging.reviewBody(data.body),documentNumber:meta.number||'',documentName:file.name,status:result,createdAt:new Date().toISOString()};
-      if(attempt.reviewRequest)DB.messages.filter(m=>m.status==='Pending'&&SmartMessaging.cleanPhone(m.phone)===SmartMessaging.cleanPhone(data.phone)&&SmartMessaging.reviewBody(m.body)).forEach(m=>m.status='Superseded');
-      DB.messages.push(attempt);save();native.disabled=true;fallback.disabled=true;mark.hidden=false;reset.hidden=false;
+      attempt=(p.sourceId&&p.stage?SmartMessaging.pendingFor(p):null)||{id:'msg-doc-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),createdAt:new Date().toISOString()};
+      Object.assign(attempt,{phone:data.phone,customerName:message.name,context:meta.kind||'document',sourceId:p.sourceId||'',stage:p.stage||meta.type||'document',template:meta.label||'Document',body:data.body,reviewRequest:p.reviewAllowed&&SmartMessaging.reviewBody(data.body),documentNumber:meta.number||'',documentName:file.name,status:result});
+      if(attempt.reviewRequest)DB.messages.filter(m=>m!==attempt&&m.status==='Pending'&&SmartMessaging.cleanPhone(m.phone)===SmartMessaging.cleanPhone(data.phone)&&SmartMessaging.reviewBody(m.body)).forEach(m=>m.status='Superseded');
+      if(!DB.messages.includes(attempt))DB.messages.push(attempt);save();native.disabled=true;fallback.disabled=true;mark.hidden=false;reset.hidden=false;
     }
     native.addEventListener('click',async()=>{const data=review();if(!data||!file)return;if(!win.confirm(`Share ${file.name} for ${message.name} (${data.phone})? Confirm the WhatsApp recipient before sending.`))return;try{await win.navigator.share({files:[file],title:file.name,text:data.body});logAttempt('Opened Share Sheet',data);status.textContent='Share sheet completed. Mark sent only after you confirm delivery in WhatsApp.';}catch(err){if(err?.name!=='AbortError')status.textContent='File sharing failed. Use Download PDF + open chat below.';}});
     fallback.addEventListener('click',()=>{const data=review();if(!data||!file)return;if(!win.confirm(`Download ${file.name} and open WhatsApp for ${data.phone}? Attach the downloaded PDF in the chat before sending.`))return;download(win,file);const chat=win.open('https://wa.me/'+data.phone+'?text='+encodeURIComponent(data.body),'_blank');logAttempt('Opened WhatsApp',data);status.textContent=chat?'PDF downloaded and WhatsApp opened. Attach the PDF, then mark sent after sending.':'PDF downloaded. Allow pop-ups, open WhatsApp and attach the PDF before sending.';});
