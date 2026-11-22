@@ -26,7 +26,7 @@ const TathastuPrint=(()=>{
       <div class="section">${quotation?'Services / package':'Items'}</div><table><thead><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Amount</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.name)}</td><td>${Number(x.quantity)||1}</td><td>${amount(x.unitPrice)}</td><td>${amount((Number(x.quantity)||1)*Number(x.unitPrice||0))}</td></tr>`).join('')}</tbody></table>
       <div class="totals"><div class="pair"><span>Subtotal</span><b>${amount(subtotal??total)}</b></div>${Number(discount)>0?`<div class="pair"><span>Discount</span><b>− ${amount(discount)}</b></div>`:''}${Number(tax)>0?`<div class="pair"><span>Tax</span><b>${amount(tax)}</b></div>`:''}<div class="pair grand"><span>${quotation?'Quoted total':'Total amount'}</span><b>${amount(total)}</b></div>
       ${!quotation||booked?`<div class="pair"><span>Amount paid</span><b>${amount(paid)}</b></div><div class="pair"><span>Balance due</span><b>${amount(balance)}</b></div>`:''}</div>
-      ${validUntil&&!booked?`<div class="note">Quotation valid until ${esc(validUntil)}. Booking is confirmed only after you approve it with the studio.</div>`:''}
+      ${quotation&&validUntil&&!booked?`<div class="note">Quotation valid until ${esc(validUntil)}. Booking is confirmed only after you approve it with the studio.</div>`:''}
       ${note?`<div class="note">${esc(note)}</div>`:''}<div class="footer"><b>Thank you for choosing Tathastu Weddings!</b><br>${quotation?'We look forward to capturing your special moments.':'Please keep this document for your records.'}</div>
       <div class="actions"><button onclick="window.print()">Print / Save as PDF</button></div></body></html>`;
   }

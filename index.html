@@ -2405,8 +2405,6 @@ function showQuotation(type,idx){
   const taxAmt=Math.round(subtotal*taxRate/100);
   const total=subtotal+taxAmt;
   const rNo=type==='walkin'?'TW-INV-'+String(idx+1).padStart(4,'0'):'TW-EV-INV-'+String(idx+1).padStart(4,'0');
-  const validTill=new Date();validTill.setDate(validTill.getDate()+15);
-  const validStr=validTill.toISOString().split('T')[0];
   const win=window.open('','_blank','width=520,height=800');
   win.document.write('<!DOCTYPE html><html><head><title>Invoice '+rNo+'</title><style>'+
     '*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px;font-size:12px;color:#111}'+
@@ -2425,7 +2423,6 @@ function showQuotation(type,idx){
     '.tot-box{background:#F5F0E8;border-radius:6px;padding:12px 14px;max-width:240px;margin-left:auto}'+
     '.tot-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}'+
     '.tot-row.final{font-size:14px;font-weight:700;border-top:2px solid #C9A84C;margin-top:6px;padding-top:8px}'+
-    '.validity{background:#FFF8E8;border:1px solid #E8CC80;border-radius:5px;padding:8px 12px;font-size:11px;color:#8B6914;margin-top:12px}'+
     '.footer{text-align:center;margin-top:18px;font-size:10px;color:#777;border-top:1px solid #ddd;padding-top:10px;line-height:1.7}'+
     '.gstin-box{background:#f9f9f9;border:1px solid #ddd;border-radius:4px;padding:6px 10px;font-size:10px;color:#555;margin-bottom:14px}'+
     '.np{text-align:center;margin-top:14px}@media print{.np{display:none}}'+
@@ -2452,7 +2449,6 @@ function showQuotation(type,idx){
     '<div class="tot-row" style="color:#080"><span>Advance Paid</span><span>&#8377;'+(parseFloat(o.advance)||0).toLocaleString('en-IN')+'</span></div>'+
     '<div class="tot-row" style="color:#c00;font-weight:700"><span>Balance Due</span><span>&#8377;'+Math.max(0,(parseFloat(o.balance)||0)+(g.gstin?taxAmt:0)).toLocaleString('en-IN')+'</span></div>'+
   '</div>'+
-  '<div class="validity">📅 This quotation is valid until <b>'+validStr+'</b>. Contact us to confirm your booking.</div>'+
   (o.terms?'<div style="margin-top:10px;font-size:10px;color:#777;border:1px dashed #ddd;padding:8px;border-radius:4px">Terms: '+o.terms+'</div>':'')+
   '<div class="footer"><b>Thank you for choosing Tathastu Weddings!</b><br>We look forward to capturing your precious moments. ✨<br>'+(g.businessName||'Tathastu Weddings')+' | Wedding &amp; Portrait Photography</div>'+
   '<div class="np"><button onclick="window.print()" style="background:#C9A84C;color:#180F00;border:none;padding:9px 24px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700;margin-top:4px">🖶 Print / Save as PDF</button></div>'+
