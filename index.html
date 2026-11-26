@@ -873,7 +873,7 @@ function renderDash(){
     <tbody>${recentWi.length?recentWi.map(o=>`<tr>
       <td style="white-space:nowrap">${o.date||'—'}</td>
       <td>${o.name}<div class="phone">${waLink(o.phone)}</div></td>
-      <td><span class="bdg bdg-muted">${o.service||'—'}</span></td>
+      <td><span class="bdg bdg-muted">${escapeWalkinText(o.service||'—')}</span></td>
       <td>${statusBadge(o.status)}</td>
       <td style="white-space:nowrap">${o.deliveryDate||'—'}</td>
     </tr>`).join(''):'<tr><td colspan="5" class="empty">No walk-ins yet</td></tr>'}</tbody>
@@ -900,10 +900,10 @@ function wiRows(list){
     return`<tr>
       <td>${o.date||'—'}</td>
       <td><b style="font-size:12px">${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
-      <td><span class="bdg bdg-muted">${o.service||'—'}</span></td>
-      <td class="amt">${fmtINR(o.amount)}</td>
-      <td class="amt">${fmtINR(o.advance)}</td>
-      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td><span class="bdg bdg-muted">${escapeWalkinText(o.service||'—')}</span></td>
+      <td class="amt">${fmtWalkinINR(o.amount)}</td>
+      <td class="amt">${fmtWalkinINR(o.advance)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtWalkinINR(o.balance)}</td>
       <td>${statusBadge(o.status)}</td>
       <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
       <td>${o.phone?`<button class="btn-wa" onclick="SmartMessaging.open('walkin',${ri})" title="WhatsApp">${WA_SVG14}</button>`:'—'}</td>
@@ -1319,10 +1319,10 @@ function renderQuickLog(){
     <thead><tr><th style="width:120px">Customer</th><th style="width:100px">Service</th><th style="width:65px">Amount</th><th style="width:65px">Advance</th><th style="width:65px">Balance</th><th style="width:92px">Delivery</th><th>Notes</th></tr></thead>
     <tbody>${[...DB.walkins].filter(o=>o.date===today()).reverse().map(o=>`<tr>
       <td><b>${o.name}</b><div class="phone">${waLink(o.phone)}</div></td>
-      <td><span class="bdg bdg-muted">${o.service}</span></td>
-      <td class="amt">${fmtINR(o.amount)}</td>
-      <td class="amt">${fmtINR(o.advance)}</td>
-      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtINR(o.balance)}</td>
+      <td><span class="bdg bdg-muted">${escapeWalkinText(o.service||'—')}</span></td>
+      <td class="amt">${fmtWalkinINR(o.amount)}</td>
+      <td class="amt">${fmtWalkinINR(o.advance)}</td>
+      <td class="${parseFloat(o.balance)>0?'bal-r':'bal-g'}">${fmtWalkinINR(o.balance)}</td>
       <td>${o.deliveryDate||'—'}${o.deliveryTime?'<div class="phone">'+o.deliveryTime+'</div>':''}</td>
       <td style="font-size:11px;color:var(--txm)">${o.notes||''}</td>
     </tr>`).join('')||'<tr><td colspan="7" class="empty">No entries today yet</td></tr>'}</tbody>
@@ -1353,13 +1353,18 @@ function buildForm(type){
     </div>
     <div id="cust-found-chip"></div>
     <div class="fg fg-3 mt8">
-      <div class="ff"><label>Service</label><select id="f-svc">${WALKIN_SVC.map(s=>`<option>${s}</option>`).join('')}</select></div>
+      <div class="ff"><label>Service</label><select id="f-svc" onchange="toggleWalkinService()">${WALKIN_SVC.map(s=>`<option>${s}</option>`).join('')}<option value="__custom__">+ Custom service</option></select><input type="text" id="f-custom-svc" placeholder="Enter service name" style="display:none;margin-top:6px"></div>
       <div class="ff"><label>Status</label><select id="f-status">${ORDER_STATUS.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="ff"><label>Delivery Date</label><input type="date" id="f-del"></div>
     </div>
     <div class="fg fg-4 mt8">
-      <div class="ff"><label>Amount (₹)</label><input type="number" id="f-amt" placeholder="0" oninput="calcBal()"></div>
-      <div class="ff"><label>Advance (₹)</label><input type="number" id="f-adv" placeholder="0" oninput="calcBal()"></div>
+      <div class="ff"><label>Original rate (₹)</label><input type="number" id="f-rate" min="0" step="0.01" placeholder="0" oninput="calcBal()"></div>
+      <div class="ff"><label>Discount (%)</label><input type="number" id="f-discount" min="0" max="100" step="0.01" value="0" oninput="calcBal()"></div>
+      <div class="ff"><label>Discount amount (₹)</label><input type="number" id="f-discount-amt" readonly></div>
+      <div class="ff"><label>Final amount (₹)</label><input type="number" id="f-amt" readonly></div>
+    </div>
+    <div class="fg fg-3 mt8">
+      <div class="ff"><label>Advance (₹)</label><input type="number" id="f-adv" min="0" step="0.01" placeholder="0" oninput="calcBal()"></div>
       <div class="ff"><label>Balance (₹)</label><input type="number" id="f-bal" readonly></div>
       <div class="ff"><label>Payment Mode</label><select id="f-pay">${PAY_MODES.map(p=>`<option>${p}</option>`).join('')}</select></div>
     </div>
@@ -1602,7 +1607,7 @@ function printReceipt(idx){
   const o=DB.walkins[idx];if(!o)return;
   const enquiry=o.status==='Enquiry';
   const rNo='TW-'+String(idx+1).padStart(4,'0');
-  const bal=Math.round(parseFloat(o.balance)||0);
+  const bal=Number(o.balance)||0,discount=Number(o.walkinDiscountAmount)||0;
   const win=window.open('','_blank','width=420,height=660');
   win.document.write('<!DOCTYPE html><html><head><title>Receipt '+rNo+'</title><style>'+
     '*{box-sizing:border-box;margin:0;padding:0}'+
@@ -1631,14 +1636,15 @@ function printReceipt(idx){
     '<tr><td>Customer</td><td>'+o.name+'</td></tr>'+
     (o.phone?'<tr><td>Phone</td><td>'+o.phone+'</td></tr>':'')+
     '<tr><td colspan="2"><div class="dash"></div></td></tr>'+
-    '<tr><td>Service</td><td>'+(o.service||'—')+'</td></tr>'+
+    '<tr><td>Service</td><td>'+escapeWalkinText(o.service||'—')+'</td></tr>'+
     (o.notes?'<tr><td>Details</td><td style="font-size:10px;font-weight:400">'+o.notes+'</td></tr>':'')+
     (o.deliveryDate?'<tr><td>Delivery</td><td>'+o.deliveryDate+(o.deliveryTime?' at '+o.deliveryTime:'')+'</td></tr>':'')+
     (!enquiry&&o.payMode?'<tr><td>Pay Mode</td><td>'+o.payMode+'</td></tr>':'')+
     '<tr><td colspan="2"><div class="dash"></div></td></tr>'+
-    '<tr class="total"><td>'+(enquiry?'Estimated Amount':'Total Amount')+'</td><td>&#8377;'+Math.round(parseFloat(o.amount)||0).toLocaleString('en-IN')+'</td></tr>'+
-    (enquiry?'':'<tr><td>Advance Paid</td><td>&#8377;'+Math.round(parseFloat(o.advance)||0).toLocaleString('en-IN')+'</td></tr>'+
-    '<tr><td class="'+(bal>0?'rp':'rg')+'">Balance Due</td><td class="'+(bal>0?'rp':'rg')+'">&#8377;'+bal.toLocaleString('en-IN')+'</td></tr>')+
+    (discount>0?'<tr><td>Original Rate</td><td>'+fmtWalkinINR(o.originalAmount)+'</td></tr><tr><td>Discount ('+Number(o.discountPercent)+'%)</td><td>− '+fmtWalkinINR(discount)+'</td></tr>':'')+
+    '<tr class="total"><td>'+(enquiry?'Estimated Amount':'Total Amount')+'</td><td>'+fmtWalkinINR(o.amount)+'</td></tr>'+
+    (enquiry?'':'<tr><td>Advance Paid</td><td>'+fmtWalkinINR(o.advance)+'</td></tr>'+
+    '<tr><td class="'+(bal>0?'rp':'rg')+'">Balance Due</td><td class="'+(bal>0?'rp':'rg')+'">'+fmtWalkinINR(bal)+'</td></tr>')+
   '</table>'+
   '<div style="text-align:center;margin:14px 0;font-size:10px;color:#777;border:1px dashed #ccc;padding:8px;border-radius:4px">'+(enquiry?'Estimate only. No booking or payment is confirmed.':'This is a computer generated receipt. No signature required.')+'</div>'+
   '<div class="footer"><b>Thank you for choosing Tathastu Weddings!</b><br>Please keep this receipt for your records.</div>'+
@@ -1649,7 +1655,38 @@ function printReceipt(idx){
 }
 
 /* ─── FORM HELPERS ─── */
+function walkinPricing(rate,percent){
+  const originalAmount=Number(rate)||0,discountPercent=Number(percent)||0;
+  const discountAmount=Math.round((originalAmount*discountPercent/100+Number.EPSILON)*100)/100;
+  return {originalAmount,discountPercent,walkinDiscountAmount:discountAmount,amount:Math.round((originalAmount-discountAmount+Number.EPSILON)*100)/100};
+}
+function fmtWalkinINR(value){return '₹'+(Number(value)||0).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function escapeWalkinText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toggleWalkinService(){
+  const custom=document.getElementById('f-svc')?.value==='__custom__',input=document.getElementById('f-custom-svc');
+  if(input){input.style.display=custom?'block':'none';input.required=custom;}
+}
+function walkinFormValues(){
+  const rawRate=document.getElementById('f-rate').value,rawDiscount=document.getElementById('f-discount').value;
+  const rate=Number(rawRate||0),percent=Number(rawDiscount||0),advance=Number(document.getElementById('f-adv').value||0);
+  const service=document.getElementById('f-svc').value==='__custom__'?document.getElementById('f-custom-svc').value.trim():document.getElementById('f-svc').value;
+  if(!service){alert('Enter a custom service name.');return null;}
+  if(!Number.isFinite(rate)||rate<0||!Number.isFinite(percent)||percent<0||percent>100||!Number.isFinite(advance)||advance<0){alert('Check the rate, discount percentage and advance. Discount must be between 0% and 100%.');return null;}
+  const pricing=walkinPricing(rate,percent);
+  if(advance>pricing.amount){alert('Advance cannot exceed the final discounted amount.');return null;}
+  return {...pricing,service,advance,balance:Math.round((pricing.amount-advance+Number.EPSILON)*100)/100};
+}
 function calcBal(){
+  const rateInput=document.getElementById('f-rate');
+  if(rateInput){
+    const rate=Math.max(0,Number(rateInput.value)||0),percent=Math.min(100,Math.max(0,Number(document.getElementById('f-discount').value)||0));
+    const pricing=walkinPricing(rate,percent);
+    document.getElementById('f-discount-amt').value=pricing.walkinDiscountAmount.toFixed(2);
+    document.getElementById('f-amt').value=pricing.amount.toFixed(2);
+    const advance=Number(document.getElementById('f-adv').value)||0;
+    document.getElementById('f-bal').value=(Math.round((Math.max(0,pricing.amount-advance)+Number.EPSILON)*100)/100).toFixed(2);
+    return;
+  }
   const a=parseFloat(document.getElementById('f-amt').value)||0;
   const d=parseFloat(document.getElementById('f-adv').value)||0;
   const b=document.getElementById('f-bal');if(b)b.value=Math.max(0,a-d);
@@ -1669,16 +1706,13 @@ function qlBal(){
 function saveWi(){
   const name=document.getElementById('f-name').value.trim();
   if(!name){alert('Customer name required');return;}
-  const amt=parseFloat(document.getElementById('f-amt').value)||0;
-  const adv=parseFloat(document.getElementById('f-adv').value)||0;
-  if(amt<0||adv<0||adv>amt){alert('Check amount and advance: both must be positive and advance cannot exceed amount.');return;}
-  if(document.getElementById('f-status').value==='Enquiry'&&adv>0){alert('An enquiry cannot show an advance. Choose a confirmed order status after receiving payment.');return;}
+  const pricing=walkinFormValues();if(!pricing)return;
+  if(document.getElementById('f-status').value==='Enquiry'&&pricing.advance>0){alert('An enquiry cannot show an advance. Choose a confirmed order status after receiving payment.');return;}
   const phone=document.getElementById('f-phone').value;
   DB.walkins.push({
     date:document.getElementById('f-date').value,name,phone,
-    service:document.getElementById('f-svc').value,
+    ...pricing,
     status:document.getElementById('f-status').value,
-    amount:amt,advance:adv,balance:Math.max(0,amt-adv),
     payMode:document.getElementById('f-pay').value,
     urgent:document.getElementById('f-urg').value==='Yes',
     deliveryDate:document.getElementById('f-del').value,
@@ -2244,12 +2278,16 @@ function editWi(i){
     document.getElementById('f-date').value=o.date||'';
     document.getElementById('f-name').value=o.name||'';
     document.getElementById('f-phone').value=o.phone||'';
-    document.getElementById('f-svc').value=o.service||WALKIN_SVC[0];
+    const listedService=!o.service||WALKIN_SVC.includes(o.service);
+    document.getElementById('f-svc').value=listedService?(o.service||WALKIN_SVC[0]):'__custom__';
+    document.getElementById('f-custom-svc').value=listedService?'':o.service||'';
+    toggleWalkinService();
     document.getElementById('f-status').value=o.status||'New Order';
     document.getElementById('f-del').value=o.deliveryDate||'';
-    document.getElementById('f-amt').value=o.amount||0;
+    document.getElementById('f-rate').value=o.originalAmount??o.amount??0;
+    document.getElementById('f-discount').value=o.discountPercent??0;
     document.getElementById('f-adv').value=o.advance||0;
-    document.getElementById('f-bal').value=o.balance||0;
+    calcBal();
     document.getElementById('f-pay').value=o.payMode||'Cash';
     document.getElementById('f-deltime').value=o.deliveryTime||'';
     document.getElementById('f-urg').value=o.urgent?'Yes':'No';
@@ -2263,11 +2301,9 @@ function editWi(i){
     if(btn)btn.onclick=()=>{
       const name=document.getElementById('f-name').value.trim();
       if(!name){alert('Customer name required');return;}
-      const amt=parseFloat(document.getElementById('f-amt').value)||0;
-      const adv=parseFloat(document.getElementById('f-adv').value)||0;
-      if(amt<0||adv<0||adv>amt){alert('Check amount and advance.');return;}
-      if(document.getElementById('f-status').value==='Enquiry'&&adv>0){alert('An enquiry cannot show an advance. Change its status after receiving payment.');return;}
-      DB.walkins[i]={...DB.walkins[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,service:document.getElementById('f-svc').value,status:document.getElementById('f-status').value,amount:amt,advance:adv,balance:Math.max(0,amt-adv),payMode:document.getElementById('f-pay').value,urgent:document.getElementById('f-urg').value==='Yes',deliveryDate:document.getElementById('f-del').value,deliveryTime:document.getElementById('f-deltime').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||'',watermarkSent:document.getElementById('f-watermark')?.value==='1',finalDelivered:document.getElementById('f-finaldel')?.value==='1'};
+      const pricing=walkinFormValues();if(!pricing)return;
+      if(document.getElementById('f-status').value==='Enquiry'&&pricing.advance>0){alert('An enquiry cannot show an advance. Change its status after receiving payment.');return;}
+      DB.walkins[i]={...DB.walkins[i],date:document.getElementById('f-date').value,name,phone:document.getElementById('f-phone').value,...pricing,status:document.getElementById('f-status').value,payMode:document.getElementById('f-pay').value,urgent:document.getElementById('f-urg').value==='Yes',deliveryDate:document.getElementById('f-del').value,deliveryTime:document.getElementById('f-deltime').value,notes:document.getElementById('f-notes').value,galleryLink:document.getElementById('f-gallery')?.value||'',watermarkSent:document.getElementById('f-watermark')?.value==='1',finalDelivered:document.getElementById('f-finaldel')?.value==='1'};
       SmartMessaging.queueFor('walkin',i);
       save();closeShade();render();
     };
@@ -2402,6 +2438,8 @@ function showQuotation(type,idx){
   const g=DB.gstConfig;
   const taxRate=parseFloat(g.taxRate)||18;
   const subtotal=parseFloat(o.amount)||0;
+  const walkinDiscount=type==='walkin'?(Number(o.walkinDiscountAmount)||0):0;
+  const originalSubtotal=walkinDiscount>0?Number(o.originalAmount)||subtotal:subtotal;
   const taxAmt=Math.round(subtotal*taxRate/100);
   const total=subtotal+taxAmt;
   const rNo=type==='walkin'?'TW-INV-'+String(idx+1).padStart(4,'0'):'TW-EV-INV-'+String(idx+1).padStart(4,'0');
@@ -2436,14 +2474,15 @@ function showQuotation(type,idx){
     '<div><div class="sec-lbl">Bill To</div><div class="bill-name">'+o.name+'</div>'+(o.phone?'<div class="bill-detail">📞 '+o.phone+'</div>':'')+
     (type==='event'&&o.venue?'<div class="bill-detail">📍 '+o.venue+'</div>':'')+'</div>'+
     '<div><div class="sec-lbl">Details</div>'+
-    (type==='event'?'<div class="bill-detail">Event: '+o.eventType+'</div><div class="bill-detail">Date: '+(o.eventDate||'TBD')+'</div>':'<div class="bill-detail">Service: '+o.service+'</div>'+(o.deliveryDate?'<div class="bill-detail">Delivery: '+o.deliveryDate+'</div>':''))+'</div>'+
+    (type==='event'?'<div class="bill-detail">Event: '+o.eventType+'</div><div class="bill-detail">Date: '+(o.eventDate||'TBD')+'</div>':'<div class="bill-detail">Service: '+escapeWalkinText(o.service)+'</div>'+(o.deliveryDate?'<div class="bill-detail">Delivery: '+o.deliveryDate+'</div>':''))+'</div>'+
   '</div>'+
   '<table><thead><tr><th style="width:50%">Description</th><th>HSN/SAC</th><th>Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>'+
-    '<tr><td>'+(type==='event'?o.eventType+' Photography &amp; Videography Package':'Professional Photography — '+o.service)+'<br><small style="color:#777">'+(o.notes||'As per discussion')+'</small></td>'+
-    '<td>'+g.hsnCode+'</td><td>1</td><td style="text-align:right">&#8377;'+subtotal.toLocaleString('en-IN')+'</td></tr>'+
+    '<tr><td>'+(type==='event'?o.eventType+' Photography &amp; Videography Package':'Professional Photography — '+escapeWalkinText(o.service))+'<br><small style="color:#777">'+(o.notes||'As per discussion')+'</small></td>'+
+    '<td>'+g.hsnCode+'</td><td>1</td><td style="text-align:right">&#8377;'+originalSubtotal.toLocaleString('en-IN')+'</td></tr>'+
   '</tbody></table>'+
   '<div class="tot-box">'+
-    '<div class="tot-row"><span>Subtotal</span><span>&#8377;'+subtotal.toLocaleString('en-IN')+'</span></div>'+
+    '<div class="tot-row"><span>Subtotal</span><span>&#8377;'+originalSubtotal.toLocaleString('en-IN')+'</span></div>'+
+    (walkinDiscount>0?'<div class="tot-row"><span>Discount ('+Number(o.discountPercent)+'%)</span><span>− &#8377;'+walkinDiscount.toLocaleString('en-IN')+'</span></div>':'')+
     (g.gstin?'<div class="tot-row"><span>CGST @'+(taxRate/2)+'%</span><span>&#8377;'+(taxAmt/2).toLocaleString('en-IN')+'</span></div><div class="tot-row"><span>SGST @'+(taxRate/2)+'%</span><span>&#8377;'+(taxAmt/2).toLocaleString('en-IN')+'</span></div>':'<div class="tot-row" style="font-size:10px;color:#888"><span>GST not applicable</span><span>—</span></div>')+
     '<div class="tot-row final"><span>TOTAL</span><span>&#8377;'+(g.gstin?total:subtotal).toLocaleString('en-IN')+'</span></div>'+
     '<div class="tot-row" style="color:#080"><span>Advance Paid</span><span>&#8377;'+(parseFloat(o.advance)||0).toLocaleString('en-IN')+'</span></div>'+
@@ -2478,7 +2517,7 @@ function showCustDetail(i){
     ${reviewStatus!=='Not due'?`<div style="margin-bottom:10px"><span class="bdg ${c.reviewDone?'bdg-grn':'bdg-amb'}">Review: ${reviewStatus}</span> ${!c.reviewDone?`<button class="btn btn-o btn-sm" onclick="markCustomerReviewReceived(${i})" title="Use after confirming the customer posted a review">Mark customer review received</button>`:''}</div>`:''}
     <div class="shdr" style="margin-top:0"><div><div class="stitle" style="font-size:14px">Order History</div></div></div>
     <div class="btn-row"><button class="btn btn-o btn-sm" onclick="EInvitationStudio.openFromSource('customer:${i}')">+ Create Invitation</button><span class="wf-help">${(DB.invitations||[]).filter(inv=>!inv.archivedAt&&c.phone&&phoneKey(inv.phone)===phoneKey(c.phone)).length} saved invitation(s) for this contact</span></div>
-    <div style="font-size:12px">${cOrders.length?cOrders.map(o=>`<div style="padding:5px 0;border-bottom:1px solid var(--br)"><b>${o.eventDate||o.deliveryDate||o.date||'—'}</b> · ${o.service||o.eventType||'—'} · ${fmtINR(o.amount)} ${o.status==='Enquiry'?'<span class="bdg bdg-muted">Estimate only</span>':parseFloat(o.balance)>0?'<span class="bal-r">(bal: '+fmtINR(o.balance)+')</span>':'<span class="bal-g">✓ Paid</span>'}</div>`).join(''):'<div class="empty">No orders yet</div>'}</div>
+     <div style="font-size:12px">${cOrders.length?cOrders.map(o=>`<div style="padding:5px 0;border-bottom:1px solid var(--br)"><b>${o.eventDate||o.deliveryDate||o.date||'—'}</b> · ${o.service?escapeWalkinText(o.service):o.eventType||'—'} · ${fmtINR(o.amount)} ${o.status==='Enquiry'?'<span class="bdg bdg-muted">Estimate only</span>':parseFloat(o.balance)>0?'<span class="bal-r">(bal: '+fmtINR(o.balance)+')</span>':'<span class="bal-g">✓ Paid</span>'}</div>`).join(''):'<div class="empty">No orders yet</div>'}</div>
     <div class="csub">Add Timeline Note</div>
     <div class="fg fg-2">
       <div class="ff"><label>Date</label><input type="date" id="tl-date" value="${today()}"></div>
