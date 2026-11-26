@@ -13,6 +13,7 @@ test('walk-in and event invoices do not invent an expiry date',()=>{
   const context={
     DB:{gstConfig:{taxRate:18,hsnCode:'998382',businessName:'Tathastu Weddings'},walkins:[{name:'Asha',phone:'9876543210',service:'Photo print',amount:750,advance:250,balance:500}],events:[{name:'Meera',phone:'9876543211',eventType:'Wedding',eventDate:'2027-02-14',amount:10000,advance:1000,balance:9000}]},
     today:()=> '2026-11-22',
+    escapeWalkinText:value=>String(value),
     DocumentShare:{attach:()=>{}},
     window:{open:()=>({document:{write:value=>output.push(value),close:()=>{}}})}
   };
